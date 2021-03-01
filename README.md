@@ -15,26 +15,26 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
 - [x] CRUD Functionality for Transactions
 - [ ] Portfolio Tracking
 - [ ] Aggregate Statistics & Summary Data:
-  - [ ] By Security
-  - [ ] Using Filters/Queries (e.g. time period, labels, include/exclude, etc.) 
-- [ ] Pragmatically Adherent to [REST Architecture Constraints](https://restfulapi.net/rest-architectural-constraints/)
-- [ ] Basic WebUI with Angular + TypeScript
+  - [ ] By security/ticker
+  - [ ] Using filters/queries (e.g. time period, labels, include/exclude, etc.) 
+- [ ] API (pragmatically) adherent to [REST Architecture Constraints](https://restfulapi.net/rest-architectural-constraints/)
+- [ ] Basic UI with Angular + TypeScript
 
 ## Architecture
 
 ### Api
-* Contains the ASP.NET Core project used to interact with the application through HTTP requests. 
+* Contains the ASP.NET Core project for interacting with the application through HTTP requests. 
 
 ### Application
 * Contains custom exceptions, interfaces, models, DTOs, and mapping profiles for the application.
-* Includes application features using with the [Command and Query Responsibility Segregation (CQRS)](https://docs.microsoft.com/en-us/azure/architecture/patterns/cqrs) pattern.
+* Includes features using with the [Command and Query Responsibility Segregation (CQRS)](https://docs.microsoft.com/en-us/azure/architecture/patterns/cqrs) pattern.
 * Provides an extension method for registering application services with the ASP.NET Core Dependency Injection container.
 
 ### Domain
 * Contains all domain entities and enums for the application&mdash;created as [plain old CLR objects (POCO)](https://en.wikipedia.org/wiki/Plain_old_CLR_object) with no dependencies on other application layers or external packages.
 
 ### Identity
-* Contains models, services, and EF Core types for  authentication and authorization with ASP.NET Core Identity.
+* Contains models, services, and EF Core types for authentication and authorization with ASP.NET Core Identity.
 * Provides an extension method to register services with the ASP.NET Core Dependency Injection container.
 
 ### Infrastructure
@@ -42,12 +42,12 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
 * Provides an extension method to register services with the ASP.NET Core Dependency Injection container.
 
 ### Persistence
-* Contains repositories, services, and EF Core Types for the data access implementation&mdash;currently using SQLite.
+* Contains repositories, services, and EF Core types for the data access implementation&mdash;currently using SQLite.
 * Provides an extension method to register services with the ASP.NET Core Dependency Injection container.
 
 ## Motivation
-* Learn Clean Architecture application development
-* Gain experience with the ASP.NET Core web framework
+* Learn Clean Architecture application development.
+* Gain experience with ASP.NET Core.
 
 ## License
 TradeTracker is licensed under the [MIT license](LICENSE).
