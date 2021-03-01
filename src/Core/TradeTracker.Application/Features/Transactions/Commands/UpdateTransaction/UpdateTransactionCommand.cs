@@ -5,7 +5,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
 {
     public class UpdateTransactionCommand : IRequest
     {
-        public string AccessTag { get; set; }
+        public string AccessKey { get; set; }
         public Guid TransactionId { get; set; }
         public DateTime DateTime { get; set; }
         public string Symbol { get; set; }

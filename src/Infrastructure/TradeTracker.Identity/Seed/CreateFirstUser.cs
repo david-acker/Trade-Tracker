@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Identity;
+using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using TradeTracker.Identity.Models;
 
@@ -10,7 +12,7 @@ namespace TradeTracker.Identity.Seed
         {
             var applicationUser = new ApplicationUser
             {
-                // AccessTag = Guid.Empty,
+                AccessKey = Guid.Empty,
                 FirstName = "testFirstName",
                 LastName = "testLastName",
                 UserName = "testUserName",
@@ -22,6 +24,9 @@ namespace TradeTracker.Identity.Seed
             if (user == null)
             {
                 await userManager.CreateAsync(applicationUser, "Password1#");
+
+                await userManager.AddClaimAsync(applicationUser, 
+                    new Claim("AccessKey", applicationUser.AccessKey.ToString()));
             }
         }
     }

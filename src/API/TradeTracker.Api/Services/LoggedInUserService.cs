@@ -8,9 +8,11 @@ namespace TradeTracker.Api.Services
     {
         public LoggedInUserService(IHttpContextAccessor httpContextAccessor)
         {
+            AccessKey = httpContextAccessor.HttpContext?.User?.FindFirstValue("AccessKey");
             UserId = httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
         }
 
+        public string AccessKey { get; }
         public string UserId { get; }
     }
 }

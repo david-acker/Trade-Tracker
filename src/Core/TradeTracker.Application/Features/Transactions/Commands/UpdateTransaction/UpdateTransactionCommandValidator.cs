@@ -8,6 +8,8 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
     {
         public UpdateTransactionCommandValidator()
         {
+            RuleFor(t => t.AccessKey).SetValidator(new AccessKeyValidator());
+
             RuleFor(t => t.DateTime)
                 .NotNull()
                 .NotEmpty()

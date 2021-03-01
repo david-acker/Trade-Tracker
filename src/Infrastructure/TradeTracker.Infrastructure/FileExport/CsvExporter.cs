@@ -2,14 +2,14 @@ using CsvHelper;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using TradeTracker.Application.Features.Transactions.Queries.GetTransactionsExport;
+using TradeTracker.Application.Features.Transactions.Queries.ExportTransactions;
 using TradeTracker.Application.Interfaces.Infrastructure;
 
 namespace TradeTracker.Infrastructure
 {
     public class CsvExporter : ICsvExporter
     {
-        public byte[] ExportTransactionsToCsv(List<TransactionForExportDto> transactionExportDtos)
+        public byte[] ExportTransactionsToCsv(List<TransactionsForExportDto> transactionExportDtos)
         {
             using var memoryStream = new MemoryStream();
             using (var streamWriter = new StreamWriter(memoryStream))

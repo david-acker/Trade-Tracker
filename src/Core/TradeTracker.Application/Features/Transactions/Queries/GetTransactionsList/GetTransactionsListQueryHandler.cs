@@ -12,9 +12,9 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
     public class GetTransactionsListQueryHandler : IRequestHandler<GetTransactionsListQuery, PagedTransactionsListVm>
     {
-        private readonly IMapper _mapper;
         private readonly ITransactionRepository _transactionRepository;
-
+        private readonly IMapper _mapper;
+        
         public GetTransactionsListQueryHandler(IMapper mapper, ITransactionRepository transactionRepository)
         {
             _mapper = mapper
@@ -25,7 +25,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 
         public async Task<PagedTransactionsListVm> Handle(GetTransactionsListQuery request, CancellationToken cancellationToken)
         {
-            var pagedList = await _transactionRepository.GetPagedTransactionsList(request.AccessTag, request.PageNumber, request.PageSize);
+            var pagedList = await _transactionRepository.GetPagedTransactionsList(request.AccessKey, request.PageNumber, request.PageSize);
             
             var transactionsToReturn = _mapper.Map<PagedList<Transaction>, List<TransactionDto>>(pagedList);
 

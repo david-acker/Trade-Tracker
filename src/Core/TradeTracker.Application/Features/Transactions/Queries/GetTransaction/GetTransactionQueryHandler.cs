@@ -3,6 +3,7 @@ using MediatR;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Interfaces.Persistence;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
@@ -22,7 +23,13 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
 
         public async Task<TransactionDto> Handle(GetTransactionQuery request, CancellationToken cancellationToken)
         {
-            var transaction = await _transactionRepository.GetByIdAsync(request.AccessTag, request.TransactionId);
+            var validator = new GetTransactionQueryValidator();
+            var validationResult = await validator.ValidateAsync(request);
+
+            if (validationResult.Errors.Count > 0)
+                throw new ValidationException(validationResult);
+
+            var transaction = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
             var transactionDto = _mapper.Map<TransactionDto>(transaction);
 
             return transactionDto;

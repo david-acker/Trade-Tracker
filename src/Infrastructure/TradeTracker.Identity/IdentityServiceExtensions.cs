@@ -21,11 +21,11 @@ namespace TradeTracker.Identity
         {
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<TradeTrackerIdentityDbContext>().AddDefaultTokenProviders();
-
             services.AddDbContext<TradeTrackerIdentityDbContext>(options => options.UseSqlite(configuration.GetConnectionString("TradeTrackerIdentityConnectionString"),
                 b => b.MigrationsAssembly(typeof(TradeTrackerIdentityDbContext).Assembly.FullName)));
+
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<TradeTrackerIdentityDbContext>().AddDefaultTokenProviders();
 
             services.AddTransient<IAuthenticationService, AuthenticationService>();
 

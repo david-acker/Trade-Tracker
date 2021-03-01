@@ -6,7 +6,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
 {
     public class GetTransactionCollectionQuery : IRequest<IEnumerable<TransactionDto>>
     {
-        public string AccessTag { get; set; }
+        public string AccessKey { get; set; }
         public IEnumerable<Guid> TransactionIds { get; set; }
     }
 }

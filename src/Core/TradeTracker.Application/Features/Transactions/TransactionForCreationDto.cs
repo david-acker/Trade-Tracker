@@ -4,7 +4,7 @@ namespace TradeTracker.Application.Features.Transactions
 {
     public class TransactionForCreationDto
     {
-        public string AccessTag { get; set; }
+        public string AccessKey { get; set; }
         public DateTime DateTime { get; set; }
         public string Symbol { get; set; }
         public string TransactionType { get; set; }

@@ -1,8 +1,8 @@
 using System;
 
-namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionsExport
+namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransactions
 {
-    public class TransactionForExportDto
+    public class TransactionsForExportDto
     {
         public Guid TransactionId { get; set; }
         public DateTime DateTime { get; set; }

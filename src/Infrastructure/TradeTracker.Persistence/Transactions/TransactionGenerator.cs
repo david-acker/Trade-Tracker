@@ -9,7 +9,7 @@ namespace TradeTracker.Persistence.Seed.Transactions
 {
     public static class TransactionSeeder
     {
-        public static IEnumerable<Transaction> GenerateEquityTransactions(string accessTag, int transactionCount)
+        public static IEnumerable<Transaction> GenerateEquityTransactions(string accessKey, int transactionCount)
         {
             DateTime start = DateTime.SpecifyKind(new DateTime(2018, 1, 1), DateTimeKind.Utc);
 
@@ -33,7 +33,7 @@ namespace TradeTracker.Persistence.Seed.Transactions
                 transactions[i] = new Transaction()
                 {
                     TransactionId = Guid.NewGuid(),
-                    AccessTag = accessTag,
+                    AccessKey = accessKey,
                     DateTime = dateTime,
                     Symbol = equitySymbol,
                     TransactionType = transactionType,

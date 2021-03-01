@@ -4,7 +4,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
     public class GetTransactionsListQuery : IRequest<PagedTransactionsListVm>
     {
-        public string AccessTag { get; set; }
+        public string AccessKey { get; set; }
 
         public int PageNumber { get; set; } = 1;
 

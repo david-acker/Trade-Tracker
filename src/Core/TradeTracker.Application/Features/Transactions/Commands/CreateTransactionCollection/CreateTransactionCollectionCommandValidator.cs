@@ -1,6 +1,5 @@
 using FluentValidation;
 
-
 namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection
 {
     public class CreateTransactionCollectionCommandValidator : AbstractValidator<CreateTransactionCollectionCommand>

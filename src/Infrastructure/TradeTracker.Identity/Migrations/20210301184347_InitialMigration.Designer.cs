@@ -9,7 +9,7 @@ using TradeTracker.Identity;
 namespace TradeTracker.Identity.Migrations
 {
     [DbContext(typeof(TradeTrackerIdentityDbContext))]
-    [Migration("20210227171106_InitialMigration")]
+    [Migration("20210301184347_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -153,6 +153,9 @@ namespace TradeTracker.Identity.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("AccessKey")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()

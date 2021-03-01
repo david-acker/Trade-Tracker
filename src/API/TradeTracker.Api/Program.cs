@@ -32,6 +32,7 @@ namespace TradeTracker.Api
             using (var scope = host.Services.CreateScope())
             {
                 var persistenceContext = scope.ServiceProvider.GetRequiredService<TradeTrackerDbContext>();
+                persistenceContext.Database.EnsureDeleted();
                 persistenceContext.Database.EnsureCreated();
             }
 

@@ -9,10 +9,5 @@ namespace TradeTracker.Identity
         public TradeTrackerIdentityDbContext(DbContextOptions<TradeTrackerIdentityDbContext> options) : base(options)
         {
         }
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-        }
     }
 }

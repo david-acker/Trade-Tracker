@@ -1,17 +1,18 @@
-using TradeTracker.Application.Models.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using TradeTracker.Application.Models.Authentication;
 using TradeTracker.Application.Interfaces.Identity;
 
 namespace TradeTracker.Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class AccountsController : ControllerBase
+    [Route("api/[controller]")]
+    public class AccountController : ControllerBase
     {
         private readonly IAuthenticationService _authenticationService;
-        public AccountsController(IAuthenticationService authenticationService)
+
+        public AccountController(IAuthenticationService authenticationService)
         {
             _authenticationService = authenticationService 
                 ?? throw new ArgumentNullException(nameof(authenticationService));
@@ -30,7 +31,15 @@ namespace TradeTracker.Api.Controllers
         }
 
         [HttpOptions]
-        public IActionResult GetAccountOptions()
+        public IActionResult GetAccountAuthenticateOptions()
+        {
+            Response.Headers.Add("Allow", "OPTIONS,POST");
+
+            return NoContent();
+        }
+
+        [HttpOptions]
+        public IActionResult GetAccountRegisterOptions()
         {
             Response.Headers.Add("Allow", "OPTIONS,POST");
             

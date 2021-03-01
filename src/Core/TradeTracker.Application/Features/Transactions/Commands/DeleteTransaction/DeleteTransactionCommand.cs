@@ -5,7 +5,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.DeleteTransact
 {
     public class DeleteTransactionCommand : IRequest
     {
-        public string AccessTag { get; set; }
+        public string AccessKey { get; set; }
         public Guid TransactionId { get; set; }
     }
 }

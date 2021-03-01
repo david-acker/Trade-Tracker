@@ -9,7 +9,7 @@ namespace TradeTracker.Domain.Entities
     {
         [Key]
         public Guid TransactionId { get; set; }
-        public string AccessTag { get; set; }
+        public string AccessKey { get; set; }
         public DateTime DateTime { get; set; }
         public string Symbol { get; set; }
         public TransactionType TransactionType { get; set; } = TransactionType.NotSpecified;

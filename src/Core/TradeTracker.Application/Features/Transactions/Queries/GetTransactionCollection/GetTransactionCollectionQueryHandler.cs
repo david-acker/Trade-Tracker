@@ -24,7 +24,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
 
         public async Task<IEnumerable<TransactionDto>> Handle(GetTransactionCollectionQuery request, CancellationToken cancellationToken)
         {
-            var transactionCollection = await _transactionRepository.GetTransactionCollectionByIds(request.AccessTag, request.TransactionIds);
+            var transactionCollection = await _transactionRepository.GetTransactionCollectionByIds(request.AccessKey, request.TransactionIds);
             var transactionCollectionDto = _mapper.Map<IEnumerable<TransactionDto>>(transactionCollection);
 
             return transactionCollectionDto;

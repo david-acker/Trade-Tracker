@@ -1,10 +1,10 @@
-using TradeTracker.Application.Features.Transactions.Queries.GetTransactionsExport;
 using System.Collections.Generic;
+using TradeTracker.Application.Features.Transactions.Queries.ExportTransactions;
 
 namespace TradeTracker.Application.Interfaces.Infrastructure
 {
     public interface ICsvExporter
     {
-        byte[] ExportTransactionsToCsv(List<TransactionForExportDto> transactionExportDtos);
+        byte[] ExportTransactionsToCsv(List<TransactionsForExportDto> transactionExportDtos);
     }
 }

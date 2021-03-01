@@ -40,12 +40,7 @@ namespace TradeTracker.Api
 
             services.AddCors(options =>
             {
-                options.AddPolicy("Option", builder =>
-                {
-                    builder.AllowAnyOrigin();
-                    builder.AllowAnyHeader();
-                    builder.AllowAnyMethod();
-                });
+                options.AddPolicy("Option", builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
             });
         }
 
@@ -58,8 +53,8 @@ namespace TradeTracker.Api
 
             app.UseHttpsRedirection();
 
-            app.UseRouting();
             app.UseAuthentication();
+            app.UseRouting();
             app.UseCustomExceptionHandler();
             app.UseCors("Open");
             app.UseAuthorization();

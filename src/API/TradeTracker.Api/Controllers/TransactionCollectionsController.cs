@@ -1,21 +1,20 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using TradeTracker.Api.Helpers;
-using TradeTracker.Api.Utilities;
-using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection;
-using TradeTracker.Application.Features.Transactions.Commands.DeleteTransaction;
-using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection;
-using TradeTracker.Application.Features.Transactions.Queries.GetTransactionsExport;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactionsList;
 
 namespace TradeTracker.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TransactionCollectionsController : Controller
@@ -34,7 +33,7 @@ namespace TradeTracker.Api.Controllers
         {
             var query = new GetTransactionCollectionQuery()
             {
-                AccessTag = User.Identity.Name,
+                AccessKey = User.Identity.Name,
                 TransactionIds = ids
             };
 
@@ -44,11 +43,11 @@ namespace TradeTracker.Api.Controllers
         [HttpPost(Name = "AddTransactionCollection")]
         public async Task<ActionResult<Guid>> AddTransactionCollection([FromBody] CreateTransactionCollectionCommand command)
         {
-            string accessTag = User.Identity.Name;
+            string AccessKey = User.Identity.Name;
 
             foreach (var transaction in command.Transactions)
             {
-                transaction.AccessTag = accessTag;
+                transaction.AccessKey = AccessKey;
             }
 
             var transactionCollectionToReturn = await _mediator.Send(command);

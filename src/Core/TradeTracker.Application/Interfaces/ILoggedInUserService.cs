@@ -2,6 +2,7 @@ namespace TradeTracker.Application.Interfaces
 {
     public interface ILoggedInUserService
     {
-        public string UserId { get; }
+        string AccessKey { get; }
+        string UserId { get; }
     }
 }

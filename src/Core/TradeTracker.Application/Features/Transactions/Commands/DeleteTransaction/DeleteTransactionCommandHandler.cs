@@ -24,7 +24,13 @@ namespace TradeTracker.Application.Features.Transactions.Commands.DeleteTransact
 
         public async Task<Unit> Handle(DeleteTransactionCommand request, CancellationToken cancellationToken)
         {
-            var transactionToDelete = await _transactionRepository.GetByIdAsync(request.AccessTag, request.TransactionId);
+            var validator = new DeleteTransactionCommandValidator();
+            var validationResult = await validator.ValidateAsync(request);  
+
+            if (validationResult.Errors.Count > 0)
+                throw new ValidationException(validationResult);    
+
+            var transactionToDelete = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
 
             if (transactionToDelete == null)
             {

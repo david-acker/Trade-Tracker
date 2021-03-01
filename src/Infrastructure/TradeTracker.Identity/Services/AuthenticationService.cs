@@ -85,6 +85,9 @@ namespace TradeTracker.Identity.Services
 
                 if (result.Succeeded)
                 {
+                    await _userManager.AddClaimAsync(user, 
+                        new Claim("AccessKey", user.AccessKey.ToString()));
+
                     return new RegistrationResponse() { UserId = user.Id };
                 }
                 else
@@ -94,7 +97,7 @@ namespace TradeTracker.Identity.Services
             }
             else
             {
-                throw new Exception($"Email {request.Email } already exists.");
+                throw new Exception($"Email {request.Email} already exists.");
             }
         }
 
@@ -115,7 +118,8 @@ namespace TradeTracker.Identity.Services
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("uid", user.Id)
+                new Claim("uid", user.Id),
+                new Claim("AccessKey", user.AccessKey.ToString())
             }
             .Union(userClaims)
             .Union(roleClaims);

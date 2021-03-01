@@ -31,8 +31,8 @@ namespace TradeTracker.Persistence
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(TradeTrackerDbContext).Assembly);
 
             var equityTransactions = TransactionSeeder.GenerateEquityTransactions(
-                accessTag: "testUserName",
-                transactionCount: 1000);
+                accessKey: Guid.Empty.ToString(),
+                transactionCount: 100);
 
             modelBuilder.Entity<Transaction>().HasData(equityTransactions);
         }

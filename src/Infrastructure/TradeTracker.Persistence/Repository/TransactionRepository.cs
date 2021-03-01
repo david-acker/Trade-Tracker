@@ -15,32 +15,32 @@ namespace TradeTracker.Persistence.Repositories
         {
         }
 
-        public override async Task<Transaction> GetByIdAsync(string accessTag, Guid id)
+        public override async Task<Transaction> GetByIdAsync(string accessKey, Guid id)
         {
             return await _dbContext.Transactions
-                .Where(t => t.AccessTag == accessTag)
+                .Where(t => t.AccessKey == accessKey)
                 .FirstOrDefaultAsync(t => t.TransactionId == id);
         }
 
-        public override async Task<IReadOnlyList<Transaction>> ListAllAsync(string accessTag)
+        public override async Task<IReadOnlyList<Transaction>> ListAllAsync(string accessKey)
         {
             return await _dbContext.Transactions
-                .Where(t => t.AccessTag == accessTag)
+                .Where(t => t.AccessKey == accessKey)
                 .ToListAsync();
         }
 
-        public async Task<PagedList<Transaction>> GetPagedTransactionsList(string accessTag, int page, int size)
+        public async Task<PagedList<Transaction>> GetPagedTransactionsList(string accessKey, int page, int size)
         {
             var transactionsQuery = _dbContext.Transactions
-                .Where(t => t.AccessTag == accessTag);
+                .Where(t => t.AccessKey == accessKey);
 
             return await PagedList<Transaction>.CreateAsync(transactionsQuery, page, size);
         }
 
-        public async Task<IEnumerable<Transaction>> GetTransactionCollectionByIds(string accessTag, IEnumerable<Guid> ids)
+        public async Task<IEnumerable<Transaction>> GetTransactionCollectionByIds(string accessKey, IEnumerable<Guid> ids)
         {
             return await _dbContext.Transactions
-                .Where(t => t.AccessTag == accessTag && ids.Contains(t.TransactionId))
+                .Where(t => t.AccessKey == accessKey && ids.Contains(t.TransactionId))
                 .ToListAsync();
         }
     }
