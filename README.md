@@ -7,7 +7,7 @@ TradeTracker is a portfolio and stock trade tracking solution implemented in ASP
 - [ ] Aggregate Statistics & Summary Data:
   - [ ] By Security
   - [ ] Using Filters/Queries (e.g. time period, labels, include/exclude, etc.) 
-- [ ] Pragmatically Adherent to REST Architecture Contraints
+- [ ] Pragmatically Adherent to [REST Architecture Constraints](https://restfulapi.net/rest-architectural-constraints/)
 - [ ] Basic WebUI with Angular + TypeScript
 
 ## Technologies
@@ -23,8 +23,7 @@ TradeTracker is a portfolio and stock trade tracking solution implemented in ASP
 ## Architecture
 
 ### Api
-* Contains the ASP.NET Core API used to interact with the application through HTTP requests. 
-* Currently not adherent to the [REST architectural constraints](https://restfulapi.net/rest-architectural-constraints/).
+* Contains the ASP.NET Core project used to interact with the application through HTTP requests. 
 
 ### Application
 * Contains custom exceptions, interfaces, models, DTOs, and mapping profiles for the application.
