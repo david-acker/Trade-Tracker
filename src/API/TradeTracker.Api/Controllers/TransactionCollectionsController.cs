@@ -33,7 +33,7 @@ namespace TradeTracker.Api.Controllers
         {
             var query = new GetTransactionCollectionQuery()
             {
-                AccessKey = User.Identity.Name,
+                AccessKey = User.FindFirstValue("AccessKey"),
                 TransactionIds = ids
             };
 
@@ -43,7 +43,7 @@ namespace TradeTracker.Api.Controllers
         [HttpPost(Name = "AddTransactionCollection")]
         public async Task<ActionResult<Guid>> AddTransactionCollection([FromBody] CreateTransactionCollectionCommand command)
         {
-            string AccessKey = User.Identity.Name;
+            string AccessKey = User.FindFirstValue("AccessKey");
 
             foreach (var transaction in command.Transactions)
             {
