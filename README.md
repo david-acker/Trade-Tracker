@@ -1,15 +1,6 @@
 # TradeTracker
 Stock trade and portfolio tracking solution implemented in ASP.NET Core using [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html).
 
-## Objectives
-- [x] CRUD Functionality for Transactions
-- [ ] Portfolio Tracking
-- [ ] Aggregate Statistics & Summary Data:
-  - [ ] By Security
-  - [ ] Using Filters/Queries (e.g. time period, labels, include/exclude, etc.) 
-- [ ] Pragmatically Adherent to [REST Architecture Constraints](https://restfulapi.net/rest-architectural-constraints/)
-- [ ] Basic WebUI with Angular + TypeScript
-
 ## Technologies
 
 * [ASP.NET Core 5](https://dotnet.microsoft.com/apps/aspnet)
@@ -19,6 +10,15 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
 * [FluentValidation](https://fluentvalidation.net/)
 * [MediatR](https://github.com/jbogard/MediatR)
 * [Serilog](https://serilog.net/)
+
+## Objectives
+- [x] CRUD Functionality for Transactions
+- [ ] Portfolio Tracking
+- [ ] Aggregate Statistics & Summary Data:
+  - [ ] By Security
+  - [ ] Using Filters/Queries (e.g. time period, labels, include/exclude, etc.) 
+- [ ] Pragmatically Adherent to [REST Architecture Constraints](https://restfulapi.net/rest-architectural-constraints/)
+- [ ] Basic WebUI with Angular + TypeScript
 
 ## Architecture
 
