@@ -22,27 +22,27 @@ TradeTracker is a portfolio and stock trade tracking solution implemented in ASP
 
 ## Architecture
 
-#### Api
+### Api
 * Contains the ASP.NET Core API used to interact with the application through HTTP requests. 
 * Currently not adherent to the [REST architectural constraints](https://restfulapi.net/rest-architectural-constraints/).
 
-#### Application
+### Application
 * Contains custom exceptions, interfaces, models, DTOs, and mapping profiles for the application.
 * Includes application features using with the [Command and Query Responsibility Segregation (CQRS)](https://docs.microsoft.com/en-us/azure/architecture/patterns/cqrs) pattern.
 * Provides an extension method for registering application services with the ASP.NET Core Dependency Injection container.
 
-#### Domain
+### Domain
 * Contains all domain entities and enums for the application&mdash;created as [plain old CLR objects (POCO)](https://en.wikipedia.org/wiki/Plain_old_CLR_object) with no dependencies on other application layers or external packages.
 
-#### Identity
+### Identity
 * Contains models, services, and EF Core types for  authentication and authorization with ASP.NET Core Identity.
 * Provides an extension method to register services with the ASP.NET Core Dependency Injection container.
 
-#### Infrastructure
+### Infrastructure
 * Contains classes for infrastructure-specific services in the application, such as exporting data as a CSV file. 
 * Provides an extension method to register services with the ASP.NET Core Dependency Injection container.
 
-#### Persistence
+### Persistence
 * Contains repositories, services, and EF Core Types for the data access implementation&mdash;currently using SQLite.
 * Provides an extension method to register services with the ASP.NET Core Dependency Injection container.
 
