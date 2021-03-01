@@ -1,7 +1,7 @@
 # TradeTracker
 Stock trade and portfolio tracking solution implemented in ASP.NET Core using [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html).
 
-## Goals
+## Objectives
 - [x] CRUD Functionality for Transactions
 - [ ] Portfolio Tracking
 - [ ] Aggregate Statistics & Summary Data:
