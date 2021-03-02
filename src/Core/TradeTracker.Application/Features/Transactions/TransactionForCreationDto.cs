@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace TradeTracker.Application.Features.Transactions
 {
@@ -11,5 +12,6 @@ namespace TradeTracker.Application.Features.Transactions
         public decimal Quantity { get; set; }
         public decimal Notional { get; set; }
         public decimal? TradePrice { get; set; }
+        public List<string> Tags { get; set; }
     }
 }
