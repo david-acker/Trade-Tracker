@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeTracker.Application.Features.Transactions.Queries.GetTransactionsList;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Models.Pagination;
 using TradeTracker.Domain.Entities;
@@ -29,12 +30,56 @@ namespace TradeTracker.Persistence.Repositories
                 .ToListAsync();
         }
 
-        public async Task<PagedList<Transaction>> GetPagedTransactionsList(string accessKey, int page, int size)
+        public async Task<PagedList<Transaction>> GetPagedTransactionsList(GetPagedTransactionsListResourceParameters resourceParameters)
         {
-            var transactionsQuery = _dbContext.Transactions
-                .Where(t => t.AccessKey == accessKey);
+            var query = (IQueryable<Transaction>)_dbContext.Transactions;
+        
+            query = query.Where(t => t.AccessKey == resourceParameters.AccessKey);
 
-            return await PagedList<Transaction>.CreateAsync(transactionsQuery, page, size);
+            if (resourceParameters.Including.Count > 0)
+            {
+                var inclusionSelection = resourceParameters.Including;
+                query = query.Where(t => inclusionSelection.Any(x => x == t.Symbol));
+            }
+
+            if (resourceParameters.Excluding.Count > 0)
+            {
+                var exclusionSelection = resourceParameters.Excluding;
+                query = query.Where(t => !exclusionSelection.Any(x => x == t.Symbol));
+            }
+
+            if (resourceParameters.StartRange != DateTime.MinValue)
+            {
+                query = query.Where(t => (t.DateTime > resourceParameters.StartRange));
+            }
+
+            if (resourceParameters.EndRange != DateTime.MaxValue && 
+                resourceParameters.EndRange != DateTime.MinValue)
+            {
+                query = query.Where(t => (t.DateTime < resourceParameters.EndRange));
+            }
+            
+            switch (resourceParameters.OrderBy)
+            {
+                case "Symbol":
+                    query = query.OrderBy(t => t.Symbol);
+                    break;
+
+                case "Quantity":
+                    query = query.OrderByDescending(t => t.Quantity);
+                    break;
+
+                case "Notional":
+                    query = query.OrderByDescending(t => t.Notional);
+                    break;
+
+                case "DateTime":
+                default:
+                    query = query.OrderByDescending(t => t.DateTime);
+                    break;
+            }
+
+            return await PagedList<Transaction>.CreateAsync(query, resourceParameters.PageNumber, resourceParameters.PageSize);
         }
 
         public async Task<IEnumerable<Transaction>> GetTransactionCollectionByIds(string accessKey, IEnumerable<Guid> ids)

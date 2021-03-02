@@ -1,3 +1,4 @@
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,23 +21,25 @@ namespace TradeTracker.Api.Controllers
     [Route("api/[controller]")]
     public class TransactionsController : Controller
     {
+        private readonly IMapper _mapper;
         private readonly IMediator _mediator;
 
-        public TransactionsController(IMediator mediator)
+        public TransactionsController(IMapper mapper, IMediator mediator)
         {
+            _mapper = mapper
+                ?? throw new ArgumentNullException(nameof(mapper));
             _mediator = mediator 
                 ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         [HttpGet(Name = "GetTransactionsList")]
-        public async Task<ActionResult<PagedTransactionsListVm>> GetTransactionsList(int pageNumber, int pageSize)
+        public async Task<ActionResult<PagedTransactionsListVm>> GetTransactionsList(
+            [FromQuery] GetTransactionsListResourceParameters getTransactionsListResourceParameters)
         {
-            var query = new GetTransactionsListQuery()
-            {
-                AccessKey = User.Identity.Name,
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            };
+            var query = _mapper.Map<GetTransactionsListQuery>(getTransactionsListResourceParameters);
+
+            query.AccessKey = User.FindFirstValue("AccessKey");
+
             return Ok(await _mediator.Send(query));
         }
 
@@ -45,7 +48,7 @@ namespace TradeTracker.Api.Controllers
         {
             var query = new GetTransactionQuery()
             {
-                AccessKey = User.Identity.Name,
+                AccessKey = User.FindFirstValue("AccessKey"),
                 TransactionId = id
             };
             
@@ -55,7 +58,7 @@ namespace TradeTracker.Api.Controllers
         [HttpPost(Name = "AddTransaction")]
         public async Task<ActionResult<Guid>> AddTransaction([FromBody] CreateTransactionCommand createTransactionCommand)
         {
-            createTransactionCommand.AccessKey = User.Identity.Name;
+            createTransactionCommand.AccessKey = User.FindFirstValue("AccessKey");
 
             var transactionToReturn = await _mediator.Send(createTransactionCommand);
             
@@ -68,7 +71,7 @@ namespace TradeTracker.Api.Controllers
         [HttpPut("{id}", Name = "UpdateTransaction")]
         public async Task<ActionResult> UpdateTransaction(Guid id, [FromBody] UpdateTransactionCommand updateTransactionCommand)
         {
-            updateTransactionCommand.AccessKey = User.Identity.Name;
+            updateTransactionCommand.AccessKey = User.FindFirstValue("AccessKey");
             updateTransactionCommand.TransactionId = id;
             await _mediator.Send(updateTransactionCommand);
             
@@ -80,7 +83,7 @@ namespace TradeTracker.Api.Controllers
         {
             var command = new DeleteTransactionCommand() 
             {
-                AccessKey = User.Identity.Name,
+                AccessKey = User.FindFirstValue("AccessKey"),
                 TransactionId = id
             };
             await _mediator.Send(command);
@@ -94,7 +97,7 @@ namespace TradeTracker.Api.Controllers
         {
             var query = new ExportTransactionsQuery()
             {
-                AccessKey = User.Identity.Name
+                AccessKey = User.FindFirstValue("AccessKey")
             };
             var fileDto = await _mediator.Send(query);
 

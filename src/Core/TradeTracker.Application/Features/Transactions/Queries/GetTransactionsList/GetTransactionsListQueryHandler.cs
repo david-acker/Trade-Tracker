@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Models.Pagination;
 using TradeTracker.Domain.Entities;
@@ -15,7 +16,9 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
         
-        public GetTransactionsListQueryHandler(IMapper mapper, ITransactionRepository transactionRepository)
+        public GetTransactionsListQueryHandler(
+            IMapper mapper, 
+            ITransactionRepository transactionRepository)
         {
             _mapper = mapper
                 ?? throw new ArgumentNullException(nameof(mapper));
@@ -25,7 +28,15 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 
         public async Task<PagedTransactionsListVm> Handle(GetTransactionsListQuery request, CancellationToken cancellationToken)
         {
-            var pagedList = await _transactionRepository.GetPagedTransactionsList(request.AccessKey, request.PageNumber, request.PageSize);
+            var validator = new GetTransactionsListQueryValidator();
+            var validationResult = await validator.ValidateAsync(request);
+
+            if (validationResult.Errors.Count > 0)
+                throw new ValidationException(validationResult);
+
+            var parameters = _mapper.Map<GetPagedTransactionsListResourceParameters>(request);
+
+            var pagedList = await _transactionRepository.GetPagedTransactionsList(parameters);
             
             var transactionsToReturn = _mapper.Map<PagedList<Transaction>, List<TransactionDto>>(pagedList);
 
