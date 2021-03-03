@@ -35,9 +35,15 @@ namespace TradeTracker.Api.Controllers
         public async Task<ActionResult<PagedTransactionsListVm>> GetTransactionCollectionById(
             [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
         {
+            var accessKey = User.FindFirstValue("AccessKey");
+            if (accessKey == null)
+            {
+                return Unauthorized();
+            }
+
             var query = new GetTransactionCollectionQuery()
             {
-                AccessKey = User.FindFirstValue("AccessKey"),
+                AccessKey = accessKey,
                 TransactionIds = ids
             };
 
@@ -48,12 +54,17 @@ namespace TradeTracker.Api.Controllers
         public async Task<ActionResult<Guid>> AddTransactionCollection(
             [FromBody] CreateTransactionCollectionCommandDto createTransactionCollectionCommandDto)
         {
+            var accessKey = User.FindFirstValue("AccessKey");
+            if (accessKey == null)
+            {
+                return Unauthorized();
+            }
+
             var command = _mapper.Map<CreateTransactionCollectionCommand>(createTransactionCollectionCommandDto);
 
-            string AccessKey = User.FindFirstValue("AccessKey");
             foreach (var transaction in command.Transactions)
             {
-                transaction.AccessKey = AccessKey;
+                transaction.AccessKey = accessKey;
             }
 
             var transactionCollectionToReturn = await _mediator.Send(command);
