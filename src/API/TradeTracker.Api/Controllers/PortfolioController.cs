@@ -25,9 +25,15 @@ namespace TradeTracker.Api.Controllers
         [HttpGet("current", Name = "GetCurrentHoldings")]
         public async Task<ActionResult<IEnumerable<HoldingVm>>> GetCurrentHoldings()
         {
+            var accessKey = User.FindFirstValue("AccessKey");
+            if (accessKey == null)
+            {
+                return Unauthorized();
+            }
+
             var query = new GetCurrentHoldingsQuery()
             {
-                AccessKey = User.FindFirstValue("AccessKey"),
+                AccessKey = accessKey,
             };
 
             return Ok(await _mediator.Send(query));
