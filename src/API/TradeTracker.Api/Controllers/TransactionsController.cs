@@ -49,7 +49,7 @@ namespace TradeTracker.Api.Controllers
         }
 
         [HttpGet("{id}", Name = "GetTransactionById")]
-        public async Task<ActionResult<TransactionDto>> GetTransactionById(Guid id)
+        public async Task<ActionResult<TransactionForReturnDto>> GetTransactionById(Guid id)
         {
             var query = new GetTransactionQuery()
             {

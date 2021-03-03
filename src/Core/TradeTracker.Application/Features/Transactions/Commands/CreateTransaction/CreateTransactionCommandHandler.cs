@@ -10,7 +10,7 @@ using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransaction
 {
-    public class CreateTransactionCommandHandler : IRequestHandler<CreateTransactionCommand, TransactionDto>
+    public class CreateTransactionCommandHandler : IRequestHandler<CreateTransactionCommand, TransactionForReturnDto>
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
@@ -23,7 +23,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
                 ?? throw new ArgumentNullException(nameof(transactionRepository));
         }
 
-        public async Task<TransactionDto> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
+        public async Task<TransactionForReturnDto> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
         {
             var validator = new CreateTransactionCommandValidator();
             var validationResult = await validator.ValidateAsync(request);
@@ -35,7 +35,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
 
             transaction = await _transactionRepository.AddAsync(transaction);
 
-            return _mapper.Map<TransactionDto>(transaction);
+            return _mapper.Map<TransactionForReturnDto>(transaction);
         }
     }
 }

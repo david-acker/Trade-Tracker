@@ -38,7 +38,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 
             var pagedList = await _transactionRepository.GetPagedTransactionsList(parameters);
             
-            var transactionsToReturn = _mapper.Map<PagedList<Transaction>, List<TransactionDto>>(pagedList);
+            var transactionsToReturn = _mapper.Map<PagedList<Transaction>, List<TransactionForReturnDto>>(pagedList);
 
             return new PagedTransactionsListVm()
             {

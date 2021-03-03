@@ -40,7 +40,7 @@ namespace TradeTracker.Application.Profiles
             CreateMap<Transaction, TransactionsForExportDto>()
                 .ReverseMap(); 
 
-            CreateMap<Transaction, TransactionDto>()
+            CreateMap<Transaction, TransactionForReturnDto>()
                 .ReverseMap();
 
             CreateMap<Transaction, CreateTransactionCollectionCommand>()

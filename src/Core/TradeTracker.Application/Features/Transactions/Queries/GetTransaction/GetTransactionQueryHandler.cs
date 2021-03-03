@@ -8,7 +8,7 @@ using TradeTracker.Application.Interfaces.Persistence;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
 {
-    public class GetTransactionQueryHandler : IRequestHandler<GetTransactionQuery, TransactionDto>
+    public class GetTransactionQueryHandler : IRequestHandler<GetTransactionQuery, TransactionForReturnDto>
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
@@ -21,7 +21,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
                 ?? throw new ArgumentNullException(nameof(transactionRepository));
         }
 
-        public async Task<TransactionDto> Handle(GetTransactionQuery request, CancellationToken cancellationToken)
+        public async Task<TransactionForReturnDto> Handle(GetTransactionQuery request, CancellationToken cancellationToken)
         {
             var validator = new GetTransactionQueryValidator();
             var validationResult = await validator.ValidateAsync(request);
@@ -30,9 +30,9 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
                 throw new ValidationException(validationResult);
 
             var transaction = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
-            var transactionDto = _mapper.Map<TransactionDto>(transaction);
+            var transactionForReturnDto = _mapper.Map<TransactionForReturnDto>(transaction);
 
-            return transactionDto;
+            return transactionForReturnDto;
         }
     }
 }

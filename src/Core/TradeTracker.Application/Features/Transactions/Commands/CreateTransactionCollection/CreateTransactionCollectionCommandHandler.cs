@@ -11,7 +11,7 @@ using TradeTracker.Domain.Entities;
 namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection
 {
     public class CreateTransactionCollectionCommandHandler 
-        : IRequestHandler<CreateTransactionCollectionCommand, IEnumerable<TransactionDto>>
+        : IRequestHandler<CreateTransactionCollectionCommand, IEnumerable<TransactionForReturnDto>>
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
@@ -24,7 +24,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
                 ?? throw new ArgumentNullException(nameof(transactionRepository));
         }
 
-        public async Task<IEnumerable<TransactionDto>> Handle(
+        public async Task<IEnumerable<TransactionForReturnDto>> Handle(
             CreateTransactionCollectionCommand request, 
             CancellationToken cancellationToken)
         {
@@ -38,7 +38,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
 
             transactionCollection = await _transactionRepository.AddRangeAsync(transactionCollection);
 
-            return _mapper.Map<IEnumerable<TransactionDto>>(transactionCollection);
+            return _mapper.Map<IEnumerable<TransactionForReturnDto>>(transactionCollection);
         }
     }
 }

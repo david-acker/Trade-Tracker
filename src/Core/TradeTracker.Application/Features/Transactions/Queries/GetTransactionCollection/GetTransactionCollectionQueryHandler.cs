@@ -9,7 +9,7 @@ using TradeTracker.Application.Interfaces.Persistence;
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection
 {
     public class GetTransactionCollectionQueryHandler 
-        : IRequestHandler<GetTransactionCollectionQuery, IEnumerable<TransactionDto>>
+        : IRequestHandler<GetTransactionCollectionQuery, IEnumerable<TransactionForReturnDto>>
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
@@ -22,10 +22,10 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
                 ?? throw new ArgumentNullException(nameof(transactionRepository));
         }
 
-        public async Task<IEnumerable<TransactionDto>> Handle(GetTransactionCollectionQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<TransactionForReturnDto>> Handle(GetTransactionCollectionQuery request, CancellationToken cancellationToken)
         {
             var transactionCollection = await _transactionRepository.GetTransactionCollectionByIds(request.AccessKey, request.TransactionIds);
-            var transactionCollectionDto = _mapper.Map<IEnumerable<TransactionDto>>(transactionCollection);
+            var transactionCollectionDto = _mapper.Map<IEnumerable<TransactionForReturnDto>>(transactionCollection);
 
             return transactionCollectionDto;
         }
