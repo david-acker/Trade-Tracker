@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using TradeTracker.Application.Features.Transactions;
+using TradeTracker.Application.Features.Transactions.Commands;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using TradeTracker.Application.Features.Transactions.Queries.ExportTransactions;
+using TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactionsList;
 using TradeTracker.Domain.Entities;
 
@@ -16,7 +18,7 @@ namespace TradeTracker.Application.Profiles
     {
         public MappingProfile()
         {
-            CreateMap<CreateTransactionCommandDto, CreateTransactionCommand>();
+            CreateMap<CreateTransactionDto, CreateTransactionCommand>();
 
             CreateMap<Transaction, CreateTransactionCommand>()
                 .ForMember(

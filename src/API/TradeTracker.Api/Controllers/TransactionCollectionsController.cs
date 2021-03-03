@@ -1,3 +1,4 @@
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -19,10 +20,13 @@ namespace TradeTracker.Api.Controllers
     [Route("api/[controller]")]
     public class TransactionCollectionsController : Controller
     {
+        private readonly IMapper _mapper;
         private readonly IMediator _mediator;
 
-        public TransactionCollectionsController(IMediator mediator)
+        public TransactionCollectionsController(IMapper mapper, IMediator mediator)
         {
+            _mapper = mapper
+                ?? throw new ArgumentNullException(nameof(mapper));
             _mediator = mediator 
                 ?? throw new ArgumentNullException(nameof(mediator));
         }
@@ -41,10 +45,12 @@ namespace TradeTracker.Api.Controllers
         }
 
         [HttpPost(Name = "AddTransactionCollection")]
-        public async Task<ActionResult<Guid>> AddTransactionCollection([FromBody] CreateTransactionCollectionCommand command)
+        public async Task<ActionResult<Guid>> AddTransactionCollection(
+            [FromBody] CreateTransactionCollectionCommandDto createTransactionCollectionCommandDto)
         {
-            string AccessKey = User.FindFirstValue("AccessKey");
+            var command = _mapper.Map<CreateTransactionCollectionCommand>(createTransactionCollectionCommandDto);
 
+            string AccessKey = User.FindFirstValue("AccessKey");
             foreach (var transaction in command.Transactions)
             {
                 transaction.AccessKey = AccessKey;

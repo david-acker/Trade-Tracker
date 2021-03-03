@@ -7,6 +7,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using TradeTracker.Api.Utilities;
 using TradeTracker.Application.Features.Transactions;
+using TradeTracker.Application.Features.Transactions.Commands;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.DeleteTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
@@ -33,9 +34,9 @@ namespace TradeTracker.Api.Controllers
         }
 
         [HttpPost(Name = "AddTransaction")]
-        public async Task<ActionResult<Guid>> AddTransaction([FromBody] CreateTransactionCommandDto createTransactionCommandDto)
+        public async Task<ActionResult<Guid>> AddTransaction([FromBody] CreateTransactionDto createTransactionDto)
         {
-            var command = _mapper.Map<CreateTransactionCommand>(createTransactionCommandDto);
+            var command = _mapper.Map<CreateTransactionCommand>(createTransactionDto);
 
             command.AccessKey = User.FindFirstValue("AccessKey");
 
