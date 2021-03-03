@@ -27,6 +27,8 @@ namespace TradeTracker.Application.Profiles
             CreateMap<Transaction, TransactionForCreationDto>()
                 .ReverseMap();
 
+            CreateMap<UpdateTransactionCommandDto, UpdateTransactionCommand>();
+
             CreateMap<Transaction, UpdateTransactionCommand>()
                 .ForMember(
                     dest => dest.AccessKey,

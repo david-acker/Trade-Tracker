@@ -51,6 +51,8 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
                         .GreaterThan(0)
                             .WithMessage("Every {PropertyName} must be greater than zero.");
                 });
+            
+            RuleFor(t => t.Tags).SetValidator(new TagsValidator());
         }
     }
 }

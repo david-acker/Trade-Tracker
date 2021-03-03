@@ -1,13 +1,10 @@
-using MediatR;
 using System;
 using System.Collections.Generic;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction
 {
-    public class UpdateTransactionCommand : IRequest
+    public class UpdateTransactionCommandDto
     {
-        public string AccessKey { get; set; }
-        public Guid TransactionId { get; set; }
         public DateTime DateTime { get; set; }
         public string Symbol { get; set; }
         public string TransactionType { get; set; }

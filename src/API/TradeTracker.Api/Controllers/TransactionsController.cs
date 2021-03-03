@@ -71,11 +71,14 @@ namespace TradeTracker.Api.Controllers
         }
 
         [HttpPut("{id}", Name = "UpdateTransaction")]
-        public async Task<ActionResult> UpdateTransaction(Guid id, [FromBody] UpdateTransactionCommand updateTransactionCommand)
+        public async Task<ActionResult> UpdateTransaction(Guid id, [FromBody] UpdateTransactionCommandDto updateTransactionCommandDto)
         {
-            updateTransactionCommand.AccessKey = User.FindFirstValue("AccessKey");
-            updateTransactionCommand.TransactionId = id;
-            await _mediator.Send(updateTransactionCommand);
+            var command = _mapper.Map<UpdateTransactionCommand>(updateTransactionCommandDto);
+
+            command.AccessKey = User.FindFirstValue("AccessKey");
+            command.TransactionId = id;
+
+            await _mediator.Send(command);
             
             return NoContent();
         }
