@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionsList
+namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class PagedTransactionsListVm 
+    public class PagedTransactionsDto 
     {
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }

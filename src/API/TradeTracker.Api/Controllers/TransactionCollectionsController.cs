@@ -1,7 +1,6 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -9,9 +8,9 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using TradeTracker.Api.Helpers;
+using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection;
-using TradeTracker.Application.Features.Transactions.Queries.GetTransactionsList;
 
 namespace TradeTracker.Api.Controllers
 {
@@ -32,7 +31,7 @@ namespace TradeTracker.Api.Controllers
         }
 
         [HttpGet("{ids}", Name = "GetTransactionCollectionById")]
-        public async Task<ActionResult<PagedTransactionsListVm>> GetTransactionCollectionById(
+        public async Task<ActionResult<IEnumerable<TransactionForReturnDto>>> GetTransactionCollectionById(
             [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
         {
             var accessKey = User.FindFirstValue("AccessKey");
@@ -50,8 +49,8 @@ namespace TradeTracker.Api.Controllers
             return Ok(await _mediator.Send(query));
         }
 
-        [HttpPost(Name = "AddTransactionCollection")]
-        public async Task<ActionResult<Guid>> AddTransactionCollection(
+        [HttpPost(Name = "CreateTransactionCollection")]
+        public async Task<ActionResult<Guid>> CreateTransactionCollection(
             [FromBody] CreateTransactionCollectionCommandDto createTransactionCollectionCommandDto)
         {
             var accessKey = User.FindFirstValue("AccessKey");

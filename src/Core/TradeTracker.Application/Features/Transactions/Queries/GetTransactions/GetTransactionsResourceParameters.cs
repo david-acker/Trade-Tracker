@@ -1,8 +1,8 @@
 using System;
 
-namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionsList
+namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionsListResourceParameters
+    public class GetTransactionsResourceParameters
     {
         public string OrderBy { get; set; } = "DateTime";
 
@@ -45,7 +45,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
         public string Including { get; set; }
         public string Excluding { get; set; }
 
-        public string StartRange { get; set; }
-        public string EndRange { get; set; }
+        public string RangeStart { get; set; }
+        public string RangeEnd { get; set; }
     }
 }

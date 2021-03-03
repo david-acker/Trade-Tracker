@@ -1,10 +1,9 @@
-using MediatR;
 using System;
 using System.Collections.Generic;
 
 namespace TradeTracker.Application.Features.Transactions.Commands
 {
-    public class CreateTransactionDto
+    public class TransactionForCreationDto
     {
         public DateTime DateTime { get; set; }
         public string Symbol { get; set; }

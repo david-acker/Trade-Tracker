@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace TradeTracker.Application.Features.Transactions
+namespace TradeTracker.Application.Features.Transactions.Shared.Validators
 {
     public class TagValidator : AbstractValidator<string>
     {

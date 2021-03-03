@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using FluentValidation;
 
-namespace TradeTracker.Application.Features.Transactions
+namespace TradeTracker.Application.Features.Transactions.Shared.Validators
 {
     public class TagsValidator : AbstractValidator<List<string>>
     {

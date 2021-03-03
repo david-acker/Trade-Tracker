@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TradeTracker.Application.Features.Transactions.Queries.GetTransactionsList;
+using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Models.Pagination;
 using TradeTracker.Domain.Entities;
@@ -30,7 +30,7 @@ namespace TradeTracker.Persistence.Repositories
                 .ToListAsync();
         }
 
-        public async Task<PagedList<Transaction>> GetPagedTransactionsList(GetPagedTransactionsListResourceParameters resourceParameters)
+        public async Task<PagedList<Transaction>> GetPagedTransactionsList(GetPagedTransactionsResourceParameters resourceParameters)
         {
             var query = (IQueryable<Transaction>)_dbContext.Transactions;
         
@@ -48,15 +48,15 @@ namespace TradeTracker.Persistence.Repositories
                 query = query.Where(t => !exclusionSelection.Any(x => x == t.Symbol));
             }
 
-            if (resourceParameters.StartRange != DateTime.MinValue)
+            if (resourceParameters.RangeStart != DateTime.MinValue)
             {
-                query = query.Where(t => (t.DateTime > resourceParameters.StartRange));
+                query = query.Where(t => (t.DateTime > resourceParameters.RangeStart));
             }
 
-            if (resourceParameters.EndRange != DateTime.MaxValue && 
-                resourceParameters.EndRange != DateTime.MinValue)
+            if (resourceParameters.RangeEnd != DateTime.MaxValue && 
+                resourceParameters.RangeEnd != DateTime.MinValue)
             {
-                query = query.Where(t => (t.DateTime < resourceParameters.EndRange));
+                query = query.Where(t => (t.DateTime < resourceParameters.RangeEnd));
             }
             
             switch (resourceParameters.OrderBy)

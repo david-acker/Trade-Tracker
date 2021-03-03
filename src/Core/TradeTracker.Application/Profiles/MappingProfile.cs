@@ -8,8 +8,7 @@ using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using TradeTracker.Application.Features.Transactions.Queries.ExportTransactions;
-using TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection;
-using TradeTracker.Application.Features.Transactions.Queries.GetTransactionsList;
+using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Profiles
@@ -18,7 +17,7 @@ namespace TradeTracker.Application.Profiles
     {
         public MappingProfile()
         {
-            CreateMap<CreateTransactionDto, CreateTransactionCommand>();
+            CreateMap<CreateTransactionCommandDto, CreateTransactionCommand>();
 
             CreateMap<Transaction, CreateTransactionCommand>()
                 .ForMember(
@@ -26,8 +25,7 @@ namespace TradeTracker.Application.Profiles
                     opt => opt.MapFrom(src => src.AccessKey))
                 .ReverseMap();
 
-            CreateMap<Transaction, TransactionForCreationDto>()
-                .ReverseMap();
+            CreateMap<CreateTransactionCollectionCommandDto, CreateTransactionCollectionCommand>();
 
             CreateMap<UpdateTransactionCommandDto, UpdateTransactionCommand>();
 
@@ -46,13 +44,13 @@ namespace TradeTracker.Application.Profiles
             CreateMap<Transaction, CreateTransactionCollectionCommand>()
                 .ReverseMap();
 
-            CreateMap<GetTransactionsListResourceParameters, GetTransactionsListQuery>()
+            CreateMap<GetTransactionsResourceParameters, GetTransactionsQuery>()
                 .ForMember(
-                    dest => dest.StartRange,
-                    opt => opt.MapFrom(src => DateTime.Parse(src.StartRange)))
+                    dest => dest.RangeStart,
+                    opt => opt.MapFrom(src => DateTime.Parse(src.RangeStart)))
                 .ForMember(
-                    dest => dest.EndRange,
-                    opt => opt.MapFrom(src => DateTime.Parse(src.EndRange)))
+                    dest => dest.RangeEnd,
+                    opt => opt.MapFrom(src => DateTime.Parse(src.RangeEnd)))
                 .ForMember(
                     dest => dest.Including,
                     opt => opt.MapFrom(src => ArraySelectionParser(src.Including)))
@@ -60,7 +58,7 @@ namespace TradeTracker.Application.Profiles
                     dest => dest.Excluding,
                     opt => opt.MapFrom(src => ArraySelectionParser(src.Excluding)));
 
-            CreateMap<GetTransactionsListQuery, GetPagedTransactionsListResourceParameters>();
+            CreateMap<GetTransactionsQuery, GetPagedTransactionsResourceParameters>();
         }
 
         private List<string> ArraySelectionParser(string input)

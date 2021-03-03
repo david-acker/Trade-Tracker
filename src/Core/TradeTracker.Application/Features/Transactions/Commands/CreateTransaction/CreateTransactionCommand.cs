@@ -1,9 +1,9 @@
 using MediatR;
-using System;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransaction
 {
-    public class CreateTransactionCommand : TransactionForCreationDto, IRequest<TransactionForReturnDto>
-    { 
+    public class CreateTransactionCommand : CreateTransactionCommandDto, IRequest<TransactionForReturnDto>
+    {
+        public string AccessKey { get; set; }
     }
 }

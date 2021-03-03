@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using MediatR;
 
-namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionsList
+namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionsListQuery : IRequest<PagedTransactionsListVm>
+    public class GetTransactionsQuery : IRequest<PagedTransactionsDto>
     {
         public string AccessKey { get; set; }
 
@@ -28,7 +28,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
         public List<string> Including { get; set; }
         public List<string> Excluding { get; set; }
 
-        public DateTime StartRange { get; set; } = DateTime.MinValue; 
-        public DateTime EndRange { get; set; } = DateTime.MaxValue;
+        public DateTime RangeStart { get; set; } = DateTime.MinValue; 
+        public DateTime RangeEnd { get; set; } = DateTime.MaxValue;
     }
 }

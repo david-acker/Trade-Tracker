@@ -1,3 +1,4 @@
+using System;
 using FluentValidation;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
@@ -6,7 +7,6 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
     {
         public GetTransactionQueryValidator()
         {
-            RuleFor(t => t.AccessKey).SetValidator(new AccessKeyValidator());
         }
     }
 }

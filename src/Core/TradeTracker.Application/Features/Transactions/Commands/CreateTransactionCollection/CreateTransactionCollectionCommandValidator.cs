@@ -6,7 +6,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
     {
         public CreateTransactionCollectionCommandValidator()
         {
-            RuleForEach(t => t.Transactions).SetValidator(new TransactionCreationValidator());
+            RuleForEach(t => t.Transactions).SetValidator(new TransactionForCreationValidator());
         }
     }
 }

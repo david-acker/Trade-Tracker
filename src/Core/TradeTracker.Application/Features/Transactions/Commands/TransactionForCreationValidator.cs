@@ -1,11 +1,11 @@
 using FluentValidation;
 using TradeTracker.Application.Features.Transactions.Shared.Validators;
 
-namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction
+namespace TradeTracker.Application.Features.Transactions.Commands
 {
-    public class UpdateTransactionCommandValidator : AbstractValidator<UpdateTransactionCommand>
+    public class TransactionForCreationValidator : AbstractValidator<TransactionForCreationDto>
     {
-        public UpdateTransactionCommandValidator()
+        public TransactionForCreationValidator()
         {
             RuleFor(t => t.DateTime)
                 .SetValidator(new DateTimeValidator());

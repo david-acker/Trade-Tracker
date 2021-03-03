@@ -4,6 +4,6 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
 {
     public class CreateTransactionCollectionCommandDto
     {
-        public IEnumerable<CreateTransactionDto> Transactions { get; set; }
+        public IEnumerable<TransactionForCreationDto> Transactions { get; set; }
     }
 }

@@ -6,7 +6,6 @@ namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransacti
     {
         public ExportTransactionsQueryValidator()
         {
-            RuleFor(t => t.AccessKey).SetValidator(new AccessKeyValidator());
         }
     }
 }
