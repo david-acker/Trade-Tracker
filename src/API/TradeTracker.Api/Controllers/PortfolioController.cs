@@ -22,22 +22,15 @@ namespace TradeTracker.Api.Controllers
                 ?? throw new ArgumentNullException(nameof(mediator));
         }
 
-        [HttpGet("current", Name = "GetCurrentHoldings")]
+        [HttpGet(Name = "GetCurrentHoldings")]
         public async Task<ActionResult<IEnumerable<HoldingVm>>> GetCurrentHoldings()
         {
-            var accessKey = User.FindFirstValue("AccessKey");
-            if (accessKey == null)
-            {
-                return Unauthorized();
-            }
-
             var query = new GetCurrentHoldingsQuery()
             {
-                AccessKey = accessKey,
+                AccessKey = User.FindFirstValue("AccessKey")
             };
 
             return Ok(await _mediator.Send(query));
         }
-
     }
 }

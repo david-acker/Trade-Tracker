@@ -34,15 +34,9 @@ namespace TradeTracker.Api.Controllers
         public async Task<ActionResult<IEnumerable<TransactionForReturnDto>>> GetTransactionCollectionById(
             [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
         {
-            var accessKey = User.FindFirstValue("AccessKey");
-            if (accessKey == null)
-            {
-                return Unauthorized();
-            }
-
             var query = new GetTransactionCollectionQuery()
             {
-                AccessKey = accessKey,
+                AccessKey = User.FindFirstValue("AccessKey"),
                 TransactionIds = ids
             };
 
@@ -53,14 +47,9 @@ namespace TradeTracker.Api.Controllers
         public async Task<ActionResult<Guid>> CreateTransactionCollection(
             [FromBody] CreateTransactionCollectionCommandDto createTransactionCollectionCommandDto)
         {
-            var accessKey = User.FindFirstValue("AccessKey");
-            if (accessKey == null)
-            {
-                return Unauthorized();
-            }
-
             var command = _mapper.Map<CreateTransactionCollectionCommand>(createTransactionCollectionCommandDto);
 
+            var accessKey = User.FindFirstValue("AccessKey");
             foreach (var transaction in command.Transactions)
             {
                 transaction.AccessKey = accessKey;

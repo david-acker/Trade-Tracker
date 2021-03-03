@@ -36,14 +36,8 @@ namespace TradeTracker.Api.Controllers
         [HttpPost(Name = "CreateTransaction")]
         public async Task<ActionResult<Guid>> CreateTransaction([FromBody] CreateTransactionCommandDto commandDto)
         {
-            var accessKey = User.FindFirstValue("AccessKey");
-            if (accessKey == null)
-            {
-                return Unauthorized();
-            }
-
             var command = _mapper.Map<CreateTransactionCommand>(commandDto);
-            command.AccessKey = accessKey;
+            command.AccessKey = User.FindFirstValue("AccessKey");
 
             var createdTransaction = await _mediator.Send(command);
             
@@ -56,15 +50,9 @@ namespace TradeTracker.Api.Controllers
         [HttpGet("{id}", Name = "GetTransactionById")]
         public async Task<ActionResult<TransactionForReturnDto>> GetTransactionById(Guid id)
         {
-            var accessKey = User.FindFirstValue("AccessKey");
-            if (accessKey == null)
-            {
-                return Unauthorized();
-            }
-
             var query = new GetTransactionQuery()
             {
-                AccessKey = accessKey,
+                AccessKey = User.FindFirstValue("AccessKey"),
                 TransactionId = id
             };
             
@@ -76,14 +64,8 @@ namespace TradeTracker.Api.Controllers
         public async Task<ActionResult<PagedTransactionsDto>> GetTransactions(
             [FromQuery] GetTransactionsResourceParameters parameters)
         {
-            var accessKey = User.FindFirstValue("AccessKey");
-            if (accessKey == null)
-            {
-                return Unauthorized();
-            }
-
             var query = _mapper.Map<GetTransactionsQuery>(parameters);
-            query.AccessKey = accessKey;
+            query.AccessKey = User.FindFirstValue("AccessKey");
 
             var returnedTransactions = await _mediator.Send(query);
             return Ok(returnedTransactions);
@@ -92,14 +74,8 @@ namespace TradeTracker.Api.Controllers
         [HttpPut("{id}", Name = "UpdateTransaction")]
         public async Task<ActionResult> UpdateTransaction(Guid id, [FromBody] UpdateTransactionCommandDto commandDto)
         {
-            var accessKey = User.FindFirstValue("AccessKey");
-            if (accessKey == null)
-            {
-                return Unauthorized();
-            }
-
             var command = _mapper.Map<UpdateTransactionCommand>(commandDto);
-            command.AccessKey = accessKey;
+            command.AccessKey = User.FindFirstValue("AccessKey");
             command.TransactionId = id;
 
             await _mediator.Send(command);
@@ -109,15 +85,9 @@ namespace TradeTracker.Api.Controllers
         [HttpDelete("{id}", Name = "DeleteTransaction")]
         public async Task<ActionResult> DeleteTransaction(Guid id)
         {
-            var accessKey = User.FindFirstValue("AccessKey");
-            if (accessKey == null)
-            {
-                return Unauthorized();
-            }
-
             var command = new DeleteTransactionCommand() 
             {
-                AccessKey = accessKey,
+                AccessKey =User.FindFirstValue("AccessKey"),
                 TransactionId = id
             };
 
@@ -129,15 +99,9 @@ namespace TradeTracker.Api.Controllers
         [FileResultContentType("text/csv")]
         public async Task<IActionResult> ExportTransactions()
         {
-            var accessKey = User.FindFirstValue("AccessKey");
-            if (accessKey == null)
-            {
-                return Unauthorized();
-            }
-
             var query = new ExportTransactionsQuery()
             {
-                AccessKey = accessKey
+                AccessKey = User.FindFirstValue("AccessKey")
             };
 
             var fileExportDto = await _mediator.Send(query);
