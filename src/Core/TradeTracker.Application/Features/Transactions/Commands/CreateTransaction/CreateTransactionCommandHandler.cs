@@ -8,7 +8,6 @@ using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Domain.Entities;
 
-
 namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransaction
 {
     public class CreateTransactionCommandHandler : IRequestHandler<CreateTransactionCommand, TransactionDto>

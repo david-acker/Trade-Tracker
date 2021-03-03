@@ -32,15 +32,19 @@ namespace TradeTracker.Api.Controllers
                 ?? throw new ArgumentNullException(nameof(mediator));
         }
 
-        [HttpGet(Name = "GetTransactionsList")]
-        public async Task<ActionResult<PagedTransactionsListVm>> GetTransactionsList(
-            [FromQuery] GetTransactionsListResourceParameters getTransactionsListResourceParameters)
+        [HttpPost(Name = "AddTransaction")]
+        public async Task<ActionResult<Guid>> AddTransaction([FromBody] CreateTransactionCommandDto createTransactionCommandDto)
         {
-            var query = _mapper.Map<GetTransactionsListQuery>(getTransactionsListResourceParameters);
+            var command = _mapper.Map<CreateTransactionCommand>(createTransactionCommandDto);
 
-            query.AccessKey = User.FindFirstValue("AccessKey");
+            command.AccessKey = User.FindFirstValue("AccessKey");
 
-            return Ok(await _mediator.Send(query));
+            var transactionToReturn = await _mediator.Send(command);
+            
+            return CreatedAtAction(
+                "GetTransactionById",
+                new { id = transactionToReturn.TransactionId },
+                transactionToReturn);
         }
 
         [HttpGet("{id}", Name = "GetTransactionById")]
@@ -55,17 +59,15 @@ namespace TradeTracker.Api.Controllers
             return Ok(await _mediator.Send(query));
         }
 
-        [HttpPost(Name = "AddTransaction")]
-        public async Task<ActionResult<Guid>> AddTransaction([FromBody] CreateTransactionCommand createTransactionCommand)
+        [HttpGet(Name = "GetTransactionsList")]
+        public async Task<ActionResult<PagedTransactionsListVm>> GetTransactionsList(
+            [FromQuery] GetTransactionsListResourceParameters getTransactionsListResourceParameters)
         {
-            createTransactionCommand.AccessKey = User.FindFirstValue("AccessKey");
+            var query = _mapper.Map<GetTransactionsListQuery>(getTransactionsListResourceParameters);
 
-            var transactionToReturn = await _mediator.Send(createTransactionCommand);
-            
-            return CreatedAtAction(
-                "GetTransactionById",
-                new { id = transactionToReturn.TransactionId },
-                transactionToReturn);
+            query.AccessKey = User.FindFirstValue("AccessKey");
+
+            return Ok(await _mediator.Send(query));
         }
 
         [HttpPut("{id}", Name = "UpdateTransaction")]

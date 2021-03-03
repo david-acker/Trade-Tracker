@@ -9,7 +9,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands
         public TransactionCreationValidator()
         {
             RuleFor(t => t.AccessKey).SetValidator(new AccessKeyValidator());
-
+            
             RuleFor(t => t.DateTime)
                 .NotNull()
                 .NotEmpty()

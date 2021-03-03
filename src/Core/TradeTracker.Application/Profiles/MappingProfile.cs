@@ -16,6 +16,8 @@ namespace TradeTracker.Application.Profiles
     {
         public MappingProfile()
         {
+            CreateMap<CreateTransactionCommandDto, CreateTransactionCommand>();
+
             CreateMap<Transaction, CreateTransactionCommand>()
                 .ForMember(
                     dest => dest.AccessKey,
