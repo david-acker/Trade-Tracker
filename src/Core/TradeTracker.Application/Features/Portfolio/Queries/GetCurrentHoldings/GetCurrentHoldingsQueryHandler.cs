@@ -6,8 +6,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Domain.Entities;
-using TradeTracker.Domain.Enums;
 
 namespace TradeTracker.Application.Features.Portfolio.Queries.GetCurrentHoldings
 {
@@ -26,12 +24,6 @@ namespace TradeTracker.Application.Features.Portfolio.Queries.GetCurrentHoldings
 
         public async Task<IEnumerable<HoldingVm>> Handle(GetCurrentHoldingsQuery request, CancellationToken cancellationToken)
         {
-            var validator = new GetCurrentHoldingsQueryValidator();
-            var validationResult = await validator.ValidateAsync(request);
-            
-            if (validationResult.Errors.Count > 0)
-                throw new Exceptions.ValidationException(validationResult);
-
             var allTransactions = await _transactionRepository.ListAllAsync(request.AccessKey);
 
             var currentHoldingsVm = allTransactions
