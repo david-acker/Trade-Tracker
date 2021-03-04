@@ -1,6 +1,7 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
@@ -10,6 +11,7 @@ using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.DeleteTransaction;
+using TradeTracker.Application.Features.Transactions.Commands.PatchTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using TradeTracker.Application.Features.Transactions.Queries.ExportTransactions;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransaction;
@@ -77,6 +79,20 @@ namespace TradeTracker.Api.Controllers
             var command = _mapper.Map<UpdateTransactionCommand>(commandDto);
             command.AccessKey = User.FindFirstValue("AccessKey");
             command.TransactionId = id;
+
+            await _mediator.Send(command);
+            return NoContent();
+        }
+
+        [HttpPatch("{id}")]
+        public async Task<ActionResult> PatchTransaction(Guid id, JsonPatchDocument<UpdateTransactionCommandDto> patchDocument)
+        {
+            var command = new PatchTransactionCommand()
+            {
+                AccessKey = User.FindFirstValue("AccessKey"),
+                TransactionId = id,
+                PatchDocument = patchDocument
+            };
 
             await _mediator.Send(command);
             return NoContent();

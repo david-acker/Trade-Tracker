@@ -30,10 +30,13 @@ namespace TradeTracker.Application.Profiles
             CreateMap<UpdateTransactionCommandDto, UpdateTransactionCommand>();
 
             CreateMap<Transaction, UpdateTransactionCommand>()
-                .ForMember(
-                    dest => dest.AccessKey,
-                    opt => opt.MapFrom(src => src.AccessKey))
                 .ReverseMap();
+
+            // CreateMap<Transaction, UpdateTransactionCommand>()
+            //     .ForMember(
+            //         dest => dest.AccessKey,
+            //         opt => opt.MapFrom(src => src.AccessKey))
+            //     .ReverseMap();
 
             CreateMap<Transaction, TransactionsForExportDto>()
                 .ReverseMap(); 
