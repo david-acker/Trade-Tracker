@@ -88,5 +88,12 @@ namespace TradeTracker.Persistence.Repositories
                 .Where(t => t.AccessKey == accessKey && ids.Contains(t.TransactionId))
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Transaction>> GetAllTransactionsForSymbol(string accessKey, string symbol)
+        {
+            return await _dbContext.Transactions
+                .Where(t => t.AccessKey == accessKey && t.Symbol == symbol)
+                .ToListAsync();
+        }
     }
 }
