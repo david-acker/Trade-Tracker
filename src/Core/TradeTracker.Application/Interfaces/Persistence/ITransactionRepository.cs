@@ -11,8 +11,8 @@ namespace TradeTracker.Application.Interfaces.Persistence
     {
         Task<PagedList<Transaction>> GetPagedTransactionsList(GetPagedTransactionsResourceParameters parameters);
 
-        Task<IEnumerable<Transaction>> GetTransactionCollectionByIds(string accessKey, IEnumerable<Guid> ids);
+        Task<IEnumerable<Transaction>> GetTransactionCollectionByIds(Guid AccessKey, IEnumerable<Guid> ids);
 
-        Task<IEnumerable<Transaction>> GetAllTransactionsForSymbol(string access, string symbol);
+        Task<IEnumerable<Transaction>> GetAllTransactionsForSymbol(Guid AccessKey, string symbol);
     }
 }

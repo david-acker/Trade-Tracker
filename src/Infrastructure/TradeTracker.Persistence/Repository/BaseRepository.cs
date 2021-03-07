@@ -9,27 +9,26 @@ namespace TradeTracker.Persistence.Repositories
 {
     public class BaseRepository<T> : IAsyncRepository<T> where T : class
     {
-        protected readonly TradeTrackerDbContext _dbContext;
+        protected readonly TradeTrackerDbContext _context;
 
-        public BaseRepository(TradeTrackerDbContext dbContext)
+        public BaseRepository(TradeTrackerDbContext context)
         {
-            _dbContext = dbContext 
-                ?? throw new ArgumentNullException(nameof(dbContext));
+            _context = context;
         }
 
-        public virtual async Task<T> GetByIdAsync(string accessTag, Guid id)
+        public virtual async Task<T> GetByIdAsync(Guid accessKey, Guid id)
         {
-            return await _dbContext.Set<T>().FindAsync(id);
+            return await _context.Set<T>().FindAsync(id);
         }
 
-        public virtual async Task<IReadOnlyList<T>> ListAllAsync(string accessTag)
+        public virtual async Task<IReadOnlyList<T>> ListAllAsync(Guid accessKey)
         {
-            return await _dbContext.Set<T>().ToListAsync();
+            return await _context.Set<T>().ToListAsync();
         }
 
-        public async virtual Task<IReadOnlyList<T>> GetPagedReponseAsync(string accessTag, int pageNumber, int pageSize)
+        public async virtual Task<IReadOnlyList<T>> GetPagedReponseAsync(Guid accessKey, int pageNumber, int pageSize)
         {
-            return await _dbContext.Set<T>()
+            return await _context.Set<T>()
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize).AsNoTracking()
                 .ToListAsync();
@@ -37,30 +36,30 @@ namespace TradeTracker.Persistence.Repositories
 
         public async Task<T> AddAsync(T entity)
         {
-            _dbContext.Set<T>().Add(entity);
-            await _dbContext.SaveChangesAsync();
+            _context.Set<T>().Add(entity);
+            await _context.SaveChangesAsync();
 
             return entity;
         }
 
         public async Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities)
         {
-            _dbContext.Set<T>().AddRange(entities);
-            await _dbContext.SaveChangesAsync();
+            _context.Set<T>().AddRange(entities);
+            await _context.SaveChangesAsync();
 
             return entities;
         }
 
         public async Task UpdateAsync(T entity)
         {
-            _dbContext.Entry(entity).State = EntityState.Modified;
-            await _dbContext.SaveChangesAsync();
+            _context.Entry(entity).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(T entity)
         {
-            _dbContext.Set<T>().Remove(entity);
-            await _dbContext.SaveChangesAsync();
+            _context.Set<T>().Remove(entity);
+            await _context.SaveChangesAsync();
         }
     }
 }

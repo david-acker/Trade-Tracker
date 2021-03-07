@@ -15,24 +15,29 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
 
         public GetTransactionQueryHandler(IMapper mapper, ITransactionRepository transactionRepository)
         {
-            _mapper = mapper
-                ?? throw new ArgumentNullException(nameof(mapper));
-            _transactionRepository = transactionRepository
-                ?? throw new ArgumentNullException(nameof(transactionRepository));
+            _mapper = mapper;
+            _transactionRepository = transactionRepository;
         }
 
         public async Task<TransactionForReturnDto> Handle(GetTransactionQuery request, CancellationToken cancellationToken)
         {
-            var validator = new GetTransactionQueryValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (validationResult.Errors.Count > 0)
-                throw new ValidationException(validationResult);
+            await ValidateRequest(request);
 
             var transaction = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
             var transactionForReturnDto = _mapper.Map<TransactionForReturnDto>(transaction);
 
             return transactionForReturnDto;
+        }
+
+        private async Task ValidateRequest(GetTransactionQuery request)
+        {
+            var validator = new GetTransactionQueryValidator();
+            var validationResult = await validator.ValidateAsync(request);
+
+            if (validationResult.Errors.Count > 0)
+            {
+                throw new ValidationException(validationResult);
+            }  
         }
     }
 }

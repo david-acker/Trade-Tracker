@@ -9,9 +9,9 @@ namespace TradeTracker.Application.Features.Transactions.Shared.Validators
             RuleFor(t => t)
                 .NotNull()
                 .NotEmpty()
-                    .WithMessage("The Quantity must not be blank.")
+                    .WithMessage("Quantity must not be blank.")
                 .GreaterThan(0)
-                    .WithMessage("The Quantity must be greater than zero.");
+                    .WithMessage("Quantity must be greater than zero.");
         }
     }
 }

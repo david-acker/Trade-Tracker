@@ -9,9 +9,9 @@ namespace TradeTracker.Application.Features.Transactions.Shared.Validators
             RuleFor(t => t)
                 .NotNull()
                 .NotEmpty()
-                    .WithMessage("Tags cannot be empty or null.")
+                    .WithMessage("A Tag cannot be empty or null.")
                 .Length(1, 25)
-                    .WithMessage("Tags must be between 1 and 25 characters.");
+                    .WithMessage("A Tag must be between 1 and 25 characters.");
         }
     }
 }

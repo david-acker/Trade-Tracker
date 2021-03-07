@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Domain.Entities;
+using TradeTracker.Domain.Enums;
+using TradeTracker.Domain.Events;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.DeleteTransaction
 {
@@ -16,22 +18,31 @@ namespace TradeTracker.Application.Features.Transactions.Commands.DeleteTransact
         
         public DeleteTransactionCommandHandler(IMapper mapper, ITransactionRepository transactionRepository)
         {
-            _mapper = mapper
-                ?? throw new ArgumentNullException(nameof(mapper));
-            _transactionRepository = transactionRepository
-                ?? throw new ArgumentNullException(nameof(transactionRepository));
+            _mapper = mapper;
+            _transactionRepository = transactionRepository;
         }
 
         public async Task<Unit> Handle(DeleteTransactionCommand request, CancellationToken cancellationToken)
         {
-            var transactionToDelete = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
+            var transaction = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
 
-            if (transactionToDelete == null)
+            if (transaction == null)
             {
                 throw new NotFoundException(nameof(Transaction), request.TransactionId);
             }
 
-            await _transactionRepository.DeleteAsync(transactionToDelete);
+            string symbolBeforeDeletion = transaction.Symbol;
+            TransactionType typeBeforeDeletion = transaction.Type;
+            decimal quantityBeforeDeletion = transaction.Quantity;
+
+            transaction.DomainEvents.Add(
+                new TransactionDeletedEvent(
+                    accessKey: transaction.AccessKey, 
+                    symbolBeforeDeletion: symbolBeforeDeletion,
+                    typeBeforeDeletion: typeBeforeDeletion,
+                    quantityBeforeDeletion: quantityBeforeDeletion));
+
+            await _transactionRepository.DeleteAsync(transaction);
 
             return Unit.Value;
         }

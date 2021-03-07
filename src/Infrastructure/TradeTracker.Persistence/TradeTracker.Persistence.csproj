@@ -9,6 +9,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
 	  <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.0-preview.1.21103.6" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.3">
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

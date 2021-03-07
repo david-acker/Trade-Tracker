@@ -5,7 +5,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
     public class GetPagedTransactionsResourceParameters
     {
-        public string AccessKey { get; set; }
+        public Guid AccessKey { get; set; }
 
         public string OrderBy { get; set; }
 

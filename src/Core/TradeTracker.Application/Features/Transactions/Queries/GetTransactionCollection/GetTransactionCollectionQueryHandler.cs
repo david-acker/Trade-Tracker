@@ -16,10 +16,8 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
 
         public GetTransactionCollectionQueryHandler(IMapper mapper, ITransactionRepository transactionRepository)
         {
-            _mapper = mapper
-                ?? throw new ArgumentNullException(nameof(mapper));
-            _transactionRepository = transactionRepository
-                ?? throw new ArgumentNullException(nameof(transactionRepository));
+            _mapper = mapper;
+            _transactionRepository = transactionRepository;
         }
 
         public async Task<IEnumerable<TransactionForReturnDto>> Handle(GetTransactionCollectionQuery request, CancellationToken cancellationToken)

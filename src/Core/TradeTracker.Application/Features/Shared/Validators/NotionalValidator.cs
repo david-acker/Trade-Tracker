@@ -9,9 +9,9 @@ namespace TradeTracker.Application.Features.Transactions.Shared.Validators
             RuleFor(t => t)
                 .NotNull()
                 .NotEmpty()
-                    .WithMessage("The Notional must not be blank.")
+                    .WithMessage("Notional must not be blank.")
                 .GreaterThan(0)
-                    .WithMessage("The Notional must be greater than zero.");
+                    .WithMessage("Notional must be greater than zero.");
         }
     }
 }

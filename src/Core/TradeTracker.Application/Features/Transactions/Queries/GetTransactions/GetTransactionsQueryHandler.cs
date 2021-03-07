@@ -20,19 +20,13 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
             IMapper mapper, 
             ITransactionRepository transactionRepository)
         {
-            _mapper = mapper
-                ?? throw new ArgumentNullException(nameof(mapper));
-            _transactionRepository = transactionRepository
-                ?? throw new ArgumentNullException(nameof(transactionRepository));
+            _mapper = mapper;
+            _transactionRepository = transactionRepository;
         }
 
         public async Task<PagedTransactionsDto> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
         {
-            var validator = new GetTransactionsQueryValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (validationResult.Errors.Count > 0)
-                throw new ValidationException(validationResult);
+            await ValidateRequest(request);
 
             var parameters = _mapper.Map<GetPagedTransactionsResourceParameters>(request);
 
@@ -50,6 +44,17 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
                 HasNext = pagedList.HasNext,
                 Items = transactionsToReturn
             };
+        }
+
+        public async Task ValidateRequest(GetTransactionsQuery request)
+        {
+            var validator = new GetTransactionsQueryValidator();
+            var validationResult = await validator.ValidateAsync(request);
+
+            if (validationResult.Errors.Count > 0)
+            {
+                throw new ValidationException(validationResult);
+            }  
         }
     }
 }

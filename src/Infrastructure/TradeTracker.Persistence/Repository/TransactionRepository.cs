@@ -12,27 +12,27 @@ namespace TradeTracker.Persistence.Repositories
 {
     public class TransactionRepository : BaseRepository<Transaction>, ITransactionRepository
     {
-        public TransactionRepository(TradeTrackerDbContext dbContext) : base(dbContext)
+        public TransactionRepository(TradeTrackerDbContext context) : base(context)
         {
         }
 
-        public override async Task<Transaction> GetByIdAsync(string accessKey, Guid id)
+        public override async Task<Transaction> GetByIdAsync(Guid accessKey, Guid id)
         {
-            return await _dbContext.Transactions
+            return await _context.Transactions
                 .Where(t => t.AccessKey == accessKey)
                 .FirstOrDefaultAsync(t => t.TransactionId == id);
         }
 
-        public override async Task<IReadOnlyList<Transaction>> ListAllAsync(string accessKey)
+        public override async Task<IReadOnlyList<Transaction>> ListAllAsync(Guid accessKey)
         {
-            return await _dbContext.Transactions
+            return await _context.Transactions
                 .Where(t => t.AccessKey == accessKey)
                 .ToListAsync();
         }
 
         public async Task<PagedList<Transaction>> GetPagedTransactionsList(GetPagedTransactionsResourceParameters resourceParameters)
         {
-            var query = (IQueryable<Transaction>)_dbContext.Transactions;
+            var query = (IQueryable<Transaction>)_context.Transactions;
         
             query = query.Where(t => t.AccessKey == resourceParameters.AccessKey);
 
@@ -82,17 +82,18 @@ namespace TradeTracker.Persistence.Repositories
             return await PagedList<Transaction>.CreateAsync(query, resourceParameters.PageNumber, resourceParameters.PageSize);
         }
 
-        public async Task<IEnumerable<Transaction>> GetTransactionCollectionByIds(string accessKey, IEnumerable<Guid> ids)
+        public async Task<IEnumerable<Transaction>> GetTransactionCollectionByIds(Guid accessKey, IEnumerable<Guid> ids)
         {
-            return await _dbContext.Transactions
+            return await _context.Transactions
                 .Where(t => t.AccessKey == accessKey && ids.Contains(t.TransactionId))
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Transaction>> GetAllTransactionsForSymbol(string accessKey, string symbol)
+        public async Task<IEnumerable<Transaction>> GetAllTransactionsForSymbol(Guid accessKey, string symbol)
         {
-            return await _dbContext.Transactions
+            return await _context.Transactions
                 .Where(t => t.AccessKey == accessKey && t.Symbol == symbol)
+                .OrderByDescending(t => t.DateTime)
                 .ToListAsync();
         }
     }

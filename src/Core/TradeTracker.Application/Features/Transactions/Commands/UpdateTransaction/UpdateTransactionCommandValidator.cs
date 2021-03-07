@@ -13,7 +13,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
             RuleFor(t => t.Symbol)
                 .SetValidator(new SymbolValidator());
 
-            RuleFor(t => t.TransactionType)
+            RuleFor(t => t.Type)
                 .SetValidator(new TransactionTypeValidator());
 
             RuleFor(t => t.Quantity)
@@ -22,14 +22,8 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
             RuleFor(t => t.Notional)
                 .SetValidator(new NotionalValidator());
 
-            When(t => (t.TradePrice != null), () =>
-            {
-                RuleFor(t => t.TradePrice)
-                    .SetValidator(new TradePriceValidator());
-            });
-
-            RuleFor(t => t.Tags)
-                .SetValidator(new TagsValidator());
+            RuleFor(t => t.TradePrice)
+                .SetValidator(new TradePriceValidator());
         }
     }
 }

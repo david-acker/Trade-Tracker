@@ -3,7 +3,9 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using TradeTracker.Api.Utilities;
@@ -24,73 +26,97 @@ namespace TradeTracker.Api.Controllers
     [Route("api/[controller]")]
     public class TransactionsController : Controller
     {
+        private readonly ILogger<TransactionsController> _logger;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
 
-        public TransactionsController(IMapper mapper, IMediator mediator)
+        public TransactionsController(
+            IMapper mapper, 
+            IMediator mediator,
+            ILogger<TransactionsController> logger)
         {
-            _mapper = mapper
-                ?? throw new ArgumentNullException(nameof(mapper));
-            _mediator = mediator 
-                ?? throw new ArgumentNullException(nameof(mediator));
-        }
-
-        [HttpPost(Name = "CreateTransaction")]
-        public async Task<ActionResult<Guid>> CreateTransaction([FromBody] CreateTransactionCommandDto commandDto)
-        {
-            var command = _mapper.Map<CreateTransactionCommand>(commandDto);
-            command.AccessKey = User.FindFirstValue("AccessKey");
-
-            var createdTransaction = await _mediator.Send(command);
-            
-            return CreatedAtAction(
-                "GetTransactionById",
-                new { id = createdTransaction.TransactionId },
-                createdTransaction);
-        }
-
-        [HttpGet("{id}", Name = "GetTransactionById")]
-        public async Task<ActionResult<TransactionForReturnDto>> GetTransactionById(Guid id)
-        {
-            var query = new GetTransactionQuery()
-            {
-                AccessKey = User.FindFirstValue("AccessKey"),
-                TransactionId = id
-            };
-            
-            var returnedTransaction = await _mediator.Send(query);
-            return Ok(returnedTransaction);
+            _logger = logger;
+            _mapper = mapper;
+            _mediator = mediator;
         }
 
         [HttpGet(Name = "GetTransactions")]
         public async Task<ActionResult<PagedTransactionsDto>> GetTransactions(
             [FromQuery] GetTransactionsResourceParameters parameters)
         {
+            _logger.LogInformation($"TransactionsController: {nameof(GetTransactions)} was called.");
+
             var query = _mapper.Map<GetTransactionsQuery>(parameters);
-            query.AccessKey = User.FindFirstValue("AccessKey");
+            query.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
 
             var returnedTransactions = await _mediator.Send(query);
             return Ok(returnedTransactions);
         }
 
-        [HttpPut("{id}", Name = "UpdateTransaction")]
-        public async Task<ActionResult> UpdateTransaction(Guid id, [FromBody] UpdateTransactionCommandDto commandDto)
+        [HttpPost(Name = "CreateTransaction")]
+        public async Task<ActionResult<TransactionForReturnDto>> CreateTransaction([FromBody] CreateTransactionCommandDto commandDto)
         {
+            _logger.LogInformation($"TransactionsController: {nameof(CreateTransaction)} was called.");
+
+            var command = _mapper.Map<CreateTransactionCommand>(commandDto);
+            command.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+
+            var createdTransaction = await _mediator.Send(command);
+            
+            return CreatedAtAction(
+                "GetTransaction",
+                new { transactionId = createdTransaction.TransactionId },
+                createdTransaction);
+        }
+
+        [HttpOptions(Name = "OptionsForTransactions")]
+        public IActionResult OptionsForTransactions()
+        {
+            _logger.LogInformation($"TransactionsController: {nameof(OptionsForTransactions)} was called.");
+            
+            Response.Headers.Add("Allow", "GET,OPTIONS,POST");
+            
+            return NoContent();
+        }
+
+        [HttpGet("{transactionId}", Name = "GetTransaction")]
+        public async Task<ActionResult<TransactionForReturnDto>> GetTransaction(Guid transactionId)
+        {
+            _logger.LogInformation($"TransactionsController: {nameof(GetTransaction)} was called.");
+
+            var query = new GetTransactionQuery()
+            {
+                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey")),
+                TransactionId = transactionId
+            };
+            
+            var returnedTransaction = await _mediator.Send(query);
+            return Ok(returnedTransaction);
+        }
+
+        [HttpPut("{transactionId}", Name = "UpdateTransaction")]
+        public async Task<ActionResult> UpdateTransaction(Guid transactionId, 
+            [FromBody] UpdateTransactionCommandDto commandDto)
+        {
+            _logger.LogInformation($"TransactionsController: {nameof(UpdateTransaction)} was called.");
+
             var command = _mapper.Map<UpdateTransactionCommand>(commandDto);
-            command.AccessKey = User.FindFirstValue("AccessKey");
-            command.TransactionId = id;
+            command.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            command.TransactionId = transactionId;
 
             await _mediator.Send(command);
             return NoContent();
         }
 
-        [HttpPatch("{id}")]
-        public async Task<ActionResult> PatchTransaction(Guid id, JsonPatchDocument<UpdateTransactionCommandDto> patchDocument)
+        [HttpPatch("{transactionId}", Name = "PatchTransaction")]
+        public async Task<ActionResult> PatchTransaction(Guid transactionId, JsonPatchDocument<UpdateTransactionCommandDto> patchDocument)
         {
+            _logger.LogInformation($"TransactionsController: {nameof(PatchTransaction)} was called.");
+
             var command = new PatchTransactionCommand()
             {
-                AccessKey = User.FindFirstValue("AccessKey"),
-                TransactionId = id,
+                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey")),
+                TransactionId = transactionId,
                 PatchDocument = patchDocument
             };
 
@@ -98,16 +124,28 @@ namespace TradeTracker.Api.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}", Name = "DeleteTransaction")]
-        public async Task<ActionResult> DeleteTransaction(Guid id)
+        [HttpDelete("{transactionId}", Name = "DeleteTransaction")]
+        public async Task<ActionResult> DeleteTransaction(Guid transactionId)
         {
+            _logger.LogInformation($"TransactionsController: {nameof(DeleteTransaction)} was called.");
+
             var command = new DeleteTransactionCommand() 
             {
-                AccessKey =User.FindFirstValue("AccessKey"),
-                TransactionId = id
+                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey")),
+                TransactionId = transactionId
             };
 
             await _mediator.Send(command);
+            return NoContent();
+        }
+
+        [HttpOptions("{transactionId}", Name = "OptionsForTransactionById")]
+        public IActionResult OptionsForTransactionById()
+        {
+            _logger.LogInformation($"TransactionsController: {nameof(OptionsForTransactionById)} was called.");
+
+            Response.Headers.Add("Allow", "DELETE,GET,OPTIONS,PATCH,PUT");
+            
             return NoContent();
         }
 
@@ -115,9 +153,11 @@ namespace TradeTracker.Api.Controllers
         [FileResultContentType("text/csv")]
         public async Task<IActionResult> ExportTransactions()
         {
+            _logger.LogInformation($"TransactionsController: {nameof(ExportTransactions)} was called.");
+
             var query = new ExportTransactionsQuery()
             {
-                AccessKey = User.FindFirstValue("AccessKey")
+                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"))
             };
 
             var fileExportDto = await _mediator.Send(query);
@@ -127,12 +167,51 @@ namespace TradeTracker.Api.Controllers
                 fileExportDto.TransactionsExportFileName);
         }
 
-        [HttpOptions(Name = "OptionsTransactions")]
-        public IActionResult OptionsTransactions()
+        [HttpOptions("export", Name = "OptionsForExportTransactions")]
+        public IActionResult OptionsForExportTransactions()
         {
-            Response.Headers.Add("Allow", "DELETE,GET,OPTIONS,POST,PUT");
+            _logger.LogInformation($"TransactionsController: {nameof(OptionsForExportTransactions)} was called.");
+
+            Response.Headers.Add("Allow", "GET,OPTIONS");
             
             return NoContent();
         }
+
+
+        // private IEnumerable<LinkDto> CreateLinksForTransaction(Guid transactionId)
+        // {
+        //     var links = new List<LinkDto>()
+        //     {
+        //         new LinkDto(
+        //             Url.Link(
+        //                 "GetTransaction",
+        //                 new { transactionId }),
+        //             "self",
+        //             "GET"),
+
+        //         new LinkDto(
+        //             Url.Link(
+        //                 "UpdateTransaction",
+        //                 new { transactionId }),
+        //             "update transaction",
+        //             "PUT"),
+                
+        //         new LinkDto(
+        //             Url.Link(
+        //                 "PatchTransaction",
+        //                 new { transactionId }),
+        //             "patch transaction",
+        //             "PATCH"),
+
+        //         new LinkDto(
+        //             Url.Link(
+        //                 "DeleteTransaction",
+        //                 new { transactionId }),
+        //             "delete transaction",
+        //             "DELETE")
+        //     };
+
+        //     return links;
+        // }
     }
 }

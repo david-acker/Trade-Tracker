@@ -6,7 +6,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
     public class GetTransactionsQuery : IRequest<PagedTransactionsDto>
     {
-        public string AccessKey { get; set; }
+        public Guid AccessKey { get; set; }
 
         public string OrderBy { get; set; } = "DateTime";
 

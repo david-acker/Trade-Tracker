@@ -1,12 +1,13 @@
 using AutoMapper;
 using MediatR;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Domain.Entities;
+using TradeTracker.Domain.Enums;
+using TradeTracker.Domain.Events;
 
 namespace GloboTicket.TicketManagement.Application.Features.Transactions.Commands.UpdateTransaction
 {
@@ -17,32 +18,47 @@ namespace GloboTicket.TicketManagement.Application.Features.Transactions.Command
 
         public UpdateTransactionCommandHandler(IMapper mapper, ITransactionRepository transactionRepository)
         {
-            _mapper = mapper
-                ?? throw new ArgumentNullException(nameof(mapper));
-            _transactionRepository = transactionRepository
-                ?? throw new ArgumentNullException(nameof(transactionRepository));
+            _mapper = mapper;
+            _transactionRepository = transactionRepository;
         }
 
         public async Task<Unit> Handle(UpdateTransactionCommand request, CancellationToken cancellationToken)
+        {
+            await ValidateRequest(request);
+
+            var transaction = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
+
+            if (transaction == null)
+            {
+                throw new NotFoundException(nameof(Transaction), request.TransactionId);
+            }
+
+            string symbolBeforeModification = transaction.Symbol;
+            TransactionType typeBeforeModification = transaction.Type;
+            decimal quantityBeforeModification = transaction.Quantity;
+
+            _mapper.Map(request, transaction, typeof(UpdateTransactionCommand), typeof(Transaction));
+
+            transaction.DomainEvents.Add(
+                new TransactionModifiedEvent(
+                    accessKey: transaction.AccessKey, 
+                    transactionId: transaction.TransactionId, 
+                    symbolBeforeModification: symbolBeforeModification,
+                    typeBeforeModification: typeBeforeModification,
+                    quantityBeforeModification: quantityBeforeModification));
+
+            await _transactionRepository.UpdateAsync(transaction);
+
+            return Unit.Value;
+        }
+
+        public async Task ValidateRequest(UpdateTransactionCommand request)
         {
             var validator = new UpdateTransactionCommandValidator();
             var validationResult = await validator.ValidateAsync(request);
 
             if (validationResult.Errors.Count > 0)
                 throw new ValidationException(validationResult);
-
-            var transactionToUpdate = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
-
-            if (transactionToUpdate == null)
-            {
-                throw new NotFoundException(nameof(Transaction), request.TransactionId);
-            }
-
-            _mapper.Map(request, transactionToUpdate, typeof(UpdateTransactionCommand), typeof(Transaction));
-
-            await _transactionRepository.UpdateAsync(transactionToUpdate);
-
-            return Unit.Value;
         }
     }
 }
