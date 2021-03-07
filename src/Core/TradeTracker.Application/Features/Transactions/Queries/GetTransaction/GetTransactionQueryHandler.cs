@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
 {
@@ -24,6 +25,12 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
             await ValidateRequest(request);
 
             var transaction = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
+            
+            if (transaction == null)
+            {
+                throw new NotFoundException(nameof(Transaction), request.TransactionId);
+            }
+            
             var transactionForReturnDto = _mapper.Map<TransactionForReturnDto>(transaction);
 
             return transactionForReturnDto;
