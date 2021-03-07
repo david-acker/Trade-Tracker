@@ -9,7 +9,7 @@ using TradeTracker.Identity;
 namespace TradeTracker.Identity.Migrations
 {
     [DbContext(typeof(TradeTrackerIdentityDbContext))]
-    [Migration("20210301184347_InitialMigration")]
+    [Migration("20210306024136_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

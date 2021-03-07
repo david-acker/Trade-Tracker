@@ -39,8 +39,6 @@ namespace TradeTracker.Api.Helpers
 
             context.Result = ModelBindingResult.Success(context.Model);
             return Task.CompletedTask;
-
-
         }
     }
 }

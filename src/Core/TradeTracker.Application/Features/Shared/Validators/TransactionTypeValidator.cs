@@ -11,11 +11,11 @@ namespace TradeTracker.Application.Features.Transactions.Shared.Validators
             RuleFor(t => t)
                 .NotNull()
                 .NotEmpty()
-                    .WithMessage("A TransactionType is required.")
+                    .WithMessage("TransactionType is required.")
                 .IsEnumName(typeof(TransactionType), caseSensitive: false)
                     .WithMessage("A valid TransactionType is required.")
                 .Must(t => IsTransactionTypeSpecified(t))
-                    .WithMessage("The {TransactionType} cannot be unspecified.");
+                    .WithMessage("TransactionType cannot be left unspecified.");
         }
         
         private bool IsTransactionTypeSpecified(string input)

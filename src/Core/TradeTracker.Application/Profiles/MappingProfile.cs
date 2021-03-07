@@ -19,24 +19,22 @@ namespace TradeTracker.Application.Profiles
         {
             CreateMap<CreateTransactionCommandDto, CreateTransactionCommand>();
 
+            CreateMap<TransactionForCreationDto, TransactionForCreationCommandBase>();
+
+            CreateMap<TransactionForCreationCommandBase, Transaction>();
+
+            CreateMap<CreateTransactionCollectionCommand, IEnumerable<Transaction>>();
+
             CreateMap<Transaction, CreateTransactionCommand>()
                 .ForMember(
                     dest => dest.AccessKey,
                     opt => opt.MapFrom(src => src.AccessKey))
                 .ReverseMap();
 
-            CreateMap<CreateTransactionCollectionCommandDto, CreateTransactionCollectionCommand>();
-
             CreateMap<UpdateTransactionCommandDto, UpdateTransactionCommand>();
 
             CreateMap<Transaction, UpdateTransactionCommand>()
                 .ReverseMap();
-
-            // CreateMap<Transaction, UpdateTransactionCommand>()
-            //     .ForMember(
-            //         dest => dest.AccessKey,
-            //         opt => opt.MapFrom(src => src.AccessKey))
-            //     .ReverseMap();
 
             CreateMap<Transaction, TransactionsForExportDto>()
                 .ReverseMap(); 
@@ -50,16 +48,22 @@ namespace TradeTracker.Application.Profiles
             CreateMap<GetTransactionsResourceParameters, GetTransactionsQuery>()
                 .ForMember(
                     dest => dest.RangeStart,
-                    opt => opt.MapFrom(src => DateTime.Parse(src.RangeStart)))
+                    opt => opt.MapFrom(src => (DateTime.Parse(src.RangeStart))))
                 .ForMember(
                     dest => dest.RangeEnd,
-                    opt => opt.MapFrom(src => DateTime.Parse(src.RangeEnd)))
+                    opt => opt.MapFrom(src => (DateTime.Parse(src.RangeEnd))))
                 .ForMember(
                     dest => dest.Including,
-                    opt => opt.MapFrom(src => ArraySelectionParser(src.Including)))
+                    opt => opt.MapFrom(src => 
+                        (src.Including != null)
+                            ? ArraySelectionParser(src.Including)
+                            : new List<string>()))
                 .ForMember(
                     dest => dest.Excluding,
-                    opt => opt.MapFrom(src => ArraySelectionParser(src.Excluding)));
+                    opt => opt.MapFrom(src => 
+                        (src.Excluding != null)
+                            ? ArraySelectionParser(src.Excluding)
+                            : new List<string>()));
 
             CreateMap<GetTransactionsQuery, GetPagedTransactionsResourceParameters>();
         }

@@ -6,7 +6,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
 {
     public class GetTransactionCollectionQuery : IRequest<IEnumerable<TransactionForReturnDto>>
     {
-        public string AccessKey { get; set; }
+        public Guid AccessKey { get; set; }
         public IEnumerable<Guid> TransactionIds { get; set; }
     }
 }

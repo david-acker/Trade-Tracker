@@ -7,7 +7,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransacti
 {
     public class PatchTransactionCommand : IRequest
     {
-        public string AccessKey { get; set; }
+        public Guid AccessKey { get; set; }
         public Guid TransactionId { get; set; }
         public JsonPatchDocument<UpdateTransactionCommandDto> PatchDocument { get; set; }
     }

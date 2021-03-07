@@ -9,9 +9,9 @@ namespace TradeTracker.Application.Features.Transactions.Shared.Validators
             RuleFor(t => t)
                 .NotNull()
                 .NotEmpty()
-                    .WithMessage("The Symbol must not be blank.")
+                    .WithMessage("Symbol must not be blank.")
                 .MaximumLength(12)
-                    .WithMessage("The Symbol must not exceed 12 characters.");
+                    .WithMessage("Symbol must not exceed 12 characters.");
         }
     }
 }

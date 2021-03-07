@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -36,7 +37,7 @@ namespace TradeTracker.Api
 
             services.AddScoped<ILoggedInUserService, LoggedInUserService>();
         
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
 
             services.AddCors(options =>
             {

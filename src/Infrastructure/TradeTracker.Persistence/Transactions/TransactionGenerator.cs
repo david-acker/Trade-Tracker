@@ -9,9 +9,9 @@ namespace TradeTracker.Persistence.Seed.Transactions
 {
     public static class TransactionSeeder
     {
-        public static IEnumerable<Transaction> GenerateEquityTransactions(string accessKey, int transactionCount)
+        public static IEnumerable<Transaction> GenerateEquityTransactions(Guid accessKey, int transactionCount)
         {
-            DateTime start = DateTime.SpecifyKind(new DateTime(2018, 1, 1), DateTimeKind.Utc);
+            DateTime start = DateTime.SpecifyKind(new DateTime(2016, 1, 1), DateTimeKind.Utc);
 
             var random = new Random();
 
@@ -20,7 +20,7 @@ namespace TradeTracker.Persistence.Seed.Transactions
             for (var i = 0; i < transactionCount; i++)
             {
                 DateTime dateTime = DateTimeGenerator.GenerateOpenMarketDateTime(random, start);
-                string equitySymbol = SymbolGenerator.GenerateEquitySymbol(random, 3);
+                string equitySymbol = SymbolGenerator.GenerateEquitySymbol(random, 1);
 
                 TransactionType transactionType = (random.NextDouble() >= 0.5) 
                     ? TransactionType.BuyToOpen 
@@ -36,7 +36,7 @@ namespace TradeTracker.Persistence.Seed.Transactions
                     AccessKey = accessKey,
                     DateTime = dateTime,
                     Symbol = equitySymbol,
-                    TransactionType = transactionType,
+                    Type = transactionType,
                     Quantity = quantity,
                     Notional = notional,
                     TradePrice = tradePrice,

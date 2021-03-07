@@ -16,6 +16,8 @@ namespace TradeTracker.Persistence
             services.AddScoped(typeof(IAsyncRepository<>), typeof(BaseRepository<>));
 
             services.AddScoped<ITransactionRepository, TransactionRepository>();
+            // services.AddScoped<IPortfolioRepository, PortfolioRepository>();
+            services.AddScoped<IPositionRepository, PositionRepository>();
 
             return services;    
         }

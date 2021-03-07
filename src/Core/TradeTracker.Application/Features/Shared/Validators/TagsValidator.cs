@@ -9,7 +9,7 @@ namespace TradeTracker.Application.Features.Transactions.Shared.Validators
         {
             RuleFor(t => t)
                 .Must(t => t.Count <= 10)
-                    .WithMessage("{PropertyName} must contain between 0 and 10 tags.");
+                    .WithMessage("Tags must contain between 0 and 10 tags.");
 
             RuleForEach(t => t)
                 .SetValidator(new TagValidator());

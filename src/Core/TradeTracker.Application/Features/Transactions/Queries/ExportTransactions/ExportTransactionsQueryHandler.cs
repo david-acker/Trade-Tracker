@@ -19,21 +19,14 @@ namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransacti
 
         public ExportTransactionsQueryHandler(IMapper mapper, ITransactionRepository transactionRepository, ICsvExporter csvExporter)
         {
-            _mapper = mapper
-                ?? throw new ArgumentNullException(nameof(mapper));
-            _transactionRepository = transactionRepository
-                ?? throw new ArgumentNullException(nameof(transactionRepository));
-            _csvExporter = csvExporter
-                ?? throw new ArgumentNullException(nameof(csvExporter));
+            _mapper = mapper;
+            _transactionRepository = transactionRepository;
+            _csvExporter = csvExporter;
         }
 
         public async Task<TransactionsExportFileVm> Handle(ExportTransactionsQuery request, CancellationToken cancellationToken)
         {
-            var validator = new ExportTransactionsQueryValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (validationResult.Errors.Count > 0)
-                throw new ValidationException(validationResult);
+            await ValidateRequest(request);
 
             var allTransactions = _mapper.Map<List<TransactionsForExportDto>>(
                 (await _transactionRepository.ListAllAsync(request.AccessKey)).OrderBy(x => x.DateTime));
@@ -48,6 +41,17 @@ namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransacti
             };
 
             return transactionExportFileDto;
+        }
+
+        public async Task ValidateRequest(ExportTransactionsQuery request)
+        {
+            var validator = new ExportTransactionsQueryValidator();
+            var validationResult = await validator.ValidateAsync(request);
+
+            if (validationResult.Errors.Count > 0)
+            {
+                throw new ValidationException(validationResult);
+            }
         }
     }
 }

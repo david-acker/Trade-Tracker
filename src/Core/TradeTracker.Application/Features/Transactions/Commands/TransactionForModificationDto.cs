@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 namespace TradeTracker.Application.Features.Transactions.Commands
 {
@@ -7,10 +6,9 @@ namespace TradeTracker.Application.Features.Transactions.Commands
     {
         public DateTime DateTime { get; set; }
         public string Symbol { get; set; }
-        public string TransactionType { get; set; }
+        public string Type { get; set; }
         public decimal Quantity { get; set; }
         public decimal Notional { get; set; }
-        public decimal? TradePrice { get; set; }
-        public List<string> Tags { get; set; }
+        public decimal TradePrice { get; set; }
     }
 }
