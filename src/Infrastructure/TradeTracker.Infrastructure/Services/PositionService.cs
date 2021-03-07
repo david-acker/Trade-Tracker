@@ -55,7 +55,7 @@ namespace TradeTracker.Infrastructure.Services
             _logger.LogInformation($"PositionService: {nameof(RefreshForTransactionGroup)} was called for {symbol}.");
 
             var transactionGroupForSymbol = await _transactionRepository
-                .GetTransactionCollectionByIds(accessKey, transactionIds);
+                .GetTransactionCollectionByIdsAsync(accessKey, transactionIds);
 
             var position = await _positionRepository.GetBySymbolAsync(accessKey, symbol);
             if (position != null)
@@ -176,7 +176,7 @@ namespace TradeTracker.Infrastructure.Services
                 await _positionRepository.DeleteAsync(position);
             }
 
-            var transactionHistory = await _transactionRepository.GetAllTransactionsForSymbol(accessKey, symbol);
+            var transactionHistory = await _transactionRepository.GetAllTransactionsForSymbolAsync(accessKey, symbol);
 
             position = new Position(accessKey, symbol);
             foreach (var transaction in transactionHistory)

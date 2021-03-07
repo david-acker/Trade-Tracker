@@ -30,7 +30,7 @@ namespace TradeTracker.Persistence.Repositories
                 .ToListAsync();
         }
 
-        public async Task<PagedList<Transaction>> GetPagedTransactionsList(GetPagedTransactionsResourceParameters resourceParameters)
+        public async Task<PagedList<Transaction>> GetPagedTransactionsListAsync(GetPagedTransactionsResourceParameters resourceParameters)
         {
             var query = (IQueryable<Transaction>)_context.Transactions;
         
@@ -82,14 +82,14 @@ namespace TradeTracker.Persistence.Repositories
             return await PagedList<Transaction>.CreateAsync(query, resourceParameters.PageNumber, resourceParameters.PageSize);
         }
 
-        public async Task<IEnumerable<Transaction>> GetTransactionCollectionByIds(Guid accessKey, IEnumerable<Guid> ids)
+        public async Task<IEnumerable<Transaction>> GetTransactionCollectionByIdsAsync(Guid accessKey, IEnumerable<Guid> ids)
         {
             return await _context.Transactions
                 .Where(t => t.AccessKey == accessKey && ids.Contains(t.TransactionId))
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Transaction>> GetAllTransactionsForSymbol(Guid accessKey, string symbol)
+        public async Task<IEnumerable<Transaction>> GetAllTransactionsForSymbolAsync(Guid accessKey, string symbol)
         {
             return await _context.Transactions
                 .Where(t => t.AccessKey == accessKey && t.Symbol == symbol)

@@ -22,7 +22,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
 
         public async Task<IEnumerable<TransactionForReturnDto>> Handle(GetTransactionCollectionQuery request, CancellationToken cancellationToken)
         {
-            var transactionCollection = await _transactionRepository.GetTransactionCollectionByIds(request.AccessKey, request.TransactionIds);
+            var transactionCollection = await _transactionRepository.GetTransactionCollectionByIdsAsync(request.AccessKey, request.TransactionIds);
             var transactionCollectionDto = _mapper.Map<IEnumerable<TransactionForReturnDto>>(transactionCollection);
 
             return transactionCollectionDto;
