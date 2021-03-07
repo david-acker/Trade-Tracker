@@ -41,13 +41,13 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
 
             var command = new CreateTransactionCommand()
             {
-                    AccessKey = userAccessKey,
-                    DateTime = new DateTime(2015, 1, 1),
-                    Symbol = "XYZ",
-                    Type = TransactionType.BuyToOpen.ToString(),
-                    Quantity = (decimal)10,
-                    Notional = (decimal)10,
-                    TradePrice = (decimal)1
+                AccessKey = userAccessKey,
+                DateTime = new DateTime(2015, 1, 1),
+                Symbol = "XYZ",
+                Type = TransactionType.BuyToOpen.ToString(),
+                Quantity = (decimal)10,
+                Notional = (decimal)10,
+                TradePrice = (decimal)1
             };
 
             // Act
@@ -67,13 +67,13 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
 
             var command = new CreateTransactionCommand()
             {
-                    AccessKey = userAccessKey,
-                    DateTime = new DateTime(2015, 1, 1),
-                    Symbol = "XYZ",
-                    Type = TransactionType.BuyToOpen.ToString(),
-                    Quantity = (decimal)10,
-                    Notional = (decimal)10,
-                    TradePrice = (decimal)1
+                AccessKey = userAccessKey,
+                DateTime = new DateTime(2015, 1, 1),
+                Symbol = "XYZ",
+                Type = TransactionType.BuyToOpen.ToString(),
+                Quantity = (decimal)10,
+                Notional = (decimal)10,
+                TradePrice = (decimal)1
             };
 
             // Act

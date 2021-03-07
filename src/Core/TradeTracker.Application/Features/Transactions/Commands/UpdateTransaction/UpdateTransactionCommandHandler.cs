@@ -9,7 +9,7 @@ using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 using TradeTracker.Domain.Events;
 
-namespace GloboTicket.TicketManagement.Application.Features.Transactions.Commands.UpdateTransaction
+namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction
 {
     public class UpdateTransactionCommandHandler : IRequestHandler<UpdateTransactionCommand>
     {
