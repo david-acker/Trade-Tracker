@@ -14,5 +14,7 @@ namespace TradeTracker.Application.Interfaces.Persistence
         Task<IEnumerable<Transaction>> GetTransactionCollectionByIdsAsync(Guid AccessKey, IEnumerable<Guid> ids);
 
         Task<IEnumerable<Transaction>> GetAllTransactionsForSymbolAsync(Guid AccessKey, string symbol);
+
+        HashSet<string> GetSetOfSymbolsForAllTransactionsByUser(Guid accessKey);
     }
 }

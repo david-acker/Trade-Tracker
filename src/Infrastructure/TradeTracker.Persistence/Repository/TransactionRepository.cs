@@ -96,5 +96,13 @@ namespace TradeTracker.Persistence.Repositories
                 .OrderByDescending(t => t.DateTime)
                 .ToListAsync();
         }
+
+        public HashSet<string> GetSetOfSymbolsForAllTransactionsByUser(Guid accessKey)
+        {
+            return _context.Transactions
+                .Where(t => t.AccessKey == accessKey)
+                .Select(t => t.Symbol)
+                .ToHashSet();
+        }
     }
 }
