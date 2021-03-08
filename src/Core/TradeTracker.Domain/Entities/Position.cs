@@ -26,7 +26,7 @@ namespace TradeTracker.Domain.Entities
         private decimal _quantity = Decimal.Zero;
         public decimal Quantity => Math.Abs(this._quantity);
 
-        public bool IsClosed { get; private set; }
+        public bool IsClosed { get; private set; } = true;
 
 
         public void Attach(TransactionType type, decimal quantity)
