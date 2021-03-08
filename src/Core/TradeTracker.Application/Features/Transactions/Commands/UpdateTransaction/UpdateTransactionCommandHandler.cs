@@ -9,7 +9,7 @@ using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 using TradeTracker.Domain.Events;
 
-namespace GloboTicket.TicketManagement.Application.Features.Transactions.Commands.UpdateTransaction
+namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction
 {
     public class UpdateTransactionCommandHandler : IRequestHandler<UpdateTransactionCommand>
     {
@@ -58,7 +58,9 @@ namespace GloboTicket.TicketManagement.Application.Features.Transactions.Command
             var validationResult = await validator.ValidateAsync(request);
 
             if (validationResult.Errors.Count > 0)
+            {
                 throw new ValidationException(validationResult);
+            }   
         }
     }
 }
