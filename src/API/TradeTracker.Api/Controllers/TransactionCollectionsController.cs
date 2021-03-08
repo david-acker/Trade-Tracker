@@ -74,7 +74,6 @@ namespace TradeTracker.Api.Controllers
         }
 
         [HttpGet("{transactionIds}", Name = "GetTransactionCollection")]
-        [ActionName("GetTransactionCollection")]
         public async Task<ActionResult<IEnumerable<TransactionForReturnDto>>> GetTransactionCollection(
             [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> transactionIds)
         {
