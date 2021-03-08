@@ -7,7 +7,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using TradeTracker.Application.Features.Transactions;
+using TradeTracker.Application.Interfaces.Infrastructure;
+using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Domain.Entities;
 using TradeTracker.Identity;
 using TradeTracker.Identity.Models;
 using TradeTracker.Persistence;
@@ -29,6 +35,22 @@ namespace TradeTracker.Api
             
             var host = CreateHostBuilder(args).Build();
 
+            await ConfirmRequiredDatabases(host);
+            await ForceRefreshUserPositions(host);
+            
+            host.Run();
+        }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .UseSerilog()
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
+
+        private async static Task ConfirmRequiredDatabases(IHost host)
+        {
             using (var scope = host.Services.CreateScope())
             {
                 var persistenceContext = scope.ServiceProvider.GetRequiredService<TradeTrackerDbContext>();
@@ -58,17 +80,52 @@ namespace TradeTracker.Api
                     Log.Warning(ex, "An error occurred while starting the application.");
                 }
             }
-
-            host.Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .UseSerilog()
-                .ConfigureWebHostDefaults(webBuilder =>
+        private async static Task ForceRefreshUserPositions(IHost host)
+        {
+            IEnumerable<Guid> accessKeys;
+
+            using (var scope = host.Services.CreateScope())
+            {
+                var loggerFactory = scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
+
+                var identityContext = scope.ServiceProvider.GetRequiredService<TradeTrackerIdentityDbContext>();
+                
+                accessKeys = identityContext.Users
+                    .Select(i => i.AccessKey)
+                    .ToList();
+
+                Log.Information($"ForceRefreshUserPositions: Identified {accessKeys.Count()} AccessKeys for users.");
+            }
+
+            using (var scope = host.Services.CreateScope())
+            {
+                var loggerFactory = scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
+
+                var transactionRepository = scope.ServiceProvider.GetRequiredService<ITransactionRepository>();
+
+                var positionService = scope.ServiceProvider.GetRequiredService<IPositionService>();
+
+                IEnumerable<string> symbolsForUser;
+
+                foreach (var key in accessKeys)
                 {
-                    webBuilder.UseStartup<Startup>();
-                });
+                    Log.Information($"ForceRefreshUserPositions: Recalculating for AccessKey {key}");
+
+                    symbolsForUser = transactionRepository.GetSetOfSymbolsForAllTransactionsByUser(key);
+
+                    foreach (var symbol in symbolsForUser)
+                    {
+                        await positionService.RecalculateForSymbol(key, symbol);
+                    }
+
+                    Log.Information($"ForceRefreshUserPositions: Recalculated positions for {symbolsForUser.Count()} symbols.");
+                }
+
+                Log.Information($"ForceRefreshUserPositions: Completed recalculation for all users.");
+            }
+        }
 
     }
 }
