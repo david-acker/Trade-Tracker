@@ -13,10 +13,13 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
 
 ## Objectives
 - [x] CRUD Functionality for Transactions
-- [X] Portfolio Tracking
-- [ ] Aggregate Statistics & Summary Data:
   - [X] By security/ticker
-  - [ ] Using filters/queries (e.g. time period, labels, include/exclude, etc.) 
+  - [X] Using filters/queries (e.g. time range, include/exclude, etc.) 
+- [X] Position Tracking
+- [ ] Portfolio Tracking
+- [ ] Aggregate Statistics & Summary Data:
+  - [ ] By security/ticker
+  - [ ] Using filters/queries (e.g. time range, include/exclude, etc.) 
 - [ ] API (pragmatically) adherent to [REST Architectural Constraints](https://restfulapi.net/rest-architectural-constraints/)
 - [ ] Basic UI with Angular + TypeScript
 
