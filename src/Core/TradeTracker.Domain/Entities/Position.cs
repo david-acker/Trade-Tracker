@@ -21,7 +21,7 @@ namespace TradeTracker.Domain.Entities
         public string Symbol { get; private set; }
 
 
-        public string Exposure { get; private set; }
+        public string Exposure { get; private set; } = ExposureType.None.ToString();
 
         private decimal _quantity = Decimal.Zero;
         public decimal Quantity => Math.Abs(this._quantity);
@@ -49,11 +49,11 @@ namespace TradeTracker.Domain.Entities
             {
                 case TransactionType.BuyToOpen:
                 case TransactionType.BuyToClose:
-                    return quantity;
+                    return Math.Abs(quantity);
                 
                 case TransactionType.SellToOpen:
                 case TransactionType.SellToClose:
-                    return -quantity;
+                    return -Math.Abs(quantity);
                 
                 default:
                     return Decimal.Zero;
