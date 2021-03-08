@@ -44,7 +44,22 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Attach_ExistingPosition_QuantityShiftsByTheQuantityFromAttachedTransaction()
+        public void Create_NewPosition_IsClosedStartsAsTrue()
+        {
+            // Arrange
+            Guid accessKey = Guid.NewGuid();
+            string symbol = "ABC";
+
+            // Act
+            var position = new Position(accessKey, symbol);
+
+            // Assert
+            position.IsClosed.Should()
+                .BeTrue();
+        }
+
+        [Fact]
+        public void Attach_TransactionToExistingPosition_QuantityShiftsByAmountAttached()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -64,7 +79,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Attach_ExistingPosition_SignOfQuantityFromAttachedTransactionIsIgnored()
+        public void Attach_TransactionToExistingPosition_SignOfQuantityIsIgnored()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -84,7 +99,27 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Attach_ExistingPosition_BuyToOpenIncreasesLongPosition()
+        public void Check_ExistingPositionWithNonZeroQuantity_IsClosedIsFalse()
+        {
+            // Arrange
+            Guid accessKey = Guid.NewGuid();
+            string symbol = "ABC";
+
+            var position = new Position(accessKey, symbol);
+
+            var type = TransactionType.BuyToOpen;
+            var quantity = (decimal)100;
+
+            // Act
+            position.Attach(type, quantity);
+
+            // Assert
+            position.IsClosed.Should()
+                .BeFalse();
+        }
+
+        [Fact]
+        public void Attach_BuyToOpenTransactionToExistingPosition_IncreasesLongPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -110,7 +145,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Attach_ExistingPosition_SellToCloseDecreasesLongPosition()
+        public void Attach_SellToCloseTransactionExistingPosition_DecreasesLongPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -138,7 +173,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Attach_ExistingPosition_SellToOpenIncreasesShortPosition()
+        public void Attach_SellToOpenTransactionExistingPosition_IncreasesShortPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -164,7 +199,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Attach_ExistingPosition_BuyToCloseDecreasesShortPosition()
+        public void Attach_BuyToCloseTransactionExistingPosition_DecreasesShortPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -192,7 +227,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Detach_ExistingPosition_BuyToOpenDecreasesLongPosition()
+        public void Detach_BuyToOpenTransactionFromExistingPosition_DecreasesLongPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -220,7 +255,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Detach_ExistingPosition_SellToCloseIncreasesLongPosition()
+        public void Detach_SellToCloseTransactionFromExistingPosition_IncreasesLongPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -248,7 +283,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Detach_ExistingPosition_SellToOpenDecreasesShortPosition()
+        public void Detach_SellToOpenTransactionFromExistingPosition_DecreasesShortPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -276,7 +311,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Detach_ExistingPosition_BuyToCloseIncreasesShortPosition()
+        public void Detach_BuyToCloseTransactionFromExistingPosition_IncreasesShortPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
