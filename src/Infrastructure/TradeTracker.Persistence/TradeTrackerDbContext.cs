@@ -47,7 +47,7 @@ namespace TradeTracker.Persistence
                 accessKey: Guid.Parse("322f44e6-bacd-42a4-9f8d-d0a8d36eb1cb"),
                 transactionCount: 2500);
 
-            // modelBuilder.Entity<Transaction>().HasData(equityTransactions);
+            modelBuilder.Entity<Transaction>().HasData(equityTransactions);
 
             modelBuilder.Entity<Position>().Property(p => p.Quantity).HasField("_quantity");
         }
