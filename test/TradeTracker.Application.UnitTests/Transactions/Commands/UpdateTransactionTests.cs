@@ -64,14 +64,29 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             // Assert
             using (new AssertionScope())
             {
-                actualTransaction.TransactionId.Should().Be(expectedTransaction.TransactionId);
-                actualTransaction.AccessKey.Should().Be(expectedTransaction.AccessKey);
-                actualTransaction.DateTime.Should().Be(expectedTransaction.DateTime);
-                actualTransaction.Symbol.Should().Be(expectedTransaction.Symbol);
-                actualTransaction.Type.Should().Be(expectedTransaction.Type);
-                actualTransaction.Quantity.Should().Be(expectedTransaction.Quantity);
-                actualTransaction.Notional.Should().Be(expectedTransaction.Notional);
-                actualTransaction.TradePrice.Should().Be(expectedTransaction.TradePrice);
+                actualTransaction.TransactionId.Should()
+                    .Be(expectedTransaction.TransactionId);
+
+                actualTransaction.AccessKey.Should()
+                    .Be(expectedTransaction.AccessKey);
+
+                actualTransaction.DateTime.Should()
+                    .Be(expectedTransaction.DateTime);
+
+                actualTransaction.Symbol.Should()
+                    .Be(expectedTransaction.Symbol);
+
+                actualTransaction.Type.Should()
+                    .Be(expectedTransaction.Type);
+
+                actualTransaction.Quantity.Should()
+                    .Be(expectedTransaction.Quantity);
+
+                actualTransaction.Notional.Should()
+                    .Be(expectedTransaction.Notional);
+
+                actualTransaction.TradePrice.Should()
+                    .Be(expectedTransaction.TradePrice);
             }
         }
 

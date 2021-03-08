@@ -54,7 +54,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             var transactionToReturn = await handler.Handle(command, CancellationToken.None);
 
             // Assert
-            transactionToReturn.Should().BeOfType<TransactionForReturnDto>();
+            transactionToReturn.Should()
+                .BeOfType<TransactionForReturnDto>();
         }
 
         [Fact]
@@ -81,7 +82,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             var allTransactionsForUser = await _mockTransactionRepository.Object.ListAllAsync(userAccessKey);
 
             // Assert
-            allTransactionsForUser.Should().ContainSingle();
+            allTransactionsForUser.Should()
+                .ContainSingle();
         }
     }
 }

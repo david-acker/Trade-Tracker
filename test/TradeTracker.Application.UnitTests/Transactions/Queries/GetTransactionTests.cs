@@ -52,7 +52,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
             var transaction = await handler.Handle(query, CancellationToken.None);
 
             // Assert
-            transaction.Should().BeOfType<TransactionForReturnDto>();
+            transaction.Should()
+                .BeOfType<TransactionForReturnDto>();
         }
 
         [Fact]
