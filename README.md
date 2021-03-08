@@ -6,10 +6,13 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
 * [ASP.NET Core 5](https://dotnet.microsoft.com/apps/aspnet)
 * [Entity Framework Core 5](https://docs.microsoft.com/en-us/ef/core/)
 * [ASP.NET Core Identity](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity?view=aspnetcore-5.0&tabs=visual-studio)
-* [AutoMapper](https://automapper.org/)
-* [FluentValidation](https://fluentvalidation.net/)
 * [MediatR](https://github.com/jbogard/MediatR)
+* [AutoMapper](https://automapper.org/)
 * [Serilog](https://serilog.net/)
+* [FluentValidation](https://fluentvalidation.net/)
+* [xUnit](https://xunit.net/)
+* [Moq](https://github.com/moq/moq)
+* [FluentAssertions](https://fluentassertions.com/)
 
 ## Objectives
 - [x] CRUD Functionality for Transactions
