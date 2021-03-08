@@ -14,11 +14,11 @@ namespace TradeTracker.Domain.Entities
         }
 
         [Key]
-        public Guid PositionId { get; set; } = Guid.NewGuid();
+        public Guid PositionId { get; private set; } = Guid.NewGuid();
 
-        public Guid AccessKey { get; set; }
+        public Guid AccessKey { get; private set; }
 
-        public string Symbol { get; set; }
+        public string Symbol { get; private set; }
 
 
         public string Exposure { get; private set; }

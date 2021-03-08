@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
+using TradeTracker.Application.Features.Positions;
 using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
@@ -66,6 +67,8 @@ namespace TradeTracker.Application.Profiles
                             : new List<string>()));
 
             CreateMap<GetTransactionsQuery, GetPagedTransactionsResourceParameters>();
+
+            CreateMap<Position, PositionForReturnDto>();
         }
 
         private List<string> ArraySelectionParser(string input)
