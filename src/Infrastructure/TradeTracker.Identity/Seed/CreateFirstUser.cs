@@ -12,7 +12,7 @@ namespace TradeTracker.Identity.Seed
         {
             var applicationUser = new ApplicationUser
             {
-                AccessKey = Guid.Empty,
+                AccessKey = Guid.Parse("322f44e6-bacd-42a4-9f8d-d0a8d36eb1cb"),
                 FirstName = "testFirstName",
                 LastName = "testLastName",
                 UserName = "testUserName",
