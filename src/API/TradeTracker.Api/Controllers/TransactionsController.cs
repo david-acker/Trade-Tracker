@@ -119,14 +119,21 @@ namespace TradeTracker.Api.Controllers
         }
 
         [HttpPost(Name = "CreateTransaction")]
-        [RequestHeaderMatchesMediaType("Content-Type",
-            "application/json",
-            "application/vnd.trade.transactionforcreation+json")]
-        [Consumes("application/json",
-            "application/vnd.trade.transactionforcreation+json")]
-        public async Task<ActionResult<TransactionForReturnDto>> CreateTransaction([FromBody] CreateTransactionCommandDto commandDto)
+        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
+        [Consumes("application/json")]
+        [Produces("application/json",
+            "application/vnd.trade.hateoas+json")]
+        public async Task<ActionResult<TransactionForReturnDto>> CreateTransaction(
+            [FromBody] CreateTransactionCommandDto commandDto,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             _logger.LogInformation($"TransactionsController: {nameof(CreateTransaction)} was called.");
+
+            if (!MediaTypeHeaderValue.TryParse(mediaType,
+                out MediaTypeHeaderValue parsedMediaType))
+            {
+                return BadRequest();
+            }
 
             var command = _mapper.Map<CreateTransactionCommand>(commandDto);
             command.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
@@ -136,14 +143,28 @@ namespace TradeTracker.Api.Controllers
             var linkedTransaction = createdTransaction
                 .ShapeData(null) as IDictionary<string, object>;
 
-            IEnumerable<LinkDto> links = CreateLinksForTransaction(createdTransaction.TransactionId, null);
+            var includeLinks = parsedMediaType.SubTypeWithoutSuffix
+                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+                
+            if (includeLinks)
+            {
+                var links = CreateLinksForTransaction(
+                    (Guid)linkedTransaction["TransactionId"], null);
+                
+                linkedTransaction.Add("links", links);
 
-            linkedTransaction.Add("links", links);
-
-            return CreatedAtAction(
-                "GetTransaction",
-                new { transactionId = linkedTransaction["TransactionId"] },
-                createdTransaction);
+                return CreatedAtAction(
+                    "GetTransaction",
+                    new { transactionId = linkedTransaction["TransactionId"] },
+                    linkedTransaction);
+            }
+            else
+            {
+                return CreatedAtAction(
+                    "GetTransaction",
+                    new { transactionId = linkedTransaction["TransactionId"] },
+                    createdTransaction);
+            }
         }
 
         [HttpOptions(Name = "OptionsForTransactions")]
@@ -159,9 +180,7 @@ namespace TradeTracker.Api.Controllers
         [HttpGet("{transactionId}", Name = "GetTransaction")]
         [Produces("application/json",
             "application/vnd.trade.hateoas+json")]
-        public async Task<IActionResult> GetTransaction(
-            Guid transactionId,
-            string fields,
+        public async Task<IActionResult> GetTransaction(Guid transactionId, string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetTransaction)} was called.");
@@ -188,7 +207,7 @@ namespace TradeTracker.Api.Controllers
 
             if (includeLinks)
             {
-                IEnumerable<LinkDto> links = CreateLinksForTransaction(transactionId, fields);
+                var links = CreateLinksForTransaction(transactionId, fields);
 
                 shapedTransaction.Add("links", links);
             }
@@ -197,6 +216,8 @@ namespace TradeTracker.Api.Controllers
         }
 
         [HttpPut("{transactionId}", Name = "UpdateTransaction")]
+        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
+        [Consumes("application/json")]
         public async Task<ActionResult> UpdateTransaction(Guid transactionId, 
             [FromBody] UpdateTransactionCommandDto commandDto)
         {
@@ -211,7 +232,10 @@ namespace TradeTracker.Api.Controllers
         }
 
         [HttpPatch("{transactionId}", Name = "PatchTransaction")]
-        public async Task<ActionResult> PatchTransaction(Guid transactionId, JsonPatchDocument<UpdateTransactionCommandDto> patchDocument)
+        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
+        [Consumes("application/json")]
+        public async Task<ActionResult> PatchTransaction(Guid transactionId, 
+            JsonPatchDocument<UpdateTransactionCommandDto> patchDocument)
         {
             _logger.LogInformation($"TransactionsController: {nameof(PatchTransaction)} was called.");
 
