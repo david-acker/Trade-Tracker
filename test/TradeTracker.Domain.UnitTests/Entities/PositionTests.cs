@@ -145,7 +145,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Attach_SellToCloseTransactionExistingPosition_DecreasesLongPosition()
+        public void Attach_SellToCloseTransactionToExistingPosition_DecreasesLongPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -173,7 +173,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Attach_SellToOpenTransactionExistingPosition_IncreasesShortPosition()
+        public void Attach_SellToOpenTransactionToExistingPosition_IncreasesShortPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -199,7 +199,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Attach_BuyToCloseTransactionExistingPosition_DecreasesShortPosition()
+        public void Attach_BuyToCloseTransactionToExistingPosition_DecreasesShortPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
