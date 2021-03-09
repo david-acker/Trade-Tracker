@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 using TradeTracker.Persistence.Seed.Transactions.Helpers;
