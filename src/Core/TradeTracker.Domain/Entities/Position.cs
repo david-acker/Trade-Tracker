@@ -9,16 +9,16 @@ namespace TradeTracker.Domain.Entities
     {
         public Position(Guid accessKey, string symbol)
         {
-            AccessKey = AccessKey;
+            AccessKey = accessKey;
             Symbol = symbol;
         }
 
         [Key]
         public Guid PositionId { get; private set; } = Guid.NewGuid();
 
-        public Guid AccessKey { get; private set; }
+        public Guid AccessKey { get; init; }
 
-        public string Symbol { get; private set; }
+        public string Symbol { get; init; }
 
 
         public string Exposure { get; private set; } = ExposureType.None.ToString();
