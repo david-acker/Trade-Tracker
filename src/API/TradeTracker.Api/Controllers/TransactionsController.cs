@@ -48,7 +48,7 @@ namespace TradeTracker.Api.Controllers
         [HttpGet(Name = "GetTransactions")]
         [Produces("application/json",
             "application/vnd.trade.hateoas+json")]
-        public async Task<ActionResult<PagedTransactionsDto>> GetTransactions(
+        public async Task<IActionResult> GetTransactions(
             [FromQuery] GetTransactionsResourceParameters parameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -123,7 +123,7 @@ namespace TradeTracker.Api.Controllers
         [Consumes("application/json")]
         [Produces("application/json",
             "application/vnd.trade.hateoas+json")]
-        public async Task<ActionResult<TransactionForReturnDto>> CreateTransaction(
+        public async Task<IActionResult> CreateTransaction(
             [FromBody] CreateTransactionCommandDto commandDto,
             [FromHeader(Name = "Accept")] string mediaType)
         {
