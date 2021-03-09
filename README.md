@@ -13,6 +13,7 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
 * [xUnit](https://xunit.net/)
 * [Moq](https://github.com/moq/moq)
 * [FluentAssertions](https://fluentassertions.com/)
+* [AspNetCoreRateLimit](https://github.com/stefanprodan/AspNetCoreRateLimit)
 
 ## Objectives
 - [x] CRUD Functionality for Transactions
