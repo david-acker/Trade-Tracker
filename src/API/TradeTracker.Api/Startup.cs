@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -47,10 +48,18 @@ namespace TradeTracker.Api
             {
                 setupAction.SerializerSettings.ContractResolver =
                     new CamelCasePropertyNamesContractResolver();
-                    
+
                 setupAction.SerializerSettings.ReferenceLoopHandling =
                     Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
+
+            services.AddMemoryCache();
+            services.Configure<IpRateLimitOptions>(
+                Configuration.GetSection("IpRateLimiting"));
+            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+            services.AddHttpContextAccessor();
 
             services.AddCors(options =>
             {
@@ -88,6 +97,7 @@ namespace TradeTracker.Api
             }
 
             app.UseHttpsRedirection();
+            app.UseIpRateLimiting();
             app.UseAuthentication();
             app.UseRouting();
             app.UseCustomExceptionHandler();
