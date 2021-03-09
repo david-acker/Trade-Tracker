@@ -1,7 +1,5 @@
 using AutoMapper;
 using MediatR;
-using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
@@ -25,7 +23,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
         {
             await ValidateRequest(request);
 
-            var position = await _positionRepository.ListAllAsync(request.AccessKey);
+            var position = await _positionRepository.GetBySymbolAsync(request.AccessKey, request.Symbol);
 
             if (position == null)
             {
