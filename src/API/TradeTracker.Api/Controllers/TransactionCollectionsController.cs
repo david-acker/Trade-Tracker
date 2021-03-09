@@ -44,7 +44,7 @@ namespace TradeTracker.Api.Controllers
         [Consumes("application/json")]
         [Produces("application/json",
             "application/vnd.trade.hateoas+json")]
-        public async Task<ActionResult<IEnumerable<TransactionForReturnDto>>> CreateTransactionCollection(
+        public async Task<IActionResult> CreateTransactionCollection(
             [FromBody] IEnumerable<TransactionForCreationDto> commandDtos,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -117,7 +117,7 @@ namespace TradeTracker.Api.Controllers
         [HttpGet("{transactionIds}", Name = "GetTransactionCollection")]
         [Produces("application/json",
             "application/vnd.trade.hateoas+json")]
-        public async Task<ActionResult<IEnumerable<TransactionForReturnDto>>> GetTransactionCollection(
+        public async Task<IActionResult> GetTransactionCollection(
             [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> transactionIds,
             string fields,
             [FromHeader(Name = "Accept")] string mediaType)
