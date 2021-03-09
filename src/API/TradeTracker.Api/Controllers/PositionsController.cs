@@ -40,11 +40,11 @@ namespace TradeTracker.Api.Controllers
         [HttpGet(Name = "GetPositions")]
         [Produces("application/json",
             "application/vnd.trade.hateoas+json")]
-        public async Task<ActionResult<IEnumerable<PositionForReturnDto>>> GetPositions(
+        public async Task<IActionResult> GetPositions(
+            [FromQuery] GetPositionsResourceParameters parameters,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositions)} was called.");
-
 
             if (!MediaTypeHeaderValue.TryParse(mediaType,
                 out MediaTypeHeaderValue parsedMediaType))
@@ -52,21 +52,23 @@ namespace TradeTracker.Api.Controllers
                 return BadRequest();
             }
 
+            var query = _mapper.Map<GetPositionsQuery>(parameters);
+            query.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
 
-            var query = new GetPositionsQuery()
-            {
-                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"))
-            };
+            var pagedPositions = await _mediator.Send(query);
 
-            var positions = await _mediator.Send(query);
-
-            var positionsToReturn = positions.ShapeData(null);
+            var positionsToReturn = pagedPositions.Items.ShapeData(null);
 
             var includeLinks = parsedMediaType.SubTypeWithoutSuffix
                 .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
 
             if (includeLinks)
             {
+                var links = CreateLinksForPositions(
+                    parameters,
+                    pagedPositions.HasNext,
+                    pagedPositions.HasPrevious);
+
                 var linkedPositionsToReturn = positionsToReturn
                     .Select(position =>
                     {
@@ -79,10 +81,30 @@ namespace TradeTracker.Api.Controllers
                        return positionAsDictionary;
                     });;
 
-                return Ok(linkedPositionsToReturn);
+                var paginationMetadata = new
+                {
+                    pageNumber = pagedPositions.CurrentPage,
+                    pageSize = pagedPositions.PageSize,
+                    pageCount = pagedPositions.TotalPages,
+                    totalRecordCount = pagedPositions.TotalCount,
+                };
+
+                var linkedPositionsResource = new
+                {
+                    paginationMetadata = paginationMetadata,
+                    results = linkedPositionsToReturn,
+                    links
+                };
+
+                return Ok(linkedPositionsResource);
             }
             else
             {
+                Response.Headers.Add("X-Paging-PageNumber", pagedPositions.CurrentPage.ToString());
+                Response.Headers.Add("X-Paging-PageSize", pagedPositions.PageSize.ToString());
+                Response.Headers.Add("X-Paging-PageCount", pagedPositions.TotalPages.ToString());
+                Response.Headers.Add("X-Paging-TotalRecordCount", pagedPositions.TotalCount.ToString());
+
                 return Ok(positionsToReturn);
             }
         }
@@ -100,7 +122,7 @@ namespace TradeTracker.Api.Controllers
         [HttpGet("{symbol}", Name = "GetPosition")]
         [Produces("application/json",
             "application/vnd.trade.hateoas+json")]
-        public async Task<ActionResult<PositionForReturnDto>> GetPosition(
+        public async Task<IActionResult> GetPosition(
             [FromRoute] string symbol,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -158,6 +180,94 @@ namespace TradeTracker.Api.Controllers
             };
                     
             return links;
+        }
+
+        private IEnumerable<LinkDto> CreateLinksForPositions(
+            GetPositionsResourceParameters parameters,
+            bool hasNext,
+            bool hasPrevious)
+        {
+            var links = new List<LinkDto>();
+
+            links.Add(
+                new LinkDto(
+                    CreatePositionsResourceUrl(
+                        parameters, 
+                        ResourceUriType.CurrentPage),
+                    "self",
+                    "GET"));
+
+            if (hasNext)
+            {
+                links.Add(
+                    new LinkDto(
+                        CreatePositionsResourceUrl(
+                            parameters, 
+                            ResourceUriType.NextPage),
+                        "nextPage",
+                        "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add(
+                    new LinkDto(
+                        CreatePositionsResourceUrl(
+                            parameters, 
+                            ResourceUriType.PreviousPage),
+                        "previousPage",
+                        "GET"));
+            }
+
+            return links;
+        }
+
+        private string CreatePositionsResourceUrl(
+            GetPositionsResourceParameters parameters,
+            ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return Url.Link(
+                        "GetPositions",
+                        new
+                        {
+                            orderBy = parameters.OrderBy,
+                            pageNumber = parameters.PageNumber - 1,
+                            pageSize = parameters.PageSize,
+                            including = parameters.Including,
+                            excluding = parameters.Excluding,
+                            exposure = parameters.Exposure
+                        });
+
+                case ResourceUriType.NextPage:
+                    return Url.Link(
+                        "GetPositions",
+                        new
+                        {
+                            orderBy = parameters.OrderBy,
+                            pageNumber = parameters.PageNumber + 1,
+                            pageSize = parameters.PageSize,
+                            including = parameters.Including,
+                            excluding = parameters.Excluding,
+                            exposure = parameters.Exposure
+                        });
+
+                case ResourceUriType.CurrentPage:
+                default:
+                    return Url.Link(
+                        "GetPositions",
+                        new
+                        {
+                            orderBy = parameters.OrderBy,
+                            pageNumber = parameters.PageNumber,
+                            pageSize = parameters.PageSize,
+                            including = parameters.Including,
+                            excluding = parameters.Excluding,
+                            exposure = parameters.Exposure
+                        });
+            }
         }
     }
 }
