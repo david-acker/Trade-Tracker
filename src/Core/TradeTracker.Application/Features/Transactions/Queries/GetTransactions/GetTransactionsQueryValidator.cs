@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using FluentValidation;
+using TradeTracker.Application.Features.Transactions.Shared.Validators;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
@@ -8,6 +9,9 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
     {
         public GetTransactionsQueryValidator()
         {
+            RuleFor(t => t.AccessKey)
+                .SetValidator(new AccessKeyValidator());
+
             var OrderByFields = new List<string>()
             {
                 "DateTime",

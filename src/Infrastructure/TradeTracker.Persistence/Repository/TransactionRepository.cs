@@ -30,56 +30,85 @@ namespace TradeTracker.Persistence.Repositories
                 .ToListAsync();
         }
 
-        public async Task<PagedList<Transaction>> GetPagedTransactionsListAsync(GetPagedTransactionsResourceParameters resourceParameters)
+        public async Task<PagedList<Transaction>> GetPagedTransactionsAsync(PagedTransactionsResourceParameters parameters)
         {
             var query = (IQueryable<Transaction>)_context.Transactions;
         
-            query = query.Where(t => t.AccessKey == resourceParameters.AccessKey);
+            query = query.Where(t => t.AccessKey == parameters.AccessKey);
 
-            if (resourceParameters.Including.Count > 0)
+            if (parameters.Including.Count > 0)
             {
-                var inclusionSelection = resourceParameters.Including;
+                var inclusionSelection = parameters.Including;
                 query = query.Where(t => inclusionSelection.Any(x => x == t.Symbol));
             }
 
-            if (resourceParameters.Excluding.Count > 0)
+            if (parameters.Excluding.Count > 0)
             {
-                var exclusionSelection = resourceParameters.Excluding;
+                var exclusionSelection = parameters.Excluding;
                 query = query.Where(t => !exclusionSelection.Any(x => x == t.Symbol));
             }
 
-            if (resourceParameters.RangeStart != DateTime.MinValue)
+            if (parameters.RangeStart != DateTime.MinValue)
             {
-                query = query.Where(t => (t.DateTime > resourceParameters.RangeStart));
+                query = query.Where(t => (t.DateTime > parameters.RangeStart));
             }
 
-            if (resourceParameters.RangeEnd != DateTime.MaxValue && 
-                resourceParameters.RangeEnd != DateTime.MinValue)
+            if (parameters.RangeEnd != DateTime.MaxValue && 
+                parameters.RangeEnd != DateTime.MinValue)
             {
-                query = query.Where(t => (t.DateTime < resourceParameters.RangeEnd));
+                query = query.Where(t => (t.DateTime < parameters.RangeEnd));
             }
             
-            switch (resourceParameters.OrderBy)
+            switch (parameters.OrderBy)
             {
                 case "Symbol":
                     query = query.OrderBy(t => t.Symbol);
                     break;
 
                 case "Quantity":
-                    query = query.OrderByDescending(t => t.Quantity);
+                    // query = query.OrderByDescending(t => t.Quantity);
                     break;
 
                 case "Notional":
-                    query = query.OrderByDescending(t => t.Notional);
+                    // query = query.OrderByDescending(t => t.Notional);
                     break;
 
                 case "DateTime":
                 default:
                     query = query.OrderByDescending(t => t.DateTime);
                     break;
+            }            
+
+            var pagedTransactions = await PagedList<Transaction>.CreateAsync(query, parameters.PageNumber, parameters.PageSize);
+
+            // Temporary workaround for OrderBy clauses on Decimal types (Quantity, Notional) while using SQLite,
+            // which does not support Decimal types with OrderBy. Will be removed upon conversion to SQL Server.
+            IList<Transaction> orderedTransactions;
+            switch (parameters.OrderBy)
+            {
+                case "Quantity":
+                    orderedTransactions = pagedTransactions
+                        .OrderByDescending(t => t.Quantity)
+                        .ToList();
+
+                    pagedTransactions.Clear();
+                    pagedTransactions.AddRange(orderedTransactions);
+                    break;
+
+                case "Notional":
+                    orderedTransactions = pagedTransactions
+                        .OrderByDescending(t => t.Notional)
+                        .ToList();
+                    
+                    pagedTransactions.Clear();
+                    pagedTransactions.AddRange(orderedTransactions);
+                    break;
+
+                default:
+                    break;
             }
 
-            return await PagedList<Transaction>.CreateAsync(query, resourceParameters.PageNumber, resourceParameters.PageSize);
+            return pagedTransactions;
         }
 
         public async Task<IEnumerable<Transaction>> GetTransactionCollectionByIdsAsync(Guid accessKey, IEnumerable<Guid> ids)

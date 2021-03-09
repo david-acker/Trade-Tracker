@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class GetPagedTransactionsResourceParameters
+    public class PagedTransactionsResourceParameters
     {
         public Guid AccessKey { get; set; }
 

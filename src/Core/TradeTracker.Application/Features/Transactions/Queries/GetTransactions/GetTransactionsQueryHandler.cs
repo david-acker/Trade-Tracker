@@ -28,21 +28,21 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
         {
             await ValidateRequest(request);
 
-            var parameters = _mapper.Map<GetPagedTransactionsResourceParameters>(request);
+            var parameters = _mapper.Map<PagedTransactionsResourceParameters>(request);
 
-            var pagedList = await _transactionRepository.GetPagedTransactionsListAsync(parameters);
+            var pagedTransactions = await _transactionRepository.GetPagedTransactionsAsync(parameters);
             
-            var transactionsToReturn = _mapper.Map<PagedList<Transaction>, List<TransactionForReturnDto>>(pagedList);
+            var transactionsForReturn = _mapper.Map<PagedList<Transaction>, List<TransactionForReturnDto>>(pagedTransactions);
 
             return new PagedTransactionsDto()
             {
-                CurrentPage = pagedList.CurrentPage,
-                TotalPages = pagedList.TotalPages,
-                PageSize = pagedList.PageSize,
-                TotalCount = pagedList.TotalCount,
-                HasPrevious = pagedList.HasPrevious,
-                HasNext = pagedList.HasNext,
-                Items = transactionsToReturn
+                CurrentPage = pagedTransactions.CurrentPage,
+                TotalPages = pagedTransactions.TotalPages,
+                PageSize = pagedTransactions.PageSize,
+                TotalCount = pagedTransactions.TotalCount,
+                HasPrevious = pagedTransactions.HasPrevious,
+                HasNext = pagedTransactions.HasNext,
+                Items = transactionsForReturn
             };
         }
 

@@ -9,7 +9,7 @@ namespace TradeTracker.Application.Interfaces.Persistence
 {
     public interface ITransactionRepository : IAsyncRepository<Transaction>
     {
-        Task<PagedList<Transaction>> GetPagedTransactionsListAsync(GetPagedTransactionsResourceParameters parameters);
+        Task<PagedList<Transaction>> GetPagedTransactionsAsync(PagedTransactionsResourceParameters parameters);
 
         Task<IEnumerable<Transaction>> GetTransactionCollectionByIdsAsync(Guid AccessKey, IEnumerable<Guid> ids);
 

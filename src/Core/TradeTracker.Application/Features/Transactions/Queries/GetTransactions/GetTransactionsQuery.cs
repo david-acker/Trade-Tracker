@@ -18,13 +18,34 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
             get => _pageNumber;
             set => _pageNumber = (value < 1) ? 1 : value;
         }
+
         const int MaxPageSize = 100;
-        
+        const int DefaultPageSize = 25;
+    
         private int _pageSize = 25;
         public int PageSize
         {
             get => _pageSize;
-            set => _pageSize = (value > MaxPageSize) ? MaxPageSize : value;
+
+            set
+            {
+                value = Math.Abs(value);
+                
+                switch (value)
+                {
+                    case var x when (value > MaxPageSize):
+                        _pageSize = MaxPageSize;
+                        break;
+                    
+                    case var x when (value < 1):
+                        _pageSize = DefaultPageSize;
+                        break;
+                    
+                    default:
+                        _pageSize = value;
+                        break;
+                }
+            }
         }
 
         public List<string> Including { get; set; }
