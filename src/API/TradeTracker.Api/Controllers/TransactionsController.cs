@@ -4,13 +4,17 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
+using TradeTracker.Api.ActionConstraints;
+using TradeTracker.Api.Helpers;
 using TradeTracker.Api.Utilities;
 using TradeTracker.Application.Features.Transactions;
-using TradeTracker.Application.Features.Transactions.Commands;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.DeleteTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.PatchTransaction;
@@ -18,6 +22,7 @@ using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using TradeTracker.Application.Features.Transactions.Queries.ExportTransactions;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransaction;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
+using TradeTracker.Application.Models.Navigation;
 
 namespace TradeTracker.Api.Controllers
 {
@@ -41,19 +46,84 @@ namespace TradeTracker.Api.Controllers
         }
 
         [HttpGet(Name = "GetTransactions")]
+        [Produces("application/json",
+            "application/vnd.trade.hateoas+json")]
         public async Task<ActionResult<PagedTransactionsDto>> GetTransactions(
-            [FromQuery] GetTransactionsResourceParameters parameters)
+            [FromQuery] GetTransactionsResourceParameters parameters,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetTransactions)} was called.");
+
+            if (!MediaTypeHeaderValue.TryParse(mediaType,
+                out MediaTypeHeaderValue parsedMediaType))
+            {
+                return BadRequest();
+            }
 
             var query = _mapper.Map<GetTransactionsQuery>(parameters);
             query.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
 
             var returnedTransactions = await _mediator.Send(query);
-            return Ok(returnedTransactions);
+
+            var shapedTransactions = returnedTransactions.Items
+                .ShapeData(parameters.Fields);
+
+            var includeLinks = parsedMediaType.SubTypeWithoutSuffix
+                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+
+            if (includeLinks)
+            {
+                var links = CreateLinksForTransactions(
+                    parameters,
+                    returnedTransactions.HasNext,
+                    returnedTransactions.HasPrevious);
+                
+                var shapedTransactionsWithLinks = shapedTransactions
+                    .Select(transaction =>
+                    {
+                       var transactionAsDictionary = transaction as IDictionary<string, object>;
+
+                       var transactionLinks = CreateLinksForTransaction(
+                           (Guid)transactionAsDictionary["TransactionId"], null);
+                    
+                       transactionAsDictionary.Add("links", transactionLinks);
+                       return transactionAsDictionary;
+                    });
+                
+                var paginationMetadata = new
+                {
+                    pageNumber = returnedTransactions.CurrentPage,
+                    pageSize = returnedTransactions.PageSize,
+                    pageCount = returnedTransactions.TotalPages,
+                    totalRecordCount = returnedTransactions.TotalCount,
+                };
+
+                var linkedTransactionsResource = new 
+                {
+                    paginationMetadata = paginationMetadata,
+                    results = shapedTransactionsWithLinks,
+                    links
+                };
+
+                return Ok(linkedTransactionsResource);
+            }
+            else
+            {
+                Response.Headers.Add("X-Paging-PageNumber", returnedTransactions.CurrentPage.ToString());
+                Response.Headers.Add("X-Paging-PageSize", returnedTransactions.PageSize.ToString());
+                Response.Headers.Add("X-Paging-PageCount", returnedTransactions.TotalPages.ToString());
+                Response.Headers.Add("X-Paging-TotalRecordCount", returnedTransactions.TotalCount.ToString());
+
+                return Ok(shapedTransactions);
+            }
         }
 
         [HttpPost(Name = "CreateTransaction")]
+        [RequestHeaderMatchesMediaType("Content-Type",
+            "application/json",
+            "application/vnd.trade.transactionforcreation+json")]
+        [Consumes("application/json",
+            "application/vnd.trade.transactionforcreation+json")]
         public async Task<ActionResult<TransactionForReturnDto>> CreateTransaction([FromBody] CreateTransactionCommandDto commandDto)
         {
             _logger.LogInformation($"TransactionsController: {nameof(CreateTransaction)} was called.");
@@ -62,10 +132,17 @@ namespace TradeTracker.Api.Controllers
             command.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
 
             var createdTransaction = await _mediator.Send(command);
-            
+
+            var linkedTransaction = createdTransaction
+                .ShapeData(null) as IDictionary<string, object>;
+
+            IEnumerable<LinkDto> links = CreateLinksForTransaction(createdTransaction.TransactionId, null);
+
+            linkedTransaction.Add("links", links);
+
             return CreatedAtAction(
                 "GetTransaction",
-                new { transactionId = createdTransaction.TransactionId },
+                new { transactionId = linkedTransaction["TransactionId"] },
                 createdTransaction);
         }
 
@@ -80,9 +157,20 @@ namespace TradeTracker.Api.Controllers
         }
 
         [HttpGet("{transactionId}", Name = "GetTransaction")]
-        public async Task<ActionResult<TransactionForReturnDto>> GetTransaction(Guid transactionId)
+        [Produces("application/json",
+            "application/vnd.trade.hateoas+json")]
+        public async Task<IActionResult> GetTransaction(
+            Guid transactionId,
+            string fields,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetTransaction)} was called.");
+
+            if (!MediaTypeHeaderValue.TryParse(mediaType,
+                out MediaTypeHeaderValue parsedMediaType))
+            {
+                return BadRequest();
+            }
 
             var query = new GetTransactionQuery()
             {
@@ -91,7 +179,21 @@ namespace TradeTracker.Api.Controllers
             };
             
             var returnedTransaction = await _mediator.Send(query);
-            return Ok(returnedTransaction);
+
+            var shapedTransaction = returnedTransaction
+                .ShapeData(fields) as IDictionary<string, object>;
+
+            var includeLinks = parsedMediaType.SubTypeWithoutSuffix
+                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+
+            if (includeLinks)
+            {
+                IEnumerable<LinkDto> links = CreateLinksForTransaction(transactionId, fields);
+
+                shapedTransaction.Add("links", links);
+            }
+
+            return Ok(shapedTransaction);
         }
 
         [HttpPut("{transactionId}", Name = "UpdateTransaction")]
@@ -177,41 +279,152 @@ namespace TradeTracker.Api.Controllers
             return NoContent();
         }
 
+        private IEnumerable<LinkDto> CreateLinksForTransaction(
+            Guid transactionId, 
+            string fields)
+        {
+            var links = new List<LinkDto>();
 
-        // private IEnumerable<LinkDto> CreateLinksForTransaction(Guid transactionId)
-        // {
-        //     var links = new List<LinkDto>()
-        //     {
-        //         new LinkDto(
-        //             Url.Link(
-        //                 "GetTransaction",
-        //                 new { transactionId }),
-        //             "self",
-        //             "GET"),
+            if (String.IsNullOrWhiteSpace(fields))
+            {
+                links.Add(
+                    new LinkDto(
+                        Url.Link(
+                            "GetTransaction", 
+                            new { transactionId }),
+                    "self",
+                    "GET"));
+            }
+            else
+            {
+                links.Add(
+                    new LinkDto(
+                        Url.Link(
+                            "GetTransaction", 
+                            new { transactionId, fields }),
+                    "self",
+                    "GET"));
+            }
 
-        //         new LinkDto(
-        //             Url.Link(
-        //                 "UpdateTransaction",
-        //                 new { transactionId }),
-        //             "update transaction",
-        //             "PUT"),
+            links.Add(
+                new LinkDto(
+                    Url.Link(
+                        "UpdateTransaction",
+                        new { transactionId }),
+                    "update transaction",
+                    "PUT"));
                 
-        //         new LinkDto(
-        //             Url.Link(
-        //                 "PatchTransaction",
-        //                 new { transactionId }),
-        //             "patch transaction",
-        //             "PATCH"),
+            links.Add(
+                new LinkDto(
+                    Url.Link(
+                        "PatchTransaction",
+                        new { transactionId }),
+                    "patch transaction",
+                    "PATCH"));
 
-        //         new LinkDto(
-        //             Url.Link(
-        //                 "DeleteTransaction",
-        //                 new { transactionId }),
-        //             "delete transaction",
-        //             "DELETE")
-        //     };
+            links.Add(
+                new LinkDto(
+                    Url.Link(
+                        "DeleteTransaction",
+                        new { transactionId }),
+                    "delete transaction",
+                    "DELETE"));
 
-        //     return links;
-        // }
+            return links;
+        }
+
+        private IEnumerable<LinkDto> CreateLinksForTransactions(
+            GetTransactionsResourceParameters parameters,
+            bool hasNext,
+            bool hasPrevious)
+        {
+            var links = new List<LinkDto>();
+
+            links.Add(
+                new LinkDto(
+                    CreateTransactionsResourceUrl(
+                        parameters, 
+                        ResourceUriType.CurrentPage),
+                    "self",
+                    "GET"));
+
+            if (hasNext)
+            {
+                links.Add(
+                    new LinkDto(
+                        CreateTransactionsResourceUrl(
+                            parameters, 
+                            ResourceUriType.NextPage),
+                        "nextPage",
+                        "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add(
+                    new LinkDto(
+                        CreateTransactionsResourceUrl(
+                            parameters, 
+                            ResourceUriType.PreviousPage),
+                        "previousPage",
+                        "GET"));
+            }
+
+            return links;
+        }
+
+        private string CreateTransactionsResourceUrl(
+            GetTransactionsResourceParameters parameters,
+            ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return Url.Link(
+                        "GetTransactions",
+                        new
+                        {
+                            fields = parameters.Fields,
+                            orderBy = parameters.OrderBy,
+                            pageNumber = parameters.PageNumber - 1,
+                            pageSize = parameters.PageSize,
+                            including = parameters.Including,
+                            excluding = parameters.Excluding,
+                            rangeStart = parameters.RangeStart,
+                            rangeEnd = parameters.RangeEnd
+                        });
+
+                case ResourceUriType.NextPage:
+                    return Url.Link(
+                        "GetTransactions",
+                        new
+                        {
+                            fields = parameters.Fields,
+                            orderBy = parameters.OrderBy,
+                            pageNumber = parameters.PageNumber + 1,
+                            pageSize = parameters.PageSize,
+                            including = parameters.Including,
+                            excluding = parameters.Excluding,
+                            rangeStart = parameters.RangeStart,
+                            rangeEnd = parameters.RangeEnd
+                        });
+
+                case ResourceUriType.CurrentPage:
+                default:
+                    return Url.Link(
+                        "GetTransactions",
+                        new
+                        {
+                            fields = parameters.Fields,
+                            orderBy = parameters.OrderBy,
+                            pageNumber = parameters.PageNumber,
+                            pageSize = parameters.PageSize,
+                            including = parameters.Including,
+                            excluding = parameters.Excluding,
+                            rangeStart = parameters.RangeStart,
+                            rangeEnd = parameters.RangeEnd
+                        });
+            }
+        }        
     }
 }

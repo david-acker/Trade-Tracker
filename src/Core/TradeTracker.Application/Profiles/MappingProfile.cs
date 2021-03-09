@@ -48,6 +48,12 @@ namespace TradeTracker.Application.Profiles
 
             CreateMap<GetTransactionsResourceParameters, GetTransactionsQuery>()
                 .ForMember(
+                    dest => dest.Fields,
+                    opt => opt.MapFrom(src =>
+                        (src.Fields != null)
+                            ? ArraySelectionParser(src.Fields)
+                            : new List<string>()))
+                .ForMember(
                     dest => dest.RangeStart,
                     opt => opt.MapFrom(src => (DateTime.Parse(src.RangeStart))))
                 .ForMember(

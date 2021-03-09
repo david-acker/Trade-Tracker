@@ -8,6 +8,8 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
     {
         public Guid AccessKey { get; set; }
 
+        public List<string> Fields { get; set; }
+
         public string OrderBy { get; set; } = "DateTime";
 
         private int _pageNumber = 1;
