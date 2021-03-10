@@ -76,6 +76,16 @@ namespace TradeTracker.Api
                     newtonsoftJsonOutputFormatter.SupportedMediaTypes.Add("application/vnd.trade.hateoas+json");
                 }
             });
+
+            services.AddSwaggerGen(setupAction =>
+            {
+                setupAction.SwaggerDoc("TradeTrackerOpenAPISpecification", 
+                new Microsoft.OpenApi.Models.OpenApiInfo()
+                {
+                    Title = "TradeTracker API",
+                    Version = "1"
+                });
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -97,11 +107,28 @@ namespace TradeTracker.Api
             }
 
             app.UseHttpsRedirection();
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(setupAction =>
+            {
+                setupAction.SwaggerEndpoint(
+                    "/swagger/TradeTrackerOpenAPISpecification/swagger.json",
+                    "TradeTracker API");
+                
+                setupAction.RoutePrefix = "";
+            });
+
             app.UseIpRateLimiting();
+
             app.UseAuthentication();
+
             app.UseRouting();
+
             app.UseCustomExceptionHandler();
+
             app.UseCors("Open");
+
             app.UseAuthorization();
             
             app.UseEndpoints(endpoints =>
