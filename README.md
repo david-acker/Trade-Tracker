@@ -45,7 +45,8 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
 * Provides an extension method to register services with the ASP.NET Core Dependency Injection container.
 
 ### Infrastructure
-* Contains classes for infrastructure-specific services in the application, such as exporting data as a CSV file. 
+* Contains classes for infrastructure-specific services in the application, such as exporting data as a CSV file.
+* Includes services for managing the recalculation of trade positions based on transaction-related CRUD activity.
 * Provides an extension method to register services with the ASP.NET Core Dependency Injection container.
 
 ### Persistence
