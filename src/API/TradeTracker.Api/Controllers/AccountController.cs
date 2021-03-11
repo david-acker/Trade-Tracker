@@ -28,6 +28,14 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="authenticationRequest">Authentication request containing account information</param>
         /// <returns>An ActionResult of type AuthenticationResponse</returns>
+        /// <remarks>
+        /// Sample request: \
+        /// POST /api/account/authenticate \
+        /// { \
+        ///     "email": "yourEmail@yourEmail.com", \
+        ///     "password": "yourPassword!1" \
+        /// } 
+        /// </remarks>
         /// <response code="422">Validation Error</response>
         [HttpPost("authenticate", Name="Authenticate")]
         [Consumes("application/json")]
@@ -44,6 +52,10 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/account/authenticate URI.
         /// </summary>
+        /// <remarks>
+        /// Sample request: \
+        /// OPTIONS /api/account/authenticate 
+        /// </remarks>
         [HttpOptions("authenticate", Name="OptionsForAuthenticate")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForAuthenticate()
@@ -60,6 +72,17 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="registrationRequest">Registration request containing account information</param>
         /// <returns>An ActionResult of type RegistrationResponse</returns>
+        /// <remarks>
+        /// Sample request: \
+        /// POST /api/account/register \
+        /// { \
+        ///     "firstName": "yourFirstName", \
+        ///     "lastName" : "yourLastName", \
+        ///     "email": "yourEmail@yourEmail.com", \
+        ///     "userName": "yourUserName", \
+        ///     "password": "yourPassword!1" \
+        /// } 
+        /// </remarks>
         /// <response code="422">Validation Error</response>
         [HttpPost("register", Name="Register")]
         [Consumes("application/json")]
@@ -76,6 +99,10 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/account/register URI.
         /// </summary>
+        /// <remarks>
+        /// Sample request: \
+        /// OPTIONS /api/account/register 
+        /// </remarks>
         [HttpOptions("register", Name="OptionsForRegister")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForRegister()
