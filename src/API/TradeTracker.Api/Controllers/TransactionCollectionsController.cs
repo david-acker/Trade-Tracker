@@ -1,10 +1,10 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,6 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
 using TradeTracker.Api.Helpers;
-using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection;
@@ -23,6 +22,7 @@ namespace TradeTracker.Api.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public class TransactionCollectionsController : Controller
     {
         private readonly ILogger<TransactionCollectionsController> _logger;
@@ -39,11 +39,18 @@ namespace TradeTracker.Api.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Create a collection of transactions.
+        /// </summary>
+        /// <param name="commandDtos">The transactions to be created</param>
+        /// <response code="422">Validation Error</response>
         [HttpPost(Name = "CreateTransactionCollection")]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [Consumes("application/json")]
         [Produces("application/json",
             "application/vnd.trade.hateoas+json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public async Task<IActionResult> CreateTransactionCollection(
             [FromBody] IEnumerable<TransactionForCreationDto> commandDtos,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -104,7 +111,11 @@ namespace TradeTracker.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Options for /api/transactioncollections URI.
+        /// </summary>
         [HttpOptions(Name = "OptionsForTransactionCollections")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactionCollections()
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(OptionsForTransactionCollections)} was called.");
@@ -114,9 +125,18 @@ namespace TradeTracker.Api.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Get a collection of transactions.
+        /// </summary>
+        /// <param name="transactionIds">The ids for the transactions</param>
+        /// <param name="fields">The fields for the transactions</param>
+        /// <response code="200">Returns the requested transactions</response>
         [HttpGet("{transactionIds}", Name = "GetTransactionCollection")]
+        [Consumes("application/json")]
         [Produces("application/json",
             "application/vnd.trade.hateoas+json")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public async Task<IActionResult> GetTransactionCollection(
             [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> transactionIds,
             string fields,
@@ -176,7 +196,11 @@ namespace TradeTracker.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Options for /api/transactioncollections/{transactionIds} URI.
+        /// </summary>
         [HttpOptions("{transactionIds}", Name = "OptionsForTransactionCollectionByTransactionIds")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactionCollectionByTransactionIds()
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(OptionsForTransactionCollectionByTransactionIds)} was called.");
