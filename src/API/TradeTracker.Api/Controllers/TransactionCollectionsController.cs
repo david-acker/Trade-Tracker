@@ -19,6 +19,8 @@ using TradeTracker.Application.Models.Navigation;
 
 namespace TradeTracker.Api.Controllers
 {
+    #pragma warning disable CS1591
+
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
@@ -43,6 +45,28 @@ namespace TradeTracker.Api.Controllers
         /// Create a collection of transactions.
         /// </summary>
         /// <param name="commandDtos">The transactions to be created</param>
+        /// <remarks>
+        /// Sample request: \
+        /// POST /api/transactioncollections \
+        /// [ \
+        ///     { \
+        ///         "dateTime": "2019-06-01T12:00:00", \
+        ///         "symbol": "XYZ" \
+        ///         "type": "SellToOpen", \
+        ///         "quantity": "1", \
+        ///         "notional": "50", \
+        ///         "tradePrice": "50" \
+        ///     }, \
+        ///     { \
+        ///         "dateTime": "2019-06-15T12:00:00", \
+        ///         "symbol": "XYZ" \
+        ///         "type": "BuyToClose", \
+        ///         "quantity": "1", \
+        ///         "notional": "40", \
+        ///         "tradePrice": "40" \
+        ///     }, \
+        /// ] 
+        /// </remarks>
         /// <response code="422">Validation Error</response>
         [HttpPost(Name = "CreateTransactionCollection")]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
@@ -114,6 +138,10 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/transactioncollections URI.
         /// </summary>
+        /// <remarks>
+        /// Sample request: \
+        /// OPTIONS /api/transactioncollections 
+        /// </remarks>
         [HttpOptions(Name = "OptionsForTransactionCollections")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactionCollections()
@@ -130,6 +158,10 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="transactionIds">The ids for the transactions</param>
         /// <param name="fields">The fields for the transactions</param>
+        /// <remarks>
+        /// Sample request: \
+        /// GET /api/transactions/{firstTransactionId},{secondTransactionId} 
+        /// </remarks>
         /// <response code="200">Returns the requested transactions</response>
         [HttpGet("{transactionIds}", Name = "GetTransactionCollection")]
         [Consumes("application/json")]
@@ -199,6 +231,10 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/transactioncollections/{transactionIds} URI.
         /// </summary>
+        /// <remarks>
+        /// Sample request: \
+        /// OPTIONS /api/transactioncollections/{firstTransactionId},{secondTransactionId} 
+        /// </remarks>
         [HttpOptions("{transactionIds}", Name = "OptionsForTransactionCollectionByTransactionIds")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactionCollectionByTransactionIds()
@@ -264,4 +300,6 @@ namespace TradeTracker.Api.Controllers
             return links;
         }
     }
+
+    #pragma warning restore CS1591
 }
