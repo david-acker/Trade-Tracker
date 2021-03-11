@@ -1,17 +1,16 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using TradeTracker.Api.Helpers;
-using TradeTracker.Application.Features.Positions;
 using TradeTracker.Application.Features.Positions.Queries.GetPosition;
 using TradeTracker.Application.Features.Positions.Queries.GetPositions;
 using TradeTracker.Application.Models.Navigation;
@@ -21,6 +20,7 @@ namespace TradeTracker.Api.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public class PositionsController : Controller
     {
         private readonly ILogger<PositionsController> _logger;
@@ -37,9 +37,17 @@ namespace TradeTracker.Api.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Get a paged list of positions.
+        /// </summary>
+        /// <param name="parameters">The resource parameters for specifying the returned positions</param>
+        /// <response code="200">Returns any paged positions matching the parameters</response>
+        /// <response code="422">Validation Error</response>
         [HttpGet(Name = "GetPositions")]
         [Produces("application/json",
             "application/vnd.trade.hateoas+json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public async Task<IActionResult> GetPositions(
             [FromQuery] GetPositionsResourceParameters parameters,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -109,7 +117,11 @@ namespace TradeTracker.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Options for /api/positions URI.
+        /// </summary>
         [HttpOptions(Name = "OptionsForPositions")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForPositions()
         {
             _logger.LogInformation($"PositionsController: {nameof(OptionsForPositions)} was called.");
@@ -119,9 +131,18 @@ namespace TradeTracker.Api.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Gets a position by symbol of its security.
+        /// </summary>
+        /// <param name="symbol">The symbol for the position</param>
+        /// <response code="200">Returns the requested position</response>
+        /// <response code="422">Validation Error</response>
         [HttpGet("{symbol}", Name = "GetPosition")]
         [Produces("application/json",
             "application/vnd.trade.hateoas+json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public async Task<IActionResult> GetPosition(
             [FromRoute] string symbol,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -157,7 +178,11 @@ namespace TradeTracker.Api.Controllers
             return Ok(positionToReturn);
         }
 
+        /// <summary>
+        /// Options for /api/positions/{symbol} URI.
+        /// </summary>
         [HttpOptions("{symbol}", Name = "OptionsForPositionBySymbol")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForPositionBySymbol()
         {
             _logger.LogInformation($"PositionsController: {nameof(OptionsForPositionBySymbol)} was called.");
