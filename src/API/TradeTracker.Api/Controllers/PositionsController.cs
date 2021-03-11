@@ -17,6 +17,8 @@ using TradeTracker.Application.Models.Navigation;
 
 namespace TradeTracker.Api.Controllers
 {
+    #pragma warning disable CS1591
+
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
@@ -41,6 +43,21 @@ namespace TradeTracker.Api.Controllers
         /// Get a paged list of positions.
         /// </summary>
         /// <param name="parameters">The resource parameters for specifying the returned positions</param>
+        /// <remarks>
+        /// Sample request: \
+        /// GET /api/positions \
+        /// { \
+        ///     "orderBy": "Quantity", \
+        ///     "pageNumber": "3" \
+        ///     "pageSize": "25", \
+        ///     "excluding": [ \ 
+        ///         "QRS", \
+        ///         "TUV", \
+        ///         "WXY" \
+        ///     ], \
+        ///     "Exposure": "Long", \
+        /// } 
+        /// </remarks>
         /// <response code="200">Returns any paged positions matching the parameters</response>
         /// <response code="422">Validation Error</response>
         [HttpGet(Name = "GetPositions")]
@@ -120,6 +137,10 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/positions URI.
         /// </summary>
+        /// <remarks>
+        /// Sample request: \
+        /// OPTIONS /api/positions 
+        /// </remarks>
         [HttpOptions(Name = "OptionsForPositions")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForPositions()
@@ -135,6 +156,10 @@ namespace TradeTracker.Api.Controllers
         /// Gets a position by symbol of its security.
         /// </summary>
         /// <param name="symbol">The symbol for the position</param>
+        /// <remarks>
+        /// Sample request: \
+        /// GET /api/positions/{symbol} 
+        /// </remarks>
         /// <response code="200">Returns the requested position</response>
         /// <response code="422">Validation Error</response>
         [HttpGet("{symbol}", Name = "GetPosition")]
@@ -181,6 +206,10 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/positions/{symbol} URI.
         /// </summary>
+        /// <remarks>
+        /// Sample request: \
+        /// OPTIONS /api/positions/{symbol} 
+        /// </remarks>
         [HttpOptions("{symbol}", Name = "OptionsForPositionBySymbol")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForPositionBySymbol()
@@ -295,4 +324,6 @@ namespace TradeTracker.Api.Controllers
             }
         }
     }
+
+    #pragma warning restore CS1591
 }
