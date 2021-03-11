@@ -20,7 +20,6 @@ namespace TradeTracker.Domain.Entities
 
         public string Symbol { get; init; }
 
-
         public string Exposure { get; private set; } = ExposureType.None.ToString();
 
         private decimal _quantity = Decimal.Zero;
