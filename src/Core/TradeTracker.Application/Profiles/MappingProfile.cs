@@ -47,13 +47,7 @@ namespace TradeTracker.Application.Profiles
             CreateMap<Transaction, CreateTransactionCollectionCommand>()
                 .ReverseMap();
 
-            CreateMap<GetTransactionsResourceParameters, GetTransactionsQuery>()
-                .ForMember(
-                    dest => dest.Fields,
-                    opt => opt.MapFrom(src =>
-                        (src.Fields != null)
-                            ? ArraySelectionParser(src.Fields)
-                            : new List<string>()))
+            CreateMap<GetPagedTransactionsResourceParameters, GetTransactionsQuery>()
                 .ForMember(
                     dest => dest.RangeStart,
                     opt => opt.MapFrom(src => (DateTime.Parse(src.RangeStart))))
@@ -74,6 +68,8 @@ namespace TradeTracker.Application.Profiles
                             : new List<string>()));
 
             CreateMap<GetTransactionsQuery, PagedTransactionsResourceParameters>();
+
+            CreateMap<TransactionForReturnDto, TransactionWithLinksForReturnDto>();
 
             CreateMap<GetPositionsResourceParameters, GetPositionsQuery>()
                 .ForMember(

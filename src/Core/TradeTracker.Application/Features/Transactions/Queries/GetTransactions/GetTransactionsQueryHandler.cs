@@ -11,7 +11,7 @@ using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, PagedTransactionsDto>
+    public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, PagedTransactionsBaseDto>
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
@@ -24,7 +24,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
             _transactionRepository = transactionRepository;
         }
 
-        public async Task<PagedTransactionsDto> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
+        public async Task<PagedTransactionsBaseDto> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
@@ -34,7 +34,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
             
             var transactionsForReturn = _mapper.Map<PagedList<Transaction>, List<TransactionForReturnDto>>(pagedTransactions);
 
-            return new PagedTransactionsDto()
+            return new PagedTransactionsBaseDto()
             {
                 CurrentPage = pagedTransactions.CurrentPage,
                 TotalPages = pagedTransactions.TotalPages,

@@ -3,11 +3,9 @@ using System.Collections.Generic;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionsResourceParameters
+    public class GetPagedTransactionsResourceParameters
     {
         public string OrderBy { get; set; } = "DateTime";
-
-        public string Fields { get; set; }
 
         public int PageNumber { get; set; } = 1;
 

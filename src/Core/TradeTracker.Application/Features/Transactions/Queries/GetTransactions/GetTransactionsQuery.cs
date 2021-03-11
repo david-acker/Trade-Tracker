@@ -4,11 +4,9 @@ using MediatR;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionsQuery : IRequest<PagedTransactionsDto>
+    public class GetTransactionsQuery : IRequest<PagedTransactionsBaseDto>
     {
         public Guid AccessKey { get; set; }
-
-        public List<string> Fields { get; set; }
 
         public string OrderBy { get; set; } = "DateTime";
 
