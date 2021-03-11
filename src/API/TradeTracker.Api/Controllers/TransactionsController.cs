@@ -1,6 +1,7 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -9,12 +10,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text.Json;
 using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
 using TradeTracker.Api.Helpers;
 using TradeTracker.Api.Utilities;
-using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.DeleteTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.PatchTransaction;
@@ -29,6 +28,7 @@ namespace TradeTracker.Api.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public class TransactionsController : Controller
     {
         private readonly ILogger<TransactionsController> _logger;
@@ -45,9 +45,18 @@ namespace TradeTracker.Api.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Get a paged list of transactions.
+        /// </summary>
+        /// <param name="parameters">The resource parameters for specifying the returned transactions</param>
+        /// <response code="200">Returns any paged transactions matching parameters</response>
+        /// <response code="422">Validation Error</response>
         [HttpGet(Name = "GetTransactions")]
+        [Consumes("application/json")]
         [Produces("application/json",
             "application/vnd.trade.hateoas+json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public async Task<IActionResult> GetTransactions(
             [FromQuery] GetTransactionsResourceParameters parameters,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -118,11 +127,18 @@ namespace TradeTracker.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Create a transaction.
+        /// </summary>
+        /// <param name="commandDto">The transaction to be created</param>
+        /// <response code="422">Validation Error</response>
         [HttpPost(Name = "CreateTransaction")]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [Consumes("application/json")]
         [Produces("application/json",
             "application/vnd.trade.hateoas+json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public async Task<IActionResult> CreateTransaction(
             [FromBody] CreateTransactionCommandDto commandDto,
             [FromHeader(Name = "Accept")] string mediaType)
@@ -167,7 +183,11 @@ namespace TradeTracker.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Options for /api/transactions URI.
+        /// </summary>
         [HttpOptions(Name = "OptionsForTransactions")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactions()
         {
             _logger.LogInformation($"TransactionsController: {nameof(OptionsForTransactions)} was called.");
@@ -177,10 +197,20 @@ namespace TradeTracker.Api.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Get a transaction by its id.
+        /// </summary>
+        /// <param name="transactionId">The id of the transaction</param>
+        /// <param name="fields">The fields for the transaction</param>
+        /// <response code="200">Returns the requested transaction</response>
         [HttpGet("{transactionId}", Name = "GetTransaction")]
         [Produces("application/json",
             "application/vnd.trade.hateoas+json")]
-        public async Task<IActionResult> GetTransaction(Guid transactionId, string fields,
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetTransaction(
+            Guid transactionId, 
+            string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetTransaction)} was called.");
@@ -215,10 +245,19 @@ namespace TradeTracker.Api.Controllers
             return Ok(shapedTransaction);
         }
 
+        /// <summary>
+        /// Partially update a transaction.
+        /// </summary>
+        /// <param name="transactionId">The id for the transaction to be updated</param>
+        /// <param name="commandDto">The transaction with updated values</param>
+        /// <response code="422">Validation Error</response>
         [HttpPut("{transactionId}", Name = "UpdateTransaction")]
-        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [Consumes("application/json")]
-        public async Task<ActionResult> UpdateTransaction(Guid transactionId, 
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        public async Task<ActionResult> UpdateTransaction(
+            Guid transactionId, 
             [FromBody] UpdateTransactionCommandDto commandDto)
         {
             _logger.LogInformation($"TransactionsController: {nameof(UpdateTransaction)} was called.");
@@ -231,10 +270,19 @@ namespace TradeTracker.Api.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Partially update a transaction.
+        /// </summary>
+        /// <param name="transactionId">The id for the transaction to be updated</param>
+        /// <param name="patchDocument">The set of operations to be applied to the transaction</param>
+        /// <response code="422">Validation Error</response>
         [HttpPatch("{transactionId}", Name = "PatchTransaction")]
-        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [Consumes("application/json")]
-        public async Task<ActionResult> PatchTransaction(Guid transactionId, 
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        public async Task<ActionResult> PatchTransaction(
+            Guid transactionId, 
             JsonPatchDocument<UpdateTransactionCommandDto> patchDocument)
         {
             _logger.LogInformation($"TransactionsController: {nameof(PatchTransaction)} was called.");
@@ -250,7 +298,13 @@ namespace TradeTracker.Api.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Delete a transaction.
+        /// </summary>
+        /// <param name="transactionId">The id for the transaction to be deleted</param>
         [HttpDelete("{transactionId}", Name = "DeleteTransaction")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> DeleteTransaction(Guid transactionId)
         {
             _logger.LogInformation($"TransactionsController: {nameof(DeleteTransaction)} was called.");
@@ -265,7 +319,11 @@ namespace TradeTracker.Api.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Options for /api/transactions/{transactionId} URI.
+        /// </summary>
         [HttpOptions("{transactionId}", Name = "OptionsForTransactionById")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactionById()
         {
             _logger.LogInformation($"TransactionsController: {nameof(OptionsForTransactionById)} was called.");
@@ -275,8 +333,13 @@ namespace TradeTracker.Api.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Get all transactions as a CSV file.
+        /// </summary>
+        /// <response code="200"></response>
         [HttpGet("export", Name = "ExportTransactions")]
         [FileResultContentType("text/csv")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> ExportTransactions()
         {
             _logger.LogInformation($"TransactionsController: {nameof(ExportTransactions)} was called.");
@@ -293,7 +356,11 @@ namespace TradeTracker.Api.Controllers
                 fileExportDto.TransactionsExportFileName);
         }
 
+        /// <summary>
+        /// Options for /api/transactions/export URI.
+        /// </summary>
         [HttpOptions("export", Name = "OptionsForExportTransactions")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForExportTransactions()
         {
             _logger.LogInformation($"TransactionsController: {nameof(OptionsForExportTransactions)} was called.");
