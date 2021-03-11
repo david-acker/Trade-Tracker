@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Reflection;
 using AspNetCoreRateLimit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -41,17 +41,30 @@ namespace TradeTracker.Api
 
             services.AddScoped<ILoggedInUserService, LoggedInUserService>();
         
-            services.AddControllers(setupAction =>
-            {
-                setupAction.ReturnHttpNotAcceptable = true;
-            }).AddNewtonsoftJson(setupAction => 
-            {
-                setupAction.SerializerSettings.ContractResolver =
-                    new CamelCasePropertyNamesContractResolver();
+            services
+                .AddControllers(setupAction =>
+                {
+                    setupAction.ReturnHttpNotAcceptable = true;
 
-                setupAction.SerializerSettings.ReferenceLoopHandling =
-                    Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            });
+                    setupAction.Filters.Add(
+                        new ProducesResponseTypeAttribute(StatusCodes.Status400BadRequest));
+                    setupAction.Filters.Add(
+                        new ProducesResponseTypeAttribute(StatusCodes.Status406NotAcceptable));
+                    setupAction.Filters.Add(
+                        new ProducesResponseTypeAttribute(StatusCodes.Status429TooManyRequests));
+                    setupAction.Filters.Add(
+                        new ProducesResponseTypeAttribute(StatusCodes.Status500InternalServerError));
+                    setupAction.Filters.Add(
+                        new ProducesDefaultResponseTypeAttribute());
+                })
+                .AddNewtonsoftJson(setupAction => 
+                {
+                    setupAction.SerializerSettings.ContractResolver =
+                        new CamelCasePropertyNamesContractResolver();
+
+                    setupAction.SerializerSettings.ReferenceLoopHandling =
+                        Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                });
 
             services.AddMemoryCache();
             services.Configure<IpRateLimitOptions>(
@@ -74,17 +87,45 @@ namespace TradeTracker.Api
                 if (newtonsoftJsonOutputFormatter != null)
                 {
                     newtonsoftJsonOutputFormatter.SupportedMediaTypes.Add("application/vnd.trade.hateoas+json");
+
+                    if (newtonsoftJsonOutputFormatter.SupportedMediaTypes.Contains("text/json"))
+                    {
+                        newtonsoftJsonOutputFormatter.SupportedMediaTypes.Remove("text/json");
+                    }
+
+                    if (newtonsoftJsonOutputFormatter.SupportedMediaTypes.Contains("text/plain"))
+                    {
+                        newtonsoftJsonOutputFormatter.SupportedMediaTypes.Remove("text/plain");
+                    }
                 }
             });
 
             services.AddSwaggerGen(setupAction =>
             {
-                setupAction.SwaggerDoc("TradeTrackerOpenAPISpecification", 
-                new Microsoft.OpenApi.Models.OpenApiInfo()
-                {
-                    Title = "TradeTracker API",
-                    Version = "1"
-                });
+                setupAction.SwaggerDoc(
+                    "TradeTrackerOpenAPISpecification", 
+                    new Microsoft.OpenApi.Models.OpenApiInfo()
+                    {
+                        Title = "TradeTracker API",
+                        Version = "1",
+                        Description = "API for accessing and managing transactions and positions with TradeTracker.",
+                        Contact = new Microsoft.OpenApi.Models.OpenApiContact()
+                        {
+                            Email = "davidacker3@gmail.com",
+                            Name = "David Acker",
+                            Url = new Uri("https://www.linkedin.com/in/daviddacker/")
+                        },
+                        License = new Microsoft.OpenApi.Models.OpenApiLicense()
+                        {
+                            Name = "MIT License",
+                            Url = new Uri("https://opensource.org/licenses/MIT")
+                        }
+                    });
+
+                var xmlCommmentsFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommmentsFile);
+
+                setupAction.IncludeXmlComments(xmlCommentsFullPath);
             });
         }
 
