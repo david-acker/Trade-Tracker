@@ -44,13 +44,13 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="parameters">The resource parameters for specifying the returned positions</param>
         /// <remarks>
-        /// Sample request: \
+        /// Example: \
         /// GET /api/positions \
         /// { \
         ///     "orderBy": "Quantity", \
         ///     "pageNumber": "3" \
         ///     "pageSize": "25", \
-        ///     "excluding": [ \ 
+        ///     "excluding": [ \
         ///         "QRS", \
         ///         "TUV", \
         ///         "WXY" \
@@ -138,7 +138,7 @@ namespace TradeTracker.Api.Controllers
         /// Options for /api/positions URI.
         /// </summary>
         /// <remarks>
-        /// Sample request: \
+        /// Example: \
         /// OPTIONS /api/positions 
         /// </remarks>
         [HttpOptions(Name = "OptionsForPositions")]
@@ -157,7 +157,7 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="symbol">The symbol for the position</param>
         /// <remarks>
-        /// Sample request: \
+        /// Example: \
         /// GET /api/positions/{symbol} 
         /// </remarks>
         /// <response code="200">Returns the requested position</response>
@@ -207,7 +207,7 @@ namespace TradeTracker.Api.Controllers
         /// Options for /api/positions/{symbol} URI.
         /// </summary>
         /// <remarks>
-        /// Sample request: \
+        /// Example: \
         /// OPTIONS /api/positions/{symbol} 
         /// </remarks>
         [HttpOptions("{symbol}", Name = "OptionsForPositionBySymbol")]

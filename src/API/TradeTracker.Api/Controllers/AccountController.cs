@@ -53,7 +53,7 @@ namespace TradeTracker.Api.Controllers
         /// Options for /api/account/authenticate URI.
         /// </summary>
         /// <remarks>
-        /// Sample request: \
+        /// Example: \
         /// OPTIONS /api/account/authenticate 
         /// </remarks>
         [HttpOptions("authenticate", Name="OptionsForAuthenticate")]
@@ -73,7 +73,7 @@ namespace TradeTracker.Api.Controllers
         /// <param name="registrationRequest">Registration request containing account information</param>
         /// <returns>An ActionResult of type RegistrationResponse</returns>
         /// <remarks>
-        /// Sample request: \
+        /// Example: \
         /// POST /api/account/register \
         /// { \
         ///     "firstName": "yourFirstName", \
@@ -100,7 +100,7 @@ namespace TradeTracker.Api.Controllers
         /// Options for /api/account/register URI.
         /// </summary>
         /// <remarks>
-        /// Sample request: \
+        /// Example: \
         /// OPTIONS /api/account/register 
         /// </remarks>
         [HttpOptions("register", Name="OptionsForRegister")]

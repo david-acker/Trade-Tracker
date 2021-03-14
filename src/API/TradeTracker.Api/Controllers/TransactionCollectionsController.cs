@@ -46,7 +46,7 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="commandDtos">The transactions to be created</param>
         /// <remarks>
-        /// Sample request: \
+        /// Example: \
         /// POST /api/transactioncollections \
         /// [ \
         ///     { \
@@ -139,7 +139,7 @@ namespace TradeTracker.Api.Controllers
         /// Options for /api/transactioncollections URI.
         /// </summary>
         /// <remarks>
-        /// Sample request: \
+        /// Example: \
         /// OPTIONS /api/transactioncollections 
         /// </remarks>
         [HttpOptions(Name = "OptionsForTransactionCollections")]
@@ -159,8 +159,8 @@ namespace TradeTracker.Api.Controllers
         /// <param name="transactionIds">The ids for the transactions</param>
         /// <param name="fields">The fields for the transactions</param>
         /// <remarks>
-        /// Sample request: \
-        /// GET /api/transactions/{firstTransactionId},{secondTransactionId} 
+        /// Example: \
+        /// GET /api/transactioncollections/{firstTransactionId},{secondTransactionId} 
         /// </remarks>
         /// <response code="200">Returns the requested transactions</response>
         [HttpGet("{transactionIds}", Name = "GetTransactionCollection")]
@@ -232,7 +232,7 @@ namespace TradeTracker.Api.Controllers
         /// Options for /api/transactioncollections/{transactionIds} URI.
         /// </summary>
         /// <remarks>
-        /// Sample request: \
+        /// Example: \
         /// OPTIONS /api/transactioncollections/{firstTransactionId},{secondTransactionId} 
         /// </remarks>
         [HttpOptions("{transactionIds}", Name = "OptionsForTransactionCollectionByTransactionIds")]
