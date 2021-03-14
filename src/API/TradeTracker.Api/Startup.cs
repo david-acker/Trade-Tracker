@@ -126,6 +126,8 @@ namespace TradeTracker.Api
                 var xmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommmentsFile);
 
                 setupAction.IncludeXmlComments(xmlCommentsFullPath);
+
+                setupAction.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
             });
         }
 
