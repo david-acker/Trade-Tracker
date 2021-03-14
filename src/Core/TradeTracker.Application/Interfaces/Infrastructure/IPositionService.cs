@@ -32,5 +32,9 @@ namespace TradeTracker.Application.Interfaces.Infrastructure
             Guid accessKey,
             string symbol,
             List<Guid> transactionIds);
+
+        Task<decimal> CalculateAverageCostBasis(
+            Guid accessKey,
+            string symbol);
     }
 }

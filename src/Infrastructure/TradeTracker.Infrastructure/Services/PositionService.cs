@@ -29,6 +29,45 @@ namespace TradeTracker.Infrastructure.Services
             _transactionRepository = transactionRepository;
         }
 
+        public async Task<decimal> CalculateAverageCostBasis(Guid accessKey, string symbol)
+        {
+            _logger.LogInformation($"PositionTrackingService: {nameof(CalculateAverageCostBasis)} was called.");
+        
+            var position = await _positionRepository.GetBySymbolAsync(accessKey, symbol);
+
+            var transactionsForSymbol = await _transactionRepository
+                .GetAllOpenTransactionsForSymbolAsync(
+                    accessKey,
+                    symbol);
+
+            var totalQuantity = position.Quantity;
+
+            var totalNotional = Decimal.Zero;
+
+            var remainingOpenQuantity = totalQuantity;
+
+            foreach (var transaction in transactionsForSymbol)
+            {
+                var quantity = transaction.Quantity;
+                var tradePrice = transaction.TradePrice;
+
+                if (remainingOpenQuantity > quantity)
+                {
+                    totalNotional += quantity * tradePrice;
+
+                    remainingOpenQuantity -= quantity;
+                }
+                else
+                {
+                    totalNotional += remainingOpenQuantity * tradePrice;
+
+                    break;
+                }
+            }
+
+            return Math.Round(totalNotional / totalQuantity, 2);
+        }
+
         public async Task RefreshForTransaction(Guid accessKey, Guid transactionId)
         {
             _logger.LogInformation($"PositionService: {nameof(RefreshForTransaction)} was called for {transactionId}.");

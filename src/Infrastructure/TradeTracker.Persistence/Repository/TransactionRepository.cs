@@ -7,6 +7,7 @@ using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Models.Pagination;
 using TradeTracker.Domain.Entities;
+using TradeTracker.Domain.Enums;
 
 namespace TradeTracker.Persistence.Repositories
 {
@@ -122,6 +123,20 @@ namespace TradeTracker.Persistence.Repositories
         {
             return await _context.Transactions
                 .Where(t => t.AccessKey == accessKey && t.Symbol == symbol)
+                .OrderByDescending(t => t.DateTime)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Transaction>> GetAllOpenTransactionsForSymbolAsync(Guid accessKey, string symbol)
+        {
+            return await _context.Transactions
+                .Where(t => 
+                    t.AccessKey == accessKey &&
+                    t.Symbol == symbol && 
+                    (
+                        t.Type == TransactionType.BuyToOpen ||
+                        t.Type == TransactionType.SellToOpen
+                    ))
                 .OrderByDescending(t => t.DateTime)
                 .ToListAsync();
         }

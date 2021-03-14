@@ -44,7 +44,7 @@ namespace TradeTracker.Persistence
 
             var equityTransactions = TransactionSeeder.GenerateEquityTransactions(
                 accessKey: Guid.Parse("322f44e6-bacd-42a4-9f8d-d0a8d36eb1cb"),
-                transactionCount: 2500);
+                transactionCount: 100);
 
             modelBuilder.Entity<Transaction>().HasData(equityTransactions);
 
