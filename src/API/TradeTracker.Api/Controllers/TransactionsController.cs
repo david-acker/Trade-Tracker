@@ -49,6 +49,7 @@ namespace TradeTracker.Api.Controllers
             _mediator = mediator;
         }
 
+
         /// <summary>
         /// Get a paged list of transactions.
         /// </summary>
@@ -97,6 +98,7 @@ namespace TradeTracker.Api.Controllers
             return Ok(pagedTransactionsBase.Items);
         }
 
+
         /// <summary>
         /// Get a paged list of transactions.
         /// </summary>
@@ -123,8 +125,7 @@ namespace TradeTracker.Api.Controllers
         [Consumes("application/json")]
         [Produces("application/vnd.trade.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity,
-            Type = typeof(Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
         [ApiExplorerSettings(IgnoreApi = true)]
@@ -169,6 +170,7 @@ namespace TradeTracker.Api.Controllers
 
             return Ok(pagedTransactionsWithLinks);
         }
+
 
         /// <summary>
         /// Create a transaction.
@@ -217,6 +219,7 @@ namespace TradeTracker.Api.Controllers
                 new { transactionId = linkedTransaction["TransactionId"] },
                 linkedTransaction);
         }
+
 
         /// <summary>
         /// Options for /api/transactions URI.
@@ -268,6 +271,7 @@ namespace TradeTracker.Api.Controllers
             return Ok(transaction);
         }
 
+
         /// <summary>
         /// Get a transaction by its id.
         /// </summary>
@@ -303,6 +307,7 @@ namespace TradeTracker.Api.Controllers
 
             return Ok(transactionWithLinks);
         }
+
 
         /// <summary>
         /// Update a transaction.
@@ -340,6 +345,7 @@ namespace TradeTracker.Api.Controllers
             await _mediator.Send(command);
             return NoContent();
         }
+
 
         /// <summary>
         /// Partially update a transaction.
@@ -383,6 +389,7 @@ namespace TradeTracker.Api.Controllers
             return NoContent();
         }
 
+
         /// <summary>
         /// Delete a transaction.
         /// </summary>
@@ -409,6 +416,7 @@ namespace TradeTracker.Api.Controllers
             return NoContent();
         }
 
+
         /// <summary>
         /// Options for /api/transactions/{transactionId} URI.
         /// </summary>
@@ -426,6 +434,7 @@ namespace TradeTracker.Api.Controllers
             
             return NoContent();
         }
+
 
         /// <summary>
         /// Get all transactions as a CSV file.
@@ -454,6 +463,7 @@ namespace TradeTracker.Api.Controllers
                 fileExportDto.TransactionsExportFileName);
         }
 
+
         /// <summary>
         /// Options for /api/transactions/export URI.
         /// </summary>
@@ -471,6 +481,7 @@ namespace TradeTracker.Api.Controllers
             
             return NoContent();
         }
+
 
         private IEnumerable<LinkDto> CreateLinksForTransaction(
             Guid transactionId, 
@@ -526,6 +537,7 @@ namespace TradeTracker.Api.Controllers
             return links;
         }
 
+
         private IEnumerable<LinkDto> CreateLinksForTransactions(
             GetPagedTransactionsResourceParameters parameters,
             bool hasNext,
@@ -565,6 +577,7 @@ namespace TradeTracker.Api.Controllers
 
             return links;
         }
+
 
         private string CreateTransactionsResourceUrl(
             GetPagedTransactionsResourceParameters parameters,
