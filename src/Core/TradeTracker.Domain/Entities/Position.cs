@@ -46,12 +46,10 @@ namespace TradeTracker.Domain.Entities
         {
             switch (type)
             {
-                case TransactionType.BuyToOpen:
-                case TransactionType.BuyToClose:
+                case TransactionType.Buy:
                     return Math.Abs(quantity);
                 
-                case TransactionType.SellToOpen:
-                case TransactionType.SellToClose:
+                case TransactionType.Sell:
                     return -Math.Abs(quantity);
                 
                 default:

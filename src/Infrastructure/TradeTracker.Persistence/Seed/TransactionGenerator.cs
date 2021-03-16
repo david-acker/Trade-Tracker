@@ -22,8 +22,8 @@ namespace TradeTracker.Persistence.Seed.Transactions
                 string equitySymbol = SymbolGenerator.GenerateEquitySymbol(random, 1);
 
                 TransactionType transactionType = (random.NextDouble() >= 0.5) 
-                    ? TransactionType.BuyToOpen 
-                    : TransactionType.SellToClose;
+                    ? TransactionType.Buy
+                    : TransactionType.Sell;
                 
                 decimal tradePrice = DecimalGenerator.GenerateInRange(random, (decimal)1.00, (decimal)100.00);
                 decimal quantity = DecimalGenerator.GenerateInRange(random, (decimal)0.05, (decimal)5.00);

@@ -26,7 +26,7 @@ namespace TradeTracker.Application.UnitTests.Mocks
                     AccessKey = userAccessKeys[0],
                     DateTime = new DateTime(2016, 1, 1),
                     Symbol = "ABC",
-                    Type = TransactionType.BuyToOpen,
+                    Type = TransactionType.Buy,
                     Quantity = (decimal)100,
                     Notional = (decimal)1000,
                     TradePrice = (decimal)10
@@ -37,7 +37,7 @@ namespace TradeTracker.Application.UnitTests.Mocks
                     AccessKey = userAccessKeys[0],
                     DateTime = new DateTime(2017, 1, 1),
                     Symbol = "XYZ",
-                    Type = TransactionType.BuyToOpen,
+                    Type = TransactionType.Buy,
                     Quantity = (decimal)10,
                     Notional = (decimal)250,
                     TradePrice =(decimal)25
@@ -48,7 +48,7 @@ namespace TradeTracker.Application.UnitTests.Mocks
                     AccessKey = userAccessKeys[0],
                     DateTime = new DateTime(2018, 1, 1),
                     Symbol = "ABC",
-                    Type = TransactionType.SellToClose,
+                    Type = TransactionType.Sell,
                     Quantity = (decimal)50,
                     Notional = (decimal)1000,
                     TradePrice =(decimal)20
@@ -59,7 +59,7 @@ namespace TradeTracker.Application.UnitTests.Mocks
                     AccessKey = userAccessKeys[1],
                     DateTime = new DateTime(2019, 1, 1),
                     Symbol = "ABC",
-                    Type = TransactionType.BuyToOpen,
+                    Type = TransactionType.Buy,
                     Quantity = (decimal)10,
                     Notional = (decimal)150,
                     TradePrice = (decimal)15
@@ -70,7 +70,7 @@ namespace TradeTracker.Application.UnitTests.Mocks
                     AccessKey = userAccessKeys[1],
                     DateTime = new DateTime(2020, 1, 1),
                     Symbol = "XYZ",
-                    Type = TransactionType.BuyToOpen,
+                    Type = TransactionType.Buy,
                     Quantity = (decimal)5,
                     Notional = (decimal)100,
                     TradePrice = (decimal)20

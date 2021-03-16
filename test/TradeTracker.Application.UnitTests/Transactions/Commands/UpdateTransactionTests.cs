@@ -49,7 +49,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
                 AccessKey = userAccessKey,
                 DateTime = new DateTime(2015, 1, 1),
                 Symbol = "XYZ",
-                Type = TransactionType.BuyToOpen.ToString(),
+                Type = TransactionType.Buy.ToString(),
                 Quantity = (decimal)10,
                 Notional = (decimal)10,
                 TradePrice = (decimal)1
@@ -103,7 +103,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
                 TransactionId = transactionId,
                 DateTime = new DateTime(2015, 1, 1),
                 Symbol = "XYZ",
-                Type = TransactionType.BuyToOpen.ToString(),
+                Type = TransactionType.Buy.ToString(),
                 Quantity = (decimal)10,
                 Notional = (decimal)10,
                 TradePrice = (decimal)1
@@ -155,7 +155,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
                 TransactionId = transactionId,
                 DateTime = new DateTime(2015, 1, 1),
                 Symbol = "XYZ",
-                Type = TransactionType.BuyToOpen.ToString(),
+                Type = TransactionType.Buy.ToString(),
                 Quantity = (decimal)10,
                 Notional = (decimal)10,
                 TradePrice = (decimal)1
@@ -185,7 +185,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
                 TransactionId = transactionId,
                 DateTime = new DateTime(2015, 1, 1),
                 Symbol = "XYZ",
-                Type = TransactionType.BuyToOpen.ToString(),
+                Type = TransactionType.Buy.ToString(),
                 Quantity = (decimal)10,
                 Notional = (decimal)10,
                 TradePrice = (decimal)1

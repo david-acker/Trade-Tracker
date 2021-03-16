@@ -4,13 +4,8 @@ namespace TradeTracker.Domain.Enums
     {
         NotSpecified,
 
-        // Long Exposure.
-        BuyToOpen,
-        SellToClose,
-
-        // Short Exposure.
-        SellToOpen,
-        BuyToClose,
+        Buy,
+        Sell,
 
         CashDividend
     }

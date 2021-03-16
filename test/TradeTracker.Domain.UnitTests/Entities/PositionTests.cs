@@ -67,7 +67,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
 
             var position = new Position(accessKey, symbol);
 
-            var type = TransactionType.BuyToOpen;
+            var type = TransactionType.Buy;
             var quantity = (decimal)100;
 
             // Act
@@ -87,7 +87,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
 
             var position = new Position(accessKey, symbol);
 
-            var type = TransactionType.BuyToOpen;
+            var type = TransactionType.Buy;
             var quantity = (decimal)-100;
 
             // Act
@@ -107,7 +107,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
 
             var position = new Position(accessKey, symbol);
 
-            var type = TransactionType.BuyToOpen;
+            var type = TransactionType.Buy;
             var quantity = (decimal)100;
 
             // Act
@@ -119,7 +119,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Attach_BuyToOpenTransactionToExistingPosition_IncreasesLongPosition()
+        public void Attach_BuyTransactionToExistingPosition_IncreasesLongPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -127,7 +127,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
 
             var position = new Position(accessKey, symbol);
 
-            var type = TransactionType.BuyToOpen;
+            var type = TransactionType.Buy;
             var quantity = (decimal)100;
 
             // Act
@@ -145,7 +145,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Attach_SellToCloseTransactionToExistingPosition_DecreasesLongPosition()
+        public void Attach_SellTransactionToExistingPosition_DecreasesLongPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -154,12 +154,12 @@ namespace TradeTracker.Domain.UnitTests.Entities
             var position = new Position(accessKey, symbol);
 
             var initialLongQuantity = (decimal)100;
-            position.Attach(TransactionType.BuyToOpen, initialLongQuantity);
+            position.Attach(TransactionType.Buy, initialLongQuantity);
 
-            var sellToCloseQuantity = (decimal)50;
+            var sellQuantity = (decimal)50;
 
             // Act
-            position.Attach(TransactionType.SellToClose, sellToCloseQuantity);
+            position.Attach(TransactionType.Sell, sellQuantity);
 
             // Assert
             using (new AssertionScope())
@@ -168,12 +168,12 @@ namespace TradeTracker.Domain.UnitTests.Entities
                     .Be("Long");
 
                 position.Quantity.Should()
-                    .Be(initialLongQuantity - sellToCloseQuantity);
+                    .Be(initialLongQuantity - sellQuantity);
             }
         }
 
         [Fact]
-        public void Attach_SellToOpenTransactionToExistingPosition_IncreasesShortPosition()
+        public void Attach_SellTransactionToExistingPosition_IncreasesShortPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -181,7 +181,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
 
             var position = new Position(accessKey, symbol);
 
-            var type = TransactionType.SellToOpen;
+            var type = TransactionType.Sell;
             var quantity = (decimal)100;
 
             // Act
@@ -199,7 +199,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
         }
 
         [Fact]
-        public void Attach_BuyToCloseTransactionToExistingPosition_DecreasesShortPosition()
+        public void Attach_BuyTransactionToExistingPosition_DecreasesShortPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -208,12 +208,12 @@ namespace TradeTracker.Domain.UnitTests.Entities
             var position = new Position(accessKey, symbol);
 
             var initialShortQuantity = (decimal)100;
-            position.Attach(TransactionType.SellToOpen, initialShortQuantity);
+            position.Attach(TransactionType.Sell, initialShortQuantity);
 
-            var buyToCloseQuantity = (decimal)50;
+            var buyQuantity = (decimal)50;
 
             // Act
-            position.Attach(TransactionType.BuyToClose, buyToCloseQuantity);
+            position.Attach(TransactionType.Buy, buyQuantity);
 
             // Assert
             using (new AssertionScope())
@@ -222,12 +222,12 @@ namespace TradeTracker.Domain.UnitTests.Entities
                     .Be("Short");
 
                 position.Quantity.Should()
-                    .Be(initialShortQuantity - buyToCloseQuantity);
+                    .Be(initialShortQuantity - buyQuantity);
             }
         }
 
         [Fact]
-        public void Detach_BuyToOpenTransactionFromExistingPosition_DecreasesLongPosition()
+        public void Detach_BuyTransactionFromExistingPosition_DecreasesLongPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -236,12 +236,12 @@ namespace TradeTracker.Domain.UnitTests.Entities
             var position = new Position(accessKey, symbol);
 
             var initialLongQuantity = (decimal)100;
-            position.Attach(TransactionType.BuyToOpen, initialLongQuantity);
+            position.Attach(TransactionType.Buy, initialLongQuantity);
 
-            var buyToOpenQuantity = (decimal)50;
+            var buyQuantity = (decimal)50;
 
             // Act
-            position.Detach(TransactionType.BuyToOpen, buyToOpenQuantity);
+            position.Detach(TransactionType.Buy, buyQuantity);
 
             // Assert
             using (new AssertionScope())
@@ -250,12 +250,12 @@ namespace TradeTracker.Domain.UnitTests.Entities
                     .Be("Long");
                 
                 position.Quantity.Should()
-                    .Be(initialLongQuantity - buyToOpenQuantity);
+                    .Be(initialLongQuantity - buyQuantity);
             }
         }
 
         [Fact]
-        public void Detach_SellToCloseTransactionFromExistingPosition_IncreasesLongPosition()
+        public void Detach_SellTransactionFromExistingPosition_IncreasesLongPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -264,12 +264,12 @@ namespace TradeTracker.Domain.UnitTests.Entities
             var position = new Position(accessKey, symbol);
 
             var initialLongQuantity = (decimal)100;
-            position.Attach(TransactionType.BuyToOpen, initialLongQuantity);
+            position.Attach(TransactionType.Buy, initialLongQuantity);
 
-            var sellToCloseQuantity = (decimal)50;
+            var sellQuantity = (decimal)50;
 
             // Act
-            position.Detach(TransactionType.SellToClose, sellToCloseQuantity);
+            position.Detach(TransactionType.Sell, sellQuantity);
 
             // Assert
             using (new AssertionScope())
@@ -278,12 +278,12 @@ namespace TradeTracker.Domain.UnitTests.Entities
                     .Be("Long");
                 
                 position.Quantity.Should()
-                    .Be(initialLongQuantity + sellToCloseQuantity);
+                    .Be(initialLongQuantity + sellQuantity);
             }
         }
 
         [Fact]
-        public void Detach_SellToOpenTransactionFromExistingPosition_DecreasesShortPosition()
+        public void Detach_SellTransactionFromExistingPosition_DecreasesShortPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -292,12 +292,12 @@ namespace TradeTracker.Domain.UnitTests.Entities
             var position = new Position(accessKey, symbol);
 
             var initialShortQuantity = (decimal)100;
-            position.Attach(TransactionType.SellToOpen, initialShortQuantity);
+            position.Attach(TransactionType.Sell, initialShortQuantity);
 
-            var sellToOpenQuantity = (decimal)50;
+            var sellQuantity = (decimal)50;
 
             // Act
-            position.Detach(TransactionType.SellToOpen, sellToOpenQuantity);
+            position.Detach(TransactionType.Sell, sellQuantity);
 
             // Assert
             using (new AssertionScope())
@@ -306,12 +306,12 @@ namespace TradeTracker.Domain.UnitTests.Entities
                     .Be("Short");
 
                 position.Quantity.Should()
-                    .Be(initialShortQuantity - sellToOpenQuantity);
+                    .Be(initialShortQuantity - sellQuantity);
             }
         }
 
         [Fact]
-        public void Detach_BuyToCloseTransactionFromExistingPosition_IncreasesShortPosition()
+        public void Detach_BuyTransactionFromExistingPosition_IncreasesShortPosition()
         {
             // Arrange
             Guid accessKey = Guid.NewGuid();
@@ -320,12 +320,12 @@ namespace TradeTracker.Domain.UnitTests.Entities
             var position = new Position(accessKey, symbol);
 
             var initialShortQuantity = (decimal)100;
-            position.Attach(TransactionType.SellToOpen, initialShortQuantity);
+            position.Attach(TransactionType.Sell, initialShortQuantity);
 
-            var buyToCloseQuantity = (decimal)50;
+            var buyQuantity = (decimal)50;
 
             // Act
-            position.Detach(TransactionType.BuyToClose, buyToCloseQuantity);
+            position.Detach(TransactionType.Buy, buyQuantity);
 
             // Assert
             using (new AssertionScope())
@@ -334,7 +334,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                     .Be("Short");
 
                 position.Quantity.Should()
-                    .Be(initialShortQuantity + buyToCloseQuantity);
+                    .Be(initialShortQuantity + buyQuantity);
             }
         }
     }

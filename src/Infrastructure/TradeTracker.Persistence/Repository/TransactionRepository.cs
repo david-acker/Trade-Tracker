@@ -133,10 +133,7 @@ namespace TradeTracker.Persistence.Repositories
                 .Where(t => 
                     t.AccessKey == accessKey &&
                     t.Symbol == symbol && 
-                    (
-                        t.Type == TransactionType.BuyToOpen ||
-                        t.Type == TransactionType.SellToOpen
-                    ))
+                    t.Type == TransactionType.Buy)
                 .OrderByDescending(t => t.DateTime)
                 .ToListAsync();
         }
