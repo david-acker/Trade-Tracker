@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,6 +40,7 @@ namespace TradeTracker.Api.Controllers
             _mediator = mediator;
         }
 
+
         /// <summary>
         /// Create a collection of transactions.
         /// </summary>
@@ -69,23 +69,79 @@ namespace TradeTracker.Api.Controllers
         /// </remarks>
         /// <response code="422">Validation Error</response>
         [HttpPost(Name = "CreateTransactionCollection")]
-        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [Consumes("application/json")]
-        [Produces("application/json",
-            "application/vnd.trade.hateoas+json")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
+        [RequestHeaderMatchesMediaType("Accept", "application/json")]
         public async Task<IActionResult> CreateTransactionCollection(
-            [FromBody] IEnumerable<TransactionForCreationDto> commandDtos,
-            [FromHeader(Name = "Accept")] string mediaType)
+            [FromBody] IEnumerable<TransactionForCreationDto> commandDtos)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(CreateTransactionCollection)} was called.");
 
-            if (!MediaTypeHeaderValue.TryParse(mediaType,
-                out MediaTypeHeaderValue parsedMediaType))
+            var command = new CreateTransactionCollectionCommand()
             {
-                return BadRequest();
+                Transactions = _mapper.Map<IEnumerable<TransactionForCreationCommandBase>>(commandDtos)
+            };
+            
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            foreach (var transaction in command.Transactions)
+            {
+                transaction.AccessKey = accessKey;
             }
+
+            var transactionCollection = await _mediator.Send(command);
+
+            var idsAsString = String.Join(",", transactionCollection.Select(t => t.TransactionId));
+            
+            var transactionCollectionToReturn = transactionCollection.ShapeData(null);
+                
+            return CreatedAtAction(
+                "GetTransactionCollection",
+                new { transactionIds = idsAsString },
+                transactionCollectionToReturn);
+        }
+
+
+        /// <summary>
+        /// Create a collection of transactions.
+        /// </summary>
+        /// <param name="commandDtos">The transactions to be created</param>
+        /// <remarks>
+        /// Example: \
+        /// POST /api/transactioncollections \
+        /// [ \
+        ///     { \
+        ///         "dateTime": "2019-06-01T12:00:00", \
+        ///         "symbol": "XYZ" \
+        ///         "type": "SellToOpen", \
+        ///         "quantity": "1", \
+        ///         "notional": "50", \
+        ///         "tradePrice": "50" \
+        ///     }, \
+        ///     { \
+        ///         "dateTime": "2019-06-15T12:00:00", \
+        ///         "symbol": "XYZ" \
+        ///         "type": "BuyToClose", \
+        ///         "quantity": "1", \
+        ///         "notional": "40", \
+        ///         "tradePrice": "40" \
+        ///     }, \
+        /// ] 
+        /// </remarks>
+        /// <response code="422">Validation Error</response>
+        [HttpPost(Name = "CreateTransactionCollection")]
+        [Consumes("application/json")]
+        [Produces("application/vnd.trade.hateoas+json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
+        [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
+        public async Task<IActionResult> CreateTransactionCollectionWithLinks(
+            [FromBody] IEnumerable<TransactionForCreationDto> commandDtos)
+        {
+            _logger.LogInformation($"TransactionCollectionsController: {nameof(CreateTransactionCollectionWithLinks)} was called.");
 
             var command = new CreateTransactionCollectionCommand()
             {
@@ -104,36 +160,24 @@ namespace TradeTracker.Api.Controllers
             
             var transactionCollectionToReturn = transactionCollection.ShapeData(null);
             
-            var includeLinks = parsedMediaType.SubTypeWithoutSuffix
-                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
-                
-            if (includeLinks)
-            {
-                var linkedTransactionCollection = transactionCollectionToReturn
-                    .Select(transaction =>
-                    {
-                       var transactionAsDictionary = transaction as IDictionary<string, object>;
+            var linkedTransactionCollection = transactionCollectionToReturn
+                .Select(transaction =>
+                {
+                    var transactionAsDictionary = transaction as IDictionary<string, object>;
 
-                       var transactionLinks = CreateLinksForTransaction(
-                           (Guid)transactionAsDictionary["TransactionId"], null);
-                    
-                       transactionAsDictionary.Add("links", transactionLinks);
-                       return transactionAsDictionary;
-                    });;
+                    var transactionLinks = CreateLinksForTransaction(
+                        (Guid)transactionAsDictionary["TransactionId"], null);
                 
-                return CreatedAtAction(
-                    "GetTransactionCollection",
-                    new { transactionIds = idsAsString },
-                    linkedTransactionCollection);
-            }
-            else
-            {
-                return CreatedAtAction(
-                    "GetTransactionCollection",
-                    new { transactionIds = idsAsString },
-                    transactionCollectionToReturn);
-            }
+                    transactionAsDictionary.Add("links", transactionLinks);
+                    return transactionAsDictionary;
+                });;
+            
+            return CreatedAtAction(
+                "GetTransactionCollection",
+                new { transactionIds = idsAsString },
+                linkedTransactionCollection);
         }
+
 
         /// <summary>
         /// Options for /api/transactioncollections URI.
@@ -153,11 +197,11 @@ namespace TradeTracker.Api.Controllers
             return NoContent();
         }
 
+
         /// <summary>
         /// Get a collection of transactions.
         /// </summary>
         /// <param name="transactionIds">The ids for the transactions</param>
-        /// <param name="fields">The fields for the transactions</param>
         /// <remarks>
         /// Example: \
         /// GET /api/transactioncollections/{firstTransactionId},{secondTransactionId} 
@@ -165,22 +209,15 @@ namespace TradeTracker.Api.Controllers
         /// <response code="200">Returns the requested transactions</response>
         [HttpGet("{transactionIds}", Name = "GetTransactionCollection")]
         [Consumes("application/json")]
-        [Produces("application/json",
-            "application/vnd.trade.hateoas+json")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
+        [RequestHeaderMatchesMediaType("Accept", "application/json")]
         public async Task<IActionResult> GetTransactionCollection(
-            [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> transactionIds,
-            string fields,
-            [FromHeader(Name = "Accept")] string mediaType)
+            [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> transactionIds)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(GetTransactionCollection)} was called.");
-
-            if (!MediaTypeHeaderValue.TryParse(mediaType,
-                out MediaTypeHeaderValue parsedMediaType))
-            {
-                return BadRequest();
-            }
 
             var query = new GetTransactionCollectionQuery()
             {
@@ -190,43 +227,69 @@ namespace TradeTracker.Api.Controllers
 
             var returnedTransactions = await _mediator.Send(query);
 
-            var shapedTransactions = returnedTransactions.ShapeData(fields);
+            var shapedTransactions = returnedTransactions.ShapeData(null);
 
-            var includeLinks = parsedMediaType.SubTypeWithoutSuffix
-                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
-
-            if (includeLinks)
-            {
-                var shapedTransactionsWithLinks = shapedTransactions
-                    .Select(transaction =>
-                    {
-                       var transactionAsDictionary = transaction as IDictionary<string, object>;
-
-                       var transactionLinks = CreateLinksForTransaction(
-                           (Guid)transactionAsDictionary["TransactionId"], null);
-                    
-                       transactionAsDictionary.Add("links", transactionLinks);
-                       return transactionAsDictionary;
-                    });
-
-                var metadata = new
-                {
-                    resultsReturnedCount = returnedTransactions.Count()
-                };
-
-                var linkedTransactionsResource = new 
-                {
-                    metadata,
-                    results = shapedTransactionsWithLinks
-                };
-
-                return Ok(linkedTransactionsResource);
-            }
-            else
-            {
-                return Ok(shapedTransactions);
-            }
+            return Ok(shapedTransactions);
         }
+
+
+        /// <summary>
+        /// Get a collection of transactions.
+        /// </summary>
+        /// <param name="transactionIds">The ids for the transactions</param>
+        /// <remarks>
+        /// Example: \
+        /// GET /api/transactioncollections/{firstTransactionId},{secondTransactionId} 
+        /// </remarks>
+        /// <response code="200">Returns the requested transactions</response>
+        [HttpGet("{transactionIds}", Name = "GetTransactionCollection")]
+        [Consumes("application/json")]
+        [Produces("application/vnd.trade.hateoas+json")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
+        [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
+        public async Task<IActionResult> GetTransactionCollectionWithLinks(
+            [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> transactionIds)
+        {
+            _logger.LogInformation($"TransactionCollectionsController: {nameof(GetTransactionCollectionWithLinks)} was called.");
+
+            var query = new GetTransactionCollectionQuery()
+            {
+                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey")),
+                TransactionIds = transactionIds
+            };
+
+            var returnedTransactions = await _mediator.Send(query);
+
+            var shapedTransactions = returnedTransactions.ShapeData(null);
+
+            var shapedTransactionsWithLinks = shapedTransactions
+                .Select(transaction =>
+                {
+                    var transactionAsDictionary = transaction as IDictionary<string, object>;
+
+                    var transactionLinks = CreateLinksForTransaction(
+                        (Guid)transactionAsDictionary["TransactionId"], null);
+                
+                    transactionAsDictionary.Add("links", transactionLinks);
+                    return transactionAsDictionary;
+                });
+
+            var metadata = new
+            {
+                resultsReturnedCount = returnedTransactions.Count()
+            };
+
+            var linkedTransactionsResource = new 
+            {
+                metadata,
+                results = shapedTransactionsWithLinks
+            };
+
+            return Ok(linkedTransactionsResource);
+        }
+
 
         /// <summary>
         /// Options for /api/transactioncollections/{transactionIds} URI.
@@ -245,6 +308,7 @@ namespace TradeTracker.Api.Controllers
             
             return NoContent();
         }
+
 
         private IEnumerable<LinkDto> CreateLinksForTransaction(
             Guid transactionId, 
