@@ -20,43 +20,46 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
 - [x] CRUD Functionality for Transactions
   - [X] By security/ticker
   - [X] Using filters/queries (e.g. time range, include/exclude, etc.) 
-- [X] Position Tracking
-- [ ] Portfolio Tracking
-- [ ] Aggregate Statistics & Summary Data:
-  - [ ] By security/ticker
-  - [ ] Using filters/queries (e.g. time range, include/exclude, etc.) 
-- [ ] API (pragmatically) adherent to [REST Architectural Constraints](https://restfulapi.net/rest-architectural-constraints/)
+- [X] Position Tracking By Instrument
+  - [x] Average Cost Basis
+  - [ ] Profit/Loss (using FIFO)
+  - [ ] Aggregate/summary statistics
+- [x] API adherent to [REST Architectural Constraints](https://restfulapi.net/rest-architectural-constraints/) *(pragmatically)*
 - [ ] Basic UI with Angular + TypeScript
+  - [ ] Accounts
+  - [ ] Transactions 
+  - [ ] Positions
 
 ## Architecture
 
 ### Api
-* Contains the ASP.NET Core project for interacting with the application through HTTP requests. 
+* Contains the ASP.NET Core project for interacting with the application through HTTP requests.
+* Implement vendor-specific media types for optional HATEOAS support.
 
 ### Application
-* Contains custom exceptions, interfaces, models, DTOs, and mapping profiles for the application.
+* Contains custom exceptions, event handlers, interfaces, models, DTOs, validation logic, and mapping profiles for the application.
 * Includes features using with the [Command and Query Responsibility Segregation (CQRS)](https://docs.microsoft.com/en-us/azure/architecture/patterns/cqrs) pattern.
 * Provides an extension method for registering application services with the ASP.NET Core Dependency Injection container.
 
 ### Domain
-* Contains all domain entities and enums for the application&mdash;created as [plain old CLR objects (POCO)](https://en.wikipedia.org/wiki/Plain_old_CLR_object) with no dependencies on other application layers or external packages.
+* Contains all domain entities, enums, and events for the application&mdash;created as [plain old CLR objects (POCO)](https://en.wikipedia.org/wiki/Plain_old_CLR_object) with no dependencies on other application layers or external packages.
 
 ### Identity
-* Contains models, services, and EF Core types for authentication and authorization with ASP.NET Core Identity.
-* Provides an extension method to register services with the ASP.NET Core Dependency Injection container.
+* Contains models, services, and EF Core types for JWT Token authentication and authorization with ASP.NET Core Identity.
+* Provides an extension method for registering services with the ASP.NET Core Dependency Injection container.
 
 ### Infrastructure
 * Contains classes for infrastructure-specific services in the application, such as exporting data as a CSV file.
 * Includes services for managing the recalculation of trade positions based on transaction-related CRUD activity.
-* Provides an extension method to register services with the ASP.NET Core Dependency Injection container.
+* Provides an extension method for registering services with the ASP.NET Core Dependency Injection container.
 
 ### Persistence
 * Contains repositories, services, and EF Core types for the data access implementation&mdash;currently using SQLite.
-* Provides an extension method to register services with the ASP.NET Core Dependency Injection container.
+* Provides an extension method for registering services with the ASP.NET Core Dependency Injection container.
 
-## Motivation
+## Motivations
 * Learn Clean Architecture application development.
-* Gain experience with ASP.NET Core.
+* Gain experience using ASP.NET Core to create APIs.
 
 ## License
 TradeTracker is licensed under the [MIT license](LICENSE).
