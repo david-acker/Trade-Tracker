@@ -23,6 +23,7 @@ namespace TradeTracker.Api.Controllers
             _logger = logger;
         }
 
+
         /// <summary>
         /// Authenticate an existing account.
         /// </summary>
@@ -49,6 +50,7 @@ namespace TradeTracker.Api.Controllers
             return Ok(await _authenticationService.AuthenticateAsync(authenticationRequest));
         }
 
+
         /// <summary>
         /// Options for /api/account/authenticate URI.
         /// </summary>
@@ -66,6 +68,7 @@ namespace TradeTracker.Api.Controllers
 
             return NoContent();
         }
+
 
         /// <summary>
         /// Register a new account.
@@ -95,6 +98,7 @@ namespace TradeTracker.Api.Controllers
 
             return Ok(await _authenticationService.RegisterAsync(registrationRequest));
         }
+
 
         /// <summary>
         /// Options for /api/account/register URI.
