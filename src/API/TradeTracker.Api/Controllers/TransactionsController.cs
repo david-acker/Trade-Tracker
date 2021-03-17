@@ -148,7 +148,7 @@ namespace TradeTracker.Api.Controllers
                 .Select(transaction =>
                 {
                     transaction.Links = CreateLinksForTransaction(
-                        transaction.TransactionId, null);
+                        transaction.TransactionId);
 
                     return transaction;
                 });
@@ -210,7 +210,7 @@ namespace TradeTracker.Api.Controllers
                 .ShapeData(null) as IDictionary<string, object>;
                 
             var links = CreateLinksForTransaction(
-                (Guid)linkedTransaction["TransactionId"], null);
+                (Guid)linkedTransaction["TransactionId"]);
             
             linkedTransaction.Add("links", links);
 
@@ -303,7 +303,7 @@ namespace TradeTracker.Api.Controllers
 
             var transactionWithLinks = _mapper.Map<TransactionWithLinksForReturnDto>(transaction);
 
-            transactionWithLinks.Links = CreateLinksForTransaction(transactionId, null);
+            transactionWithLinks.Links = CreateLinksForTransaction(transactionId);
 
             return Ok(transactionWithLinks);
         }
@@ -484,31 +484,17 @@ namespace TradeTracker.Api.Controllers
 
 
         private IEnumerable<LinkDto> CreateLinksForTransaction(
-            Guid transactionId, 
-            string fields)
+            Guid transactionId)
         {
             var links = new List<LinkDto>();
 
-            if (String.IsNullOrWhiteSpace(fields))
-            {
-                links.Add(
-                    new LinkDto(
-                        Url.Link(
-                            "GetTransaction", 
-                            new { transactionId }),
-                    "self",
-                    "GET"));
-            }
-            else
-            {
-                links.Add(
-                    new LinkDto(
-                        Url.Link(
-                            "GetTransaction", 
-                            new { transactionId, fields }),
-                    "self",
-                    "GET"));
-            }
+            links.Add(
+                new LinkDto(
+                    Url.Link(
+                        "GetTransaction", 
+                        new { transactionId }),
+                "self",
+                "GET"));
 
             links.Add(
                 new LinkDto(
