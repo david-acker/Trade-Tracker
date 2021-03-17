@@ -135,7 +135,7 @@ namespace TradeTracker.Api.Controllers
         /// ] 
         /// </remarks>
         /// <response code="422">Validation Error</response>
-        [HttpPost(Name = "CreateTransactionCollection")]
+        [HttpPost(Name = "CreateTransactionCollectionWithLinks")]
         [Consumes("application/json")]
         [Produces("application/vnd.trade.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -257,7 +257,7 @@ namespace TradeTracker.Api.Controllers
         /// GET /api/transactioncollections/{firstTransactionId},{secondTransactionId} 
         /// </remarks>
         /// <response code="200">Returns the requested transactions</response>
-        [HttpGet("{transactionIds}", Name = "GetTransactionCollection")]
+        [HttpGet("{transactionIds}", Name = "GetTransactionCollectionWithLinks")]
         [Consumes("application/json")]
         [Produces("application/vnd.trade.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
