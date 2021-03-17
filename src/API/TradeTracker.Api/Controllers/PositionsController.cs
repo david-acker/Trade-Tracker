@@ -198,7 +198,7 @@ namespace TradeTracker.Api.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/json")]
-        public async Task<IActionResult> GetPosition(
+        public async Task<ActionResult<PositionForReturnDto>> GetPosition(
             [FromRoute] string symbol)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPosition)} was called.");
@@ -211,9 +211,7 @@ namespace TradeTracker.Api.Controllers
 
             var position = await _mediator.Send(query);
 
-            var positionToReturn = position.ShapeData(null) as IDictionary<string, object>;
-
-            return Ok(positionToReturn);
+            return Ok(position);
         }
 
 
@@ -235,10 +233,10 @@ namespace TradeTracker.Api.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
-        public async Task<IActionResult> GetPositionWithLinks(
+        public async Task<ActionResult<PositionForReturnWithLinksDto>> GetPositionWithLinks(
             [FromRoute] string symbol)
         {
-            _logger.LogInformation($"PositionsController: {nameof(GetPosition)} was called.");
+            _logger.LogInformation($"PositionsController: {nameof(GetPositionWithLinks)} was called.");
 
             var query = new GetPositionQuery()
             {
@@ -248,13 +246,11 @@ namespace TradeTracker.Api.Controllers
 
             var position = await _mediator.Send(query);
 
-            var positionToReturn = position.ShapeData(null) as IDictionary<string, object>;
+            var positionWithLinks = _mapper.Map<PositionForReturnWithLinksDto>(position);
 
-            var links = CreateLinksForPosition(symbol);
+            positionWithLinks.Links = CreateLinksForPosition(symbol);
 
-            positionToReturn.Add("links", links);
-
-            return Ok(positionToReturn);
+            return Ok(positionWithLinks);
         }
 
 
