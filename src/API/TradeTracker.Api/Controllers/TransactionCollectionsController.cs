@@ -11,9 +11,11 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
 using TradeTracker.Api.Helpers;
+using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection;
+using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
 using TradeTracker.Application.Models.Navigation;
 
 namespace TradeTracker.Api.Controllers
@@ -214,7 +216,7 @@ namespace TradeTracker.Api.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/json")]
-        public async Task<IActionResult> GetTransactionCollection(
+        public async Task<ActionResult<IEnumerable<TransactionForReturnDto>>> GetTransactionCollection(
             [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> transactionIds)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(GetTransactionCollection)} was called.");
@@ -225,11 +227,9 @@ namespace TradeTracker.Api.Controllers
                 TransactionIds = transactionIds
             };
 
-            var returnedTransactions = await _mediator.Send(query);
+            var transactionCollection = await _mediator.Send(query);
 
-            var shapedTransactions = returnedTransactions.ShapeData(null);
-
-            return Ok(shapedTransactions);
+            return Ok(transactionCollection);
         }
 
 
@@ -249,7 +249,7 @@ namespace TradeTracker.Api.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
-        public async Task<IActionResult> GetTransactionCollectionWithLinks(
+        public async Task<ActionResult<TransactionCollectionWithLinksDto>> GetTransactionCollectionWithLinks(
             [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> transactionIds)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(GetTransactionCollectionWithLinks)} was called.");
@@ -260,34 +260,26 @@ namespace TradeTracker.Api.Controllers
                 TransactionIds = transactionIds
             };
 
-            var returnedTransactions = await _mediator.Send(query);
+            var transactionCollection = await _mediator.Send(query);
 
-            var shapedTransactions = returnedTransactions.ShapeData(null);
+            var transactionCollectionWithLinks = new TransactionCollectionWithLinksDto();
 
-            var shapedTransactionsWithLinks = shapedTransactions
-                .Select(transaction =>
+            transactionCollectionWithLinks.Items = _mapper
+                .Map<IEnumerable<TransactionWithLinksForReturnDto>>(transactionCollection);
+
+            transactionCollectionWithLinks.Items = transactionCollectionWithLinks.Items
+                .Select(transaction => 
                 {
-                    var transactionAsDictionary = transaction as IDictionary<string, object>;
-
-                    var transactionLinks = CreateLinksForTransaction(
-                        (Guid)transactionAsDictionary["TransactionId"], null);
-                
-                    transactionAsDictionary.Add("links", transactionLinks);
-                    return transactionAsDictionary;
+                    transaction.Links = CreateLinksForTransaction(
+                        transaction.TransactionId, null);
+                    
+                    return transaction;
                 });
+            
+            transactionCollectionWithLinks.Links =
+                CreateLinksForTransactionCollection(transactionIds);
 
-            var metadata = new
-            {
-                resultsReturnedCount = returnedTransactions.Count()
-            };
-
-            var linkedTransactionsResource = new 
-            {
-                metadata,
-                results = shapedTransactionsWithLinks
-            };
-
-            return Ok(linkedTransactionsResource);
+            return Ok(transactionCollectionWithLinks);
         }
 
 
@@ -361,6 +353,22 @@ namespace TradeTracker.Api.Controllers
                     "delete transaction",
                     "DELETE"));
 
+            return links;
+        }
+
+        private IEnumerable<LinkDto> CreateLinksForTransactionCollection(
+            IEnumerable<Guid> transactionIds)
+        {
+            var links = new List<LinkDto>();
+
+            links.Add(
+                new LinkDto(
+                    Url.Link(
+                        "GetTransactionCollection",
+                        new { transactionIds }),
+                    "self",
+                    "GET"));
+            
             return links;
         }
     }
