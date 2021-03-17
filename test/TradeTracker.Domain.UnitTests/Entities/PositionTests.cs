@@ -12,329 +12,174 @@ namespace TradeTracker.Domain.UnitTests.Entities
     public class PositionTests
     {
         [Fact]
-        public void Create_NewPosition_QuantityStartsAtZero()
+        public void Create_NewPosition_StartsEmpty()
         {
-            // Arrange
-            Guid accessKey = Guid.NewGuid();
-            string symbol = "ABC";
-
             // Act
-            var position = new Position(accessKey, symbol);
+            var position = new Position(Guid.Empty, "");
 
             // Assert
-            position.Quantity.Should()
-                .Be(Decimal.Zero);
+            using (new AssertionScope())
+            {
+                position.Quantity.Should()
+                    .Be(Decimal.Zero);
+
+                position.Exposure.Should()
+                    .Be("None");
+
+                position.IsClosed.Should()
+                    .BeTrue();
+            }
         }
 
-        [Fact]
-        public void Create_NewPosition_ExposureTypeStartsAtNone()
+        [Theory]
+        [InlineData(TransactionType.Buy, 0)]
+        [InlineData(TransactionType.Sell, 0)]
+        public void Attach_TransactionOfZeroToEmptyPosition_CausesNoChanges(
+            TransactionType transactionType,
+            int transactionQuantity)
         {
             // Arrange
-            Guid accessKey = Guid.NewGuid();
-            string symbol = "ABC";
-
-            var position = new Position(accessKey, symbol);
+            var position = new Position(Guid.Empty, "");
 
             // Act
-            var exposureType = position.Exposure;
+            position.Attach(transactionType, (decimal)transactionQuantity);
 
             // Assert
-            exposureType.Should()
-                .Be("None");
+            using (new AssertionScope())
+            {
+                position.Quantity.Should()
+                    .Be(Decimal.Zero);
+                
+                position.Exposure.Should()
+                    .Be("None");
+                
+                position.IsClosed.Should()
+                    .BeTrue();
+            }
         }
 
-        [Fact]
-        public void Create_NewPosition_IsClosedStartsAsTrue()
+        [Theory]
+        [MemberData(nameof(PositionTestData.AttachTransactionOfZeroToPositionTestData),
+            MemberType = typeof(PositionTestData))]
+        public void Attach_TransactionOfZeroToExistingPosition_CausesNoChanges(
+            TransactionType attachedTransactionType,
+            Position position)
         {
             // Arrange
-            Guid accessKey = Guid.NewGuid();
-            string symbol = "ABC";
+            decimal originalPositionQuantity = position.Quantity;
+            string originalPositionExposure = position.Exposure;
+            bool originalPositionIsClosed = position.IsClosed;
 
             // Act
-            var position = new Position(accessKey, symbol);
+            position.Attach(attachedTransactionType, Decimal.Zero);
 
             // Assert
-            position.IsClosed.Should()
-                .BeTrue();
+            using (new AssertionScope())
+            {
+                position.Quantity.Should()
+                    .Be(originalPositionQuantity);
+                
+                position.Exposure.Should()
+                    .Be(originalPositionExposure);
+                
+                position.IsClosed.Should()
+                    .Be(originalPositionIsClosed);
+            }
         }
 
-        [Fact]
-        public void Attach_TransactionToExistingPosition_QuantityShiftsByAmountAttached()
+        [Theory]
+        [InlineData(TransactionType.Buy, 100)]
+        [InlineData(TransactionType.Sell, 100)]
+        public void Check_ExistingPositionWithNonZeroQuantity_IsClosedIsFalse(
+            TransactionType transactionType,
+            int transactionQuantity)
         {
             // Arrange
-            Guid accessKey = Guid.NewGuid();
-            string symbol = "ABC";
-
-            var position = new Position(accessKey, symbol);
-
-            var type = TransactionType.Buy;
-            var quantity = (decimal)100;
+            var position = new Position(Guid.Empty, "");
 
             // Act
-            position.Attach(type, quantity);
-
-            // Assert
-            position.Quantity.Should()
-                .Be(quantity);
-        }
-
-        [Fact]
-        public void Attach_TransactionToExistingPosition_SignOfQuantityIsIgnored()
-        {
-            // Arrange
-            Guid accessKey = Guid.NewGuid();
-            string symbol = "ABC";
-
-            var position = new Position(accessKey, symbol);
-
-            var type = TransactionType.Buy;
-            var quantity = (decimal)-100;
-
-            // Act
-            position.Attach(type, quantity);
-
-            // Assert
-            position.Quantity.Should()
-                .Be(Math.Abs(quantity));
-        }
-
-        [Fact]
-        public void Check_ExistingPositionWithNonZeroQuantity_IsClosedIsFalse()
-        {
-            // Arrange
-            Guid accessKey = Guid.NewGuid();
-            string symbol = "ABC";
-
-            var position = new Position(accessKey, symbol);
-
-            var type = TransactionType.Buy;
-            var quantity = (decimal)100;
-
-            // Act
-            position.Attach(type, quantity);
+            position.Attach(transactionType, (decimal)transactionQuantity);
 
             // Assert
             position.IsClosed.Should()
                 .BeFalse();
         }
 
-        [Fact]
-        public void Attach_BuyTransactionToExistingPosition_IncreasesLongPosition()
+        [Theory]
+        [MemberData(nameof(PositionTestData.AttachToNewPositionTestData),
+            MemberType = typeof(PositionTestData))]
+        public void Attach_TransactionToEmptyPosition_MatchesTransaction(
+            TransactionType attachedTransactionType,
+            decimal attachedTransactionQuantity,
+            Position position,
+            decimal expectedPositionQuantity,
+            string expectedPositionExposure)
         {
-            // Arrange
-            Guid accessKey = Guid.NewGuid();
-            string symbol = "ABC";
-
-            var position = new Position(accessKey, symbol);
-
-            var type = TransactionType.Buy;
-            var quantity = (decimal)100;
-
             // Act
-            position.Attach(type, quantity);
+            position.Attach(
+                attachedTransactionType, 
+                attachedTransactionQuantity);
 
             // Assert
             using (new AssertionScope())
             {
                 position.Exposure.Should()
-                    .Be("Long");
+                    .Be(expectedPositionExposure);
                 
                 position.Quantity.Should()
-                    .Be(quantity);
+                    .Be(expectedPositionQuantity);
             }
         }
 
-        [Fact]
-        public void Attach_SellTransactionToExistingPosition_DecreasesLongPosition()
+        [Theory]
+        [MemberData(nameof(PositionTestData.AttachToExistingPositionTestData),
+            MemberType = typeof(PositionTestData))]
+        public void Attach_TransactionToExistingPosition_ShiftsByTransaction(
+            TransactionType attachedTransactionType,
+            decimal attachedTransactionQuantity,
+            Position position,
+            decimal expectedPositionQuantity,
+            string expectedPositionExposure)
         {
-            // Arrange
-            Guid accessKey = Guid.NewGuid();
-            string symbol = "ABC";
-
-            var position = new Position(accessKey, symbol);
-
-            var initialLongQuantity = (decimal)100;
-            position.Attach(TransactionType.Buy, initialLongQuantity);
-
-            var sellQuantity = (decimal)50;
-
             // Act
-            position.Attach(TransactionType.Sell, sellQuantity);
+            position.Attach(
+                attachedTransactionType, 
+                attachedTransactionQuantity);
 
             // Assert
             using (new AssertionScope())
             {
                 position.Exposure.Should()
-                    .Be("Long");
+                    .Be(expectedPositionExposure);
 
                 position.Quantity.Should()
-                    .Be(initialLongQuantity - sellQuantity);
+                    .Be(expectedPositionQuantity);
             }
         }
 
-        [Fact]
-        public void Attach_SellTransactionToExistingPosition_IncreasesShortPosition()
+        [Theory]
+        [MemberData(nameof(PositionTestData.DetachFromExistingPositionTestData),
+            MemberType = typeof(PositionTestData))]
+        public void Detach_TransactionToExistingPosition_ShiftsByTransaction(
+            TransactionType attachedTransactionType,
+            decimal attachedTransactionQuantity,
+            Position position,
+            decimal expectedPositionQuantity,
+            string expectedPositionExposure)
         {
-            // Arrange
-            Guid accessKey = Guid.NewGuid();
-            string symbol = "ABC";
-
-            var position = new Position(accessKey, symbol);
-
-            var type = TransactionType.Sell;
-            var quantity = (decimal)100;
-
             // Act
-            position.Attach(type, quantity);
+            position.Detach(
+                attachedTransactionType, 
+                attachedTransactionQuantity);
 
             // Assert
             using (new AssertionScope())
             {
                 position.Exposure.Should()
-                    .Be("Short");
+                    .Be(expectedPositionExposure);
 
                 position.Quantity.Should()
-                    .Be(quantity);
-            }
-        }
-
-        [Fact]
-        public void Attach_BuyTransactionToExistingPosition_DecreasesShortPosition()
-        {
-            // Arrange
-            Guid accessKey = Guid.NewGuid();
-            string symbol = "ABC";
-
-            var position = new Position(accessKey, symbol);
-
-            var initialShortQuantity = (decimal)100;
-            position.Attach(TransactionType.Sell, initialShortQuantity);
-
-            var buyQuantity = (decimal)50;
-
-            // Act
-            position.Attach(TransactionType.Buy, buyQuantity);
-
-            // Assert
-            using (new AssertionScope())
-            {
-                position.Exposure.Should()
-                    .Be("Short");
-
-                position.Quantity.Should()
-                    .Be(initialShortQuantity - buyQuantity);
-            }
-        }
-
-        [Fact]
-        public void Detach_BuyTransactionFromExistingPosition_DecreasesLongPosition()
-        {
-            // Arrange
-            Guid accessKey = Guid.NewGuid();
-            string symbol = "ABC";
-
-            var position = new Position(accessKey, symbol);
-
-            var initialLongQuantity = (decimal)100;
-            position.Attach(TransactionType.Buy, initialLongQuantity);
-
-            var buyQuantity = (decimal)50;
-
-            // Act
-            position.Detach(TransactionType.Buy, buyQuantity);
-
-            // Assert
-            using (new AssertionScope())
-            {
-                position.Exposure.Should()
-                    .Be("Long");
-                
-                position.Quantity.Should()
-                    .Be(initialLongQuantity - buyQuantity);
-            }
-        }
-
-        [Fact]
-        public void Detach_SellTransactionFromExistingPosition_IncreasesLongPosition()
-        {
-            // Arrange
-            Guid accessKey = Guid.NewGuid();
-            string symbol = "ABC";
-
-            var position = new Position(accessKey, symbol);
-
-            var initialLongQuantity = (decimal)100;
-            position.Attach(TransactionType.Buy, initialLongQuantity);
-
-            var sellQuantity = (decimal)50;
-
-            // Act
-            position.Detach(TransactionType.Sell, sellQuantity);
-
-            // Assert
-            using (new AssertionScope())
-            {
-                position.Exposure.Should()
-                    .Be("Long");
-                
-                position.Quantity.Should()
-                    .Be(initialLongQuantity + sellQuantity);
-            }
-        }
-
-        [Fact]
-        public void Detach_SellTransactionFromExistingPosition_DecreasesShortPosition()
-        {
-            // Arrange
-            Guid accessKey = Guid.NewGuid();
-            string symbol = "ABC";
-
-            var position = new Position(accessKey, symbol);
-
-            var initialShortQuantity = (decimal)100;
-            position.Attach(TransactionType.Sell, initialShortQuantity);
-
-            var sellQuantity = (decimal)50;
-
-            // Act
-            position.Detach(TransactionType.Sell, sellQuantity);
-
-            // Assert
-            using (new AssertionScope())
-            {
-                position.Exposure.Should()
-                    .Be("Short");
-
-                position.Quantity.Should()
-                    .Be(initialShortQuantity - sellQuantity);
-            }
-        }
-
-        [Fact]
-        public void Detach_BuyTransactionFromExistingPosition_IncreasesShortPosition()
-        {
-            // Arrange
-            Guid accessKey = Guid.NewGuid();
-            string symbol = "ABC";
-
-            var position = new Position(accessKey, symbol);
-
-            var initialShortQuantity = (decimal)100;
-            position.Attach(TransactionType.Sell, initialShortQuantity);
-
-            var buyQuantity = (decimal)50;
-
-            // Act
-            position.Detach(TransactionType.Buy, buyQuantity);
-
-            // Assert
-            using (new AssertionScope())
-            {
-                position.Exposure.Should()
-                    .Be("Short");
-
-                position.Quantity.Should()
-                    .Be(initialShortQuantity + buyQuantity);
+                    .Be(expectedPositionQuantity);
             }
         }
     }
