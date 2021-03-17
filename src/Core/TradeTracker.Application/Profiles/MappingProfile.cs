@@ -69,7 +69,7 @@ namespace TradeTracker.Application.Profiles
 
             CreateMap<GetTransactionsQuery, PagedTransactionsResourceParameters>();
 
-            CreateMap<TransactionForReturnDto, TransactionWithLinksForReturnDto>();
+            CreateMap<TransactionForReturnDto, TransactionForReturnWithLinksDto>();
 
             CreateMap<GetPositionsResourceParameters, GetPositionsQuery>()
                 .ForMember(

@@ -6,7 +6,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
 {
     public class TransactionCollectionCreatedWithLinksDto
     {
-        public IEnumerable<TransactionWithLinksForReturnDto> Items { get; set; }
+        public IEnumerable<TransactionForReturnWithLinksDto> Items { get; set; }
 
         public IEnumerable<LinkDto> Links { get; set; }
     }

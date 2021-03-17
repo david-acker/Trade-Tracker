@@ -8,7 +8,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
     {
         public PaginationMetadata Metadata { get; set; }
 
-        public IEnumerable<TransactionWithLinksForReturnDto> Items { get; set; }
+        public IEnumerable<TransactionForReturnWithLinksDto> Items { get; set; }
 
         public IEnumerable<LinkDto> Links { get; set; }
     }

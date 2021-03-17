@@ -142,7 +142,7 @@ namespace TradeTracker.Api.Controllers
             var pagedTransactionsWithLinks = new PagedTransactionsWithLinksDto();
 
             pagedTransactionsWithLinks.Items = _mapper
-            .Map<IEnumerable<TransactionWithLinksForReturnDto>>(pagedTransactionsBase.Items);
+            .Map<IEnumerable<TransactionForReturnWithLinksDto>>(pagedTransactionsBase.Items);
 
             pagedTransactionsWithLinks.Items = pagedTransactionsWithLinks.Items
                 .Select(transaction =>
@@ -191,11 +191,11 @@ namespace TradeTracker.Api.Controllers
         /// <response code="422">Validation Error</response>
         [HttpPost(Name = "CreateTransaction")]
         [Consumes("application/json")]
-        [Produces("application/vnd.trade.hateoas+json")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
-        [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
+        [RequestHeaderMatchesMediaType("Accept", "application/json")]
         public async Task<IActionResult> CreateTransaction(
             [FromBody] CreateTransactionCommandDto commandDto)
         {
@@ -204,20 +204,59 @@ namespace TradeTracker.Api.Controllers
             var command = _mapper.Map<CreateTransactionCommand>(commandDto);
             command.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
 
-            var createdTransaction = await _mediator.Send(command);
-
-            var linkedTransaction = createdTransaction
-                .ShapeData(null) as IDictionary<string, object>;
-                
-            var links = CreateLinksForTransaction(
-                (Guid)linkedTransaction["TransactionId"]);
-            
-            linkedTransaction.Add("links", links);
+            var transactionCreated = await _mediator.Send(command);
 
             return CreatedAtAction(
                 "GetTransaction",
-                new { transactionId = linkedTransaction["TransactionId"] },
-                linkedTransaction);
+                new { transactionId = transactionCreated.TransactionId },
+                transactionCreated);
+        }
+
+
+        /// <summary>
+        /// Create a transaction.
+        /// </summary>
+        /// <param name="commandDto">The transaction to be created</param>
+        /// <remarks>
+        /// Example: \
+        /// POST /api/transactions \
+        /// { \
+        ///     "dateTime": "2020-01-01T12:30:15", \
+        ///     "symbol": "ABC" \
+        ///     "type": "BuyToOpen", \
+        ///     "quantity": "2.5", \
+        ///     "notional": "13.75", \
+        ///     "tradePrice": "5.50" \
+        /// } 
+        /// </remarks>
+        /// <response code="422">Validation Error</response>
+        [HttpPost(Name = "CreateTransaction")]
+        [Consumes("application/json")]
+        [Produces("application/vnd.trade.hateoas+json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
+        [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
+        public async Task<ActionResult<TransactionForReturnWithLinksDto>> CreateTransactionWithLinks(
+            [FromBody] CreateTransactionCommandDto commandDto)
+        {
+            _logger.LogInformation($"TransactionsController: {nameof(CreateTransaction)} was called.");
+
+            var command = _mapper.Map<CreateTransactionCommand>(commandDto);
+            command.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+
+            var transactionCreated = await _mediator.Send(command);
+
+            var transactionCreatedWithLinks =
+                new TransactionForReturnWithLinksDto();
+
+            transactionCreatedWithLinks.Links = CreateLinksForTransaction(
+                transactionCreatedWithLinks.TransactionId);
+
+            return CreatedAtAction(
+                "GetTransaction",
+                new { transactionId = transactionCreatedWithLinks.TransactionId },
+                transactionCreatedWithLinks);
         }
 
 
@@ -288,7 +327,7 @@ namespace TradeTracker.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
-        public async Task<ActionResult<TransactionWithLinksForReturnDto>> GetTransactionWithLinks(
+        public async Task<ActionResult<TransactionForReturnWithLinksDto>> GetTransactionWithLinks(
             [FromRoute] Guid transactionId)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetTransactionWithLinks)} was called.");
@@ -301,7 +340,7 @@ namespace TradeTracker.Api.Controllers
             
             var transaction = await _mediator.Send(query);
 
-            var transactionWithLinks = _mapper.Map<TransactionWithLinksForReturnDto>(transaction);
+            var transactionWithLinks = _mapper.Map<TransactionForReturnWithLinksDto>(transaction);
 
             transactionWithLinks.Links = CreateLinksForTransaction(transactionId);
 

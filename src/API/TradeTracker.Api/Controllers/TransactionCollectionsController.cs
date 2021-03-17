@@ -167,7 +167,7 @@ namespace TradeTracker.Api.Controllers
                 new TransactionCollectionCreatedWithLinksDto();
 
             transactionCollectionCreatedWithLinks.Items = _mapper
-                .Map<IEnumerable<TransactionWithLinksForReturnDto>>(
+                .Map<IEnumerable<TransactionForReturnWithLinksDto>>(
                     transactionCollectionCreated);
 
             transactionCollectionCreatedWithLinks.Items = 
@@ -280,7 +280,7 @@ namespace TradeTracker.Api.Controllers
             var transactionCollectionWithLinks = new TransactionCollectionWithLinksDto();
 
             transactionCollectionWithLinks.Items = _mapper
-                .Map<IEnumerable<TransactionWithLinksForReturnDto>>(transactionCollection);
+                .Map<IEnumerable<TransactionForReturnWithLinksDto>>(transactionCollection);
 
             transactionCollectionWithLinks.Items = transactionCollectionWithLinks.Items
                 .Select(transaction => 
