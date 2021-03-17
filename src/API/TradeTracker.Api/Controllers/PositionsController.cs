@@ -12,6 +12,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
 using TradeTracker.Api.Helpers;
+using TradeTracker.Api.Models.Pagination;
+using TradeTracker.Application.Features.Positions;
 using TradeTracker.Application.Features.Positions.Queries.GetPosition;
 using TradeTracker.Application.Features.Positions.Queries.GetPositions;
 using TradeTracker.Application.Models.Navigation;
@@ -70,7 +72,7 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/json")]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<IActionResult> GetPositions(
+        public async Task<ActionResult<IEnumerable<PositionForReturnDto>>> GetPositions(
             [FromQuery] GetPositionsResourceParameters parameters)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositions)} was called.");
@@ -78,16 +80,14 @@ namespace TradeTracker.Api.Controllers
             var query = _mapper.Map<GetPositionsQuery>(parameters);
             query.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
 
-            var pagedPositions = await _mediator.Send(query);
+            var pagedPositionsBase = await _mediator.Send(query);
 
-            var positionsToReturn = pagedPositions.Items.ShapeData(null);
+            Response.Headers.Add("X-Paging-PageNumber", pagedPositionsBase.CurrentPage.ToString());
+            Response.Headers.Add("X-Paging-PageSize", pagedPositionsBase.PageSize.ToString());
+            Response.Headers.Add("X-Paging-PageCount", pagedPositionsBase.TotalPages.ToString());
+            Response.Headers.Add("X-Paging-TotalRecordCount", pagedPositionsBase.TotalCount.ToString());
 
-            Response.Headers.Add("X-Paging-PageNumber", pagedPositions.CurrentPage.ToString());
-            Response.Headers.Add("X-Paging-PageSize", pagedPositions.PageSize.ToString());
-            Response.Headers.Add("X-Paging-PageCount", pagedPositions.TotalPages.ToString());
-            Response.Headers.Add("X-Paging-TotalRecordCount", pagedPositions.TotalCount.ToString());
-
-            return Ok(positionsToReturn);
+            return Ok(pagedPositionsBase.Items);
         }
         
 
@@ -119,7 +119,7 @@ namespace TradeTracker.Api.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
-        public async Task<IActionResult> GetPositionsWithLinks(
+        public async Task<ActionResult<PagedPositionsWithLinksDto>> GetPositionsWithLinks(
             [FromQuery] GetPositionsResourceParameters parameters)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositionsWithLinks)} was called.");
@@ -127,43 +127,37 @@ namespace TradeTracker.Api.Controllers
             var query = _mapper.Map<GetPositionsQuery>(parameters);
             query.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
 
-            var pagedPositions = await _mediator.Send(query);
+            var pagedPositionsBase = await _mediator.Send(query);
 
-            var positionsToReturn = pagedPositions.Items.ShapeData(null);
+            var pagedPositionsWithLinks = new PagedPositionsWithLinksDto();
 
-            var links = CreateLinksForPositions(
-                parameters,
-                pagedPositions.HasNext,
-                pagedPositions.HasPrevious);
+            pagedPositionsWithLinks.Items = _mapper
+                .Map<IEnumerable<PositionForReturnWithLinksDto>>(pagedPositionsBase.Items);
 
-            var linkedPositionsToReturn = positionsToReturn
-                .Select(position =>
+            pagedPositionsWithLinks.Items = pagedPositionsWithLinks.Items
+                .Select(position => 
                 {
-                    var positionAsDictionary = position as IDictionary<string, object>;
-
-                    var positionLinks = CreateLinksForPosition(
-                        (string)positionAsDictionary["Symbol"]);
+                    position.Links = CreateLinksForPosition(position.Symbol);
                 
-                    positionAsDictionary.Add("links", positionLinks);
-                    return positionAsDictionary;
-                });;
+                    return position;
+                });
+            
+            pagedPositionsWithLinks.Links = 
+                CreateLinksForPositions(
+                    parameters,
+                    pagedPositionsBase.HasNext,
+                    pagedPositionsBase.HasPrevious);
 
-            var paginationMetadata = new
-            {
-                pageNumber = pagedPositions.CurrentPage,
-                pageSize = pagedPositions.PageSize,
-                pageCount = pagedPositions.TotalPages,
-                totalRecordCount = pagedPositions.TotalCount,
-            };
+            pagedPositionsWithLinks.Metadata = 
+                new PaginationMetadata()
+                {
+                    PageNumber = pagedPositionsBase.CurrentPage,
+                    PageSize = pagedPositionsBase.PageSize,
+                    PageCount = pagedPositionsBase.TotalPages,
+                    TotalRecordCount = pagedPositionsBase.TotalCount
+                };
 
-            var linkedPositionsResource = new
-            {
-                paginationMetadata = paginationMetadata,
-                results = linkedPositionsToReturn,
-                links
-            };
-
-            return Ok(linkedPositionsResource);
+            return Ok(pagedPositionsWithLinks);
         }
 
 

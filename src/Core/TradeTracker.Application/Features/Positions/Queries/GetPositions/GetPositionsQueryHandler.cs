@@ -13,7 +13,7 @@ using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
-    public class GetPositionsQueryHandler : IRequestHandler<GetPositionsQuery, PagedPositionsDto>
+    public class GetPositionsQueryHandler : IRequestHandler<GetPositionsQuery, PagedPositionsBaseDto>
     {
         private readonly IMapper _mapper;
         private readonly IPositionRepository _positionRepository;
@@ -29,7 +29,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
             _positionService = positionService;
         }
 
-        public async Task<PagedPositionsDto> Handle(GetPositionsQuery request, CancellationToken cancellationToken)
+        public async Task<PagedPositionsBaseDto> Handle(GetPositionsQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
@@ -42,7 +42,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
             var positionsForReturnWithAverageCostBasis = 
                 await AddAverageCostBasis(positionsForReturn, request.AccessKey);
 
-            return new PagedPositionsDto()
+            return new PagedPositionsBaseDto()
             {
                 CurrentPage = pagedPositions.CurrentPage,
                 TotalPages = pagedPositions.TotalPages,
