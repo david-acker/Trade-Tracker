@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using TradeTracker.Api.Models.Pagination;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
 using TradeTracker.Application.Models.Navigation;
 
