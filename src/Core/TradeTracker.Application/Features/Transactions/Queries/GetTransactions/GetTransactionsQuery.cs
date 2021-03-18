@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MediatR;
+using TradeTracker.Application.Enums;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
@@ -9,6 +10,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
         public Guid AccessKey { get; set; }
 
         public string OrderBy { get; set; } = "DateTime";
+        public SortOrder SortOrder { get; set; } = SortOrder.Descending;
 
         private int _pageNumber = 1;
         public int PageNumber

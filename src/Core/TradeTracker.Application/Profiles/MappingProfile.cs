@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
+using TradeTracker.Application.Enums;
 using TradeTracker.Application.Features.Positions;
 using TradeTracker.Application.Features.Positions.Queries.GetPositions;
 using TradeTracker.Application.Features.Transactions;
@@ -49,6 +50,12 @@ namespace TradeTracker.Application.Profiles
 
             CreateMap<GetPagedTransactionsResourceParameters, GetTransactionsQuery>()
                 .ForMember(
+                    dest => dest.OrderBy,
+                    opt => opt.MapFrom(src => OrderByParser(src.Order)))
+                .ForMember(
+                    dest => dest.SortOrder,
+                    opt => opt.MapFrom(src => SortOrderParser(src.Order)))
+                .ForMember(
                     dest => dest.RangeStart,
                     opt => opt.MapFrom(src => (DateTime.Parse(src.RangeStart))))
                 .ForMember(
@@ -71,7 +78,13 @@ namespace TradeTracker.Application.Profiles
 
             CreateMap<TransactionForReturnDto, TransactionForReturnWithLinksDto>();
 
-            CreateMap<GetPositionsResourceParameters, GetPositionsQuery>()
+            CreateMap<GetPagedPositionsResourceParameters, GetPositionsQuery>()
+                .ForMember(
+                    dest => dest.OrderBy,
+                    opt => opt.MapFrom(src => OrderByParser(src.Order)))
+                .ForMember(
+                    dest => dest.SortOrder,
+                    opt => opt.MapFrom(src => SortOrderParser(src.Order)))
                 .ForMember(
                     dest => dest.Including,
                     opt => opt.MapFrom(src => 
@@ -95,6 +108,30 @@ namespace TradeTracker.Application.Profiles
             char[] boundaryCharacters = { '(', ')' };
 
             return input.Trim(boundaryCharacters).Split(',').ToList();
+        }
+
+        private string OrderByParser(string input)
+        {
+            return input.Split(' ')[0];
+        }
+
+        private SortOrder SortOrderParser(string input)
+        {
+            var sortOrder = SortOrder.Descending;
+
+            var splitInput = input.Split(' ');
+
+            if (splitInput.Count() == 2)
+            {
+                var sortOrderString = splitInput[1];
+
+                if (sortOrderString.Equals("asc", StringComparison.OrdinalIgnoreCase))
+                {
+                    sortOrder = SortOrder.Ascending;
+                }
+            }
+            
+            return sortOrder;
         }
     }
 }

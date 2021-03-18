@@ -73,7 +73,7 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Accept", "application/json")]
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<ActionResult<IEnumerable<PositionForReturnDto>>> GetPositions(
-            [FromQuery] GetPositionsResourceParameters parameters)
+            [FromQuery] GetPagedPositionsResourceParameters parameters)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositions)} was called.");
 
@@ -120,7 +120,7 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
         public async Task<ActionResult<PagedPositionsWithLinksDto>> GetPositionsWithLinks(
-            [FromQuery] GetPositionsResourceParameters parameters)
+            [FromQuery] GetPagedPositionsResourceParameters parameters)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositionsWithLinks)} was called.");
 
@@ -290,7 +290,7 @@ namespace TradeTracker.Api.Controllers
 
 
         private IEnumerable<LinkDto> CreateLinksForPositions(
-            GetPositionsResourceParameters parameters,
+            GetPagedPositionsResourceParameters parameters,
             bool hasNext,
             bool hasPrevious)
         {
@@ -331,7 +331,7 @@ namespace TradeTracker.Api.Controllers
 
 
         private string CreatePositionsResourceUrl(
-            GetPositionsResourceParameters parameters,
+            GetPagedPositionsResourceParameters parameters,
             ResourceUriType type)
         {
             switch (type)
@@ -341,7 +341,7 @@ namespace TradeTracker.Api.Controllers
                         "GetPositions",
                         new
                         {
-                            orderBy = parameters.OrderBy,
+                            order = parameters.Order,
                             pageNumber = parameters.PageNumber - 1,
                             pageSize = parameters.PageSize,
                             including = parameters.Including,
@@ -354,7 +354,7 @@ namespace TradeTracker.Api.Controllers
                         "GetPositions",
                         new
                         {
-                            orderBy = parameters.OrderBy,
+                            order = parameters.Order,
                             pageNumber = parameters.PageNumber + 1,
                             pageSize = parameters.PageSize,
                             including = parameters.Including,
@@ -368,7 +368,7 @@ namespace TradeTracker.Api.Controllers
                         "GetPositions",
                         new
                         {
-                            orderBy = parameters.OrderBy,
+                            order = parameters.Order,
                             pageNumber = parameters.PageNumber,
                             pageSize = parameters.PageSize,
                             including = parameters.Including,

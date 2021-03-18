@@ -5,7 +5,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
     public class GetPagedTransactionsResourceParameters
     {
-        public string OrderBy { get; set; } = "DateTime";
+        public string Order { get; set; } = "DateTime+desc";
 
         public int PageNumber { get; set; } = 1;
 

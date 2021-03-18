@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeTracker.Application.Enums;
 using TradeTracker.Application.Features.Positions.Queries.GetPositions;
-using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Models.Pagination;
 using TradeTracker.Domain.Entities;
@@ -45,7 +45,10 @@ namespace TradeTracker.Persistence.Repositories
             switch (parameters.OrderBy)
             {
                 case "Symbol":
-                    query = query.OrderBy(t => t.Symbol);
+                    if (parameters.SortOrder == SortOrder.Ascending)
+                        query = query.OrderBy(t => t.Symbol);
+                    else
+                        query = query.OrderByDescending(t => t.Symbol);
                     break;
 
                 case "Quantity":
@@ -76,9 +79,14 @@ namespace TradeTracker.Persistence.Repositories
             switch (parameters.OrderBy)
             {
                 case "Quantity":
-                    orderedPositions = pagedPositions
-                        .OrderByDescending(t => t.Quantity)
-                        .ToList();
+                    if (parameters.SortOrder == SortOrder.Ascending)
+                        orderedPositions = pagedPositions
+                            .OrderBy(t => t.Quantity)
+                            .ToList();
+                    else
+                        orderedPositions = pagedPositions
+                            .OrderByDescending(t => t.Quantity)
+                            .ToList();
 
                     pagedPositions.Clear();
                     pagedPositions.AddRange(orderedPositions);

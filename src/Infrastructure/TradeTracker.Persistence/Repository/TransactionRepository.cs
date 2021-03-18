@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeTracker.Application.Enums;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Models.Pagination;
@@ -63,7 +64,10 @@ namespace TradeTracker.Persistence.Repositories
             switch (parameters.OrderBy)
             {
                 case "Symbol":
-                    query = query.OrderBy(t => t.Symbol);
+                    if (parameters.SortOrder == SortOrder.Ascending)
+                        query = query.OrderBy(t => t.Symbol);
+                    else
+                        query = query.OrderByDescending(t => t.Symbol);
                     break;
 
                 case "Quantity":
@@ -76,7 +80,10 @@ namespace TradeTracker.Persistence.Repositories
 
                 case "DateTime":
                 default:
-                    query = query.OrderByDescending(t => t.DateTime);
+                    if (parameters.SortOrder == SortOrder.Ascending)
+                        query = query.OrderBy(t => t.DateTime);
+                    else
+                        query = query.OrderByDescending(t => t.DateTime);
                     break;
             }            
 
@@ -88,18 +95,28 @@ namespace TradeTracker.Persistence.Repositories
             switch (parameters.OrderBy)
             {
                 case "Quantity":
-                    orderedTransactions = pagedTransactions
-                        .OrderByDescending(t => t.Quantity)
-                        .ToList();
+                    if (parameters.SortOrder == SortOrder.Ascending)
+                        orderedTransactions = pagedTransactions
+                            .OrderBy(t => t.Quantity)
+                            .ToList();
+                    else
+                        orderedTransactions = pagedTransactions
+                            .OrderByDescending(t => t.Quantity)
+                            .ToList();
 
                     pagedTransactions.Clear();
                     pagedTransactions.AddRange(orderedTransactions);
                     break;
 
                 case "Notional":
-                    orderedTransactions = pagedTransactions
-                        .OrderByDescending(t => t.Notional)
-                        .ToList();
+                    if (parameters.SortOrder == SortOrder.Ascending)
+                        orderedTransactions = pagedTransactions
+                            .OrderBy(t => t.Notional)
+                            .ToList();
+                    else
+                        orderedTransactions = pagedTransactions
+                            .OrderByDescending(t => t.Notional)
+                            .ToList();
                     
                     pagedTransactions.Clear();
                     pagedTransactions.AddRange(orderedTransactions);

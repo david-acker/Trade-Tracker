@@ -615,7 +615,7 @@ namespace TradeTracker.Api.Controllers
                         "GetTransactions",
                         new
                         {
-                            orderBy = parameters.OrderBy,
+                            order = parameters.Order,
                             pageNumber = parameters.PageNumber - 1,
                             pageSize = parameters.PageSize,
                             including = parameters.Including,
@@ -629,7 +629,7 @@ namespace TradeTracker.Api.Controllers
                         "GetTransactions",
                         new
                         {
-                            orderBy = parameters.OrderBy,
+                            order = parameters.Order,
                             pageNumber = parameters.PageNumber + 1,
                             pageSize = parameters.PageSize,
                             including = parameters.Including,
@@ -644,7 +644,7 @@ namespace TradeTracker.Api.Controllers
                         "GetTransactions",
                         new
                         {
-                            orderBy = parameters.OrderBy,
+                            order = parameters.Order,
                             pageNumber = parameters.PageNumber,
                             pageSize = parameters.PageSize,
                             including = parameters.Including,

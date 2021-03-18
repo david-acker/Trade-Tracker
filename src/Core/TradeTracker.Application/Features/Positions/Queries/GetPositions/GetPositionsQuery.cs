@@ -1,6 +1,7 @@
 using MediatR;
 using System;
 using System.Collections.Generic;
+using TradeTracker.Application.Enums;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
@@ -11,6 +12,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
         public List<string> Fields { get; set; }
 
         public string OrderBy { get; set; } = "Quantity";
+        public SortOrder SortOrder { get; set; } = SortOrder.Descending;
 
         private int _pageNumber = 1;
         public int PageNumber

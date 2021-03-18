@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TradeTracker.Application.Enums;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
@@ -8,6 +9,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
         public Guid AccessKey { get; set; }
 
         public string OrderBy { get; set; }
+        public SortOrder SortOrder { get; set; }
 
         public int PageNumber { get; set; }
 

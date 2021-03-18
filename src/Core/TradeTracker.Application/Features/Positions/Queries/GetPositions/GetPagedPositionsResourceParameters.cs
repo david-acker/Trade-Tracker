@@ -2,11 +2,11 @@ using System;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
-    public class GetPositionsResourceParameters
+    public class GetPagedPositionsResourceParameters
     {
         public Guid AccessKey { get; set; } 
 
-        public string OrderBy { get; set; } = "Quantity";
+        public string Order { get; set; } = "Quantity+desc";
 
         public int PageNumber { get; set; } = 1;
 
