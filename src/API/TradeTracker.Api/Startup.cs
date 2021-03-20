@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
+using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -76,7 +76,10 @@ namespace TradeTracker.Api
 
             services.AddCors(options =>
             {
-                options.AddPolicy("Option", builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+                options.AddPolicy("Option", builder => 
+                    builder.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
             });
 
             services.Configure<MvcOptions>(config =>
@@ -129,6 +132,11 @@ namespace TradeTracker.Api
 
                 setupAction.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
             });
+
+            services.AddSpaStaticFiles(config =>
+            {
+                config.RootPath = "../../UI/TradeTrackerUI/dist";
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -163,20 +171,25 @@ namespace TradeTracker.Api
             });
 
             app.UseIpRateLimiting();
-
             app.UseAuthentication();
-
             app.UseRouting();
-
             app.UseCustomExceptionHandler();
-
             app.UseCors("Open");
-
             app.UseAuthorization();
             
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+
+            app.UseSpa(spa => 
+            {
+                spa.Options.SourcePath = "../../UI/TradeTrackerUI";
+
+                if (env.IsDevelopment())
+                {
+                    spa.UseAngularCliServer(npmScript: "start");
+                }
             });
         }
     }
