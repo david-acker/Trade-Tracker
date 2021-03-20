@@ -98,7 +98,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
 
             var transactionId = Guid.NewGuid();
             
-            var query = new UpdateTransactionCommand()
+            var command = new UpdateTransactionCommand()
             {
                 TransactionId = transactionId,
                 DateTime = new DateTime(2015, 1, 1),
@@ -110,7 +110,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             };
 
             // Act
-            Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);
+            Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
             
             // Assert
             await act.Should()
@@ -126,13 +126,13 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
 
             var userAccessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
             
-            var query = new UpdateTransactionCommand()
+            var command = new UpdateTransactionCommand()
             {
                 AccessKey = userAccessKey
             };
 
             // Act
-            Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);
+            Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
             
             // Assert
             await act.Should()
@@ -149,7 +149,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             var userAccessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
             var transactionId = Guid.NewGuid();
 
-            var query = new UpdateTransactionCommand()
+            var command = new UpdateTransactionCommand()
             {
                 AccessKey = userAccessKey,
                 TransactionId = transactionId,
@@ -162,7 +162,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             };
 
             // Act
-            Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);
+            Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
             
             // Assert
             await act.Should()
@@ -179,7 +179,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             var userAccessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
             var transactionId = Guid.Parse("2eb3de2f-7869-41b5-9bfc-3867c844f6e7");
 
-            var query = new UpdateTransactionCommand()
+            var command = new UpdateTransactionCommand()
             {
                 AccessKey = userAccessKey,
                 TransactionId = transactionId,
@@ -192,7 +192,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             };
 
             // Act
-            Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);
+            Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
             
             // Assert
             await act.Should()
