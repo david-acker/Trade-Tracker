@@ -1,3 +1,5 @@
+using System;
+
 namespace TradeTracker.Application.Models.Authentication
 {
     public class AuthenticationResponse
@@ -6,5 +8,6 @@ namespace TradeTracker.Application.Models.Authentication
         public string UserName { get; set; }
         public string Email { get; set; }
         public string Token { get; set; }
+        public DateTime Expiration { get; set; }
     }
 }
