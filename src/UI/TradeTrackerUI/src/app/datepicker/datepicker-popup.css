@@ -1,0 +1,18 @@
+input {
+    width: 125px;
+    height: 25px;
+}
+
+button {
+    padding: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+} 
+
+fa-icon {
+    vertical-align: middle;
+    text-align: center;
+    width: 25px;
+    height: 25px;
+    margin: 0;
+}

@@ -1,0 +1,36 @@
+<br>
+<div class='card col-2 offset-5 shadow-sm p-3 mb-5 bg-body rounded'>
+    <div class='card-body '>
+        <form #loginForm='ngForm'
+              (submit)='onLogin()'
+              class='login-form justify-content-center text-center'
+              novalidate>
+            <h1 class='h3 mb-3 fw-normal'>Please Login In</h1>
+        
+            <div class='form-group'>
+                <input name='email'
+                       type='email'
+                       [(ngModel)]='credentials.email'
+                       class='form-control'
+                       placeholder='Email Address'
+                       required='required' />
+            </div>
+        
+            <div class='form-group'>
+                <input name='password'
+                       type='password'
+                       [(ngModel)]='credentials.password'
+                       class='form-control'
+                       placeholder='Password'
+                       required='required' />
+            </div>
+        
+            <div class='form-group'>
+                <input type='submit'
+                       value='Login'
+                       class='btn btn-primary btn-block'
+                       [disabled]='loginForm.invalid'>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,37 @@
+.center { 
+    text-align: center 
+}
+
+table {
+    width: 100%;
+}
+
+label.input-label {
+    display: block;
+    text-align: left
+}
+
+.orderby-dropdown {
+    width: 125px;
+    height: 34px;
+}
+
+button.orderby-button {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+button>fa-icon {
+    vertical-align: middle;
+    width: 25px;
+    height: 25px;
+    margin: 0;
+}
+
+.buy {
+    color: rgb(0, 196, 0);
+}
+
+.sell {
+    color: rgb(204, 0, 0);
+}

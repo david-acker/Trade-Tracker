@@ -1,0 +1,115 @@
+<br>
+<div class='container-fluid'>
+    <div class='row'>
+        <div class='col-2 offset-1 border shadow-sm p-3 mb-5 bg-body'>
+            <form [formGroup]='transactionsFilters'
+                novalidate>
+                <div>
+                    <div class='row'>
+                        <div class='col-2 offset-4'>
+                            <h3>Filter</h3>
+                        </div>
+                        <div class='col-2'>
+                            <fa-icon [icon]='["fas", "sliders-h"]'></fa-icon>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class='form-group row'>
+                        <div class='col-3'>
+                            <label class='input-label'
+                                   for='orderById'>OrderBy</label>
+                        </div>
+                        <div class='col-9 input-group'>
+                            <select id='orderById'
+                                    class='form-select orderby-dropdown'
+                                    formControlName='orderBy'
+                                    aria-label='DateTime'>
+                                <option value='DateTime'>DateTime</option>
+                                <option value='Symbol'>Symbol</option>
+                                <option value='Quantity'>Quantity</option>
+                                <option value='Notional'>Notional</option>
+                            </select>
+                            <div class='input-group-append'>
+                                <button class='btn btn-sm btn-check btn-secondary orderby-button'
+                                        (click)='reverseDirection()'>
+                                    <fa-icon [icon]='["fas", "sort-amount-down"]'
+                                                *ngIf='sortDirection == "desc"'></fa-icon>
+                                    <fa-icon [icon]='["fas", "sort-amount-up"]'
+                                                *ngIf='sortDirection == "asc"'></fa-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div formGroupName='dateRange'>
+                    <div class='form-group row'>
+                        <div class='col-3'>
+                            <label for='startRangeId'
+                                    class='input-label'>Start</label>
+                        </div>
+                        <div class='col-9'>
+                            <ngbd-datepicker-popup id='startRangeId'
+                                                    formControlName='start'>
+                            </ngbd-datepicker-popup>
+                        </div>
+                    </div>
+                    <div class='form-group row'>
+                        <div class='col-3'>
+                            <label for='endRangeId'
+                                    class='input-label'>End</label>
+                        </div>
+                        <div class='col-9'>
+                            <ngbd-datepicker-popup id='endRangeId'
+                                                    formControlName='end'>
+                            </ngbd-datepicker-popup>
+                        </div>
+                    </div>
+                </div>
+                <div class='form-group row'>
+                    <div class='col text-center'>
+                        <button class='btn btn-sm btn-primary'
+                                (click)='onUpdate()'>Update</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class='col-8'>
+            <table class='table table-sm table-bordered table-hover shadow-sm p-3 mb-5'>
+                <thead class='thead-dark'>
+                    <tr style='text-align: center'>
+                        <th scope='col'>DateTime</th>
+                        <th scope='col'>Symbol</th>
+                        <th scope='col'>Type</th>
+                        <th scope='col'>Quantity</th>
+                        <th scope='col'>Notional</th>
+                        <th scope='col'>Trade Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr scope='row' 
+                        class='center' 
+                        *ngFor='let transaction of transactions'>
+                        <td>{{ transaction.dateTime | date:'MM/dd/yy hh:mm:ss aa' }}</td>
+                        <td>{{ transaction.symbol }}</td>
+                        <td [ngClass]='{
+                                "buy": transaction.type === "Buy",
+                                "sell": transaction.type === "Sell" }'>
+                            <b>{{ transaction.type }}</b>
+                        </td>
+                        <td>{{ transaction.quantity | currency }}</td>
+                        <td>{{ transaction.notional | currency}}</td>
+                        <td>{{ transaction.tradePrice | currency }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class='d-flex justify-content-center'>
+        <ngb-pagination [(page)]='pageNumber'
+                        [collectionSize]='pageCount'
+                        [boundaryLinks]='true'
+                        (pageChange)='onPageChange(pageNumber)'>
+        </ngb-pagination>
+    </div>
+</div>
