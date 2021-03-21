@@ -50,10 +50,10 @@ namespace TradeTracker.Identity.Services
 
             AuthenticationResponse response = new AuthenticationResponse
             {
-                Id = user.Id,
                 Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken),
                 Email = user.Email,
-                UserName = user.UserName
+                UserName = user.UserName,
+                Expiration = jwtSecurityToken.ValidTo
             };
             
             return response;
