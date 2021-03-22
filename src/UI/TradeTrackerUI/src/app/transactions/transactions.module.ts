@@ -12,14 +12,28 @@ import { RouterModule } from '@angular/router';
 import { TransactionListComponent } from './transactions-list/transaction-list.component';
 import { NgbdDatepickerPopupModule } from '../datepicker/datepicker-popup.module';
 import { BrowserModule } from '@angular/platform-browser';
+import { AddTransactionComponent } from './add-transaction/add-transaction.component';
 
 let routes = [
-  { path: 'transactions', component: TransactionListComponent },
-]
+  {
+    path: 'transactions', 
+    children: [
+      {
+        path: 'add',
+        component: AddTransactionComponent
+      },
+      {
+        path: 'view',
+        component: TransactionListComponent
+      }
+    ]
+  }
+];
 
 @NgModule({
   declarations: [
     TransactionListComponent,
+    AddTransactionComponent,
   ],
   imports: [
     BrowserModule,
