@@ -5,15 +5,18 @@ import { NgModule } from '@angular/core';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 
-import { LoginComponent } from './login.component';
+import { LoginComponent } from './login/login.component';
+import { RegistrationComponent } from './registration/registration.component';
 
 let routes = [
   { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegistrationComponent }
 ]
 
 @NgModule({
   declarations: [
     LoginComponent,
+    RegistrationComponent,
   ],
   imports: [
     CommonModule,
