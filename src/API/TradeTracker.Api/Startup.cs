@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Serialization;
+using TradeTracker.Api.Extensions;
 using TradeTracker.Api.Middleware;
 using TradeTracker.Api.Services;
 using TradeTracker.Application;
@@ -103,35 +104,7 @@ namespace TradeTracker.Api
                 }
             });
 
-            services.AddSwaggerGen(setupAction =>
-            {
-                setupAction.SwaggerDoc(
-                    "TradeTrackerOpenAPISpecification", 
-                    new Microsoft.OpenApi.Models.OpenApiInfo()
-                    {
-                        Title = "TradeTracker API",
-                        Version = "1",
-                        Description = "API for accessing and managing transactions and positions with TradeTracker.",
-                        Contact = new Microsoft.OpenApi.Models.OpenApiContact()
-                        {
-                            Email = "davidacker3@gmail.com",
-                            Name = "David Acker",
-                            Url = new Uri("https://www.linkedin.com/in/daviddacker/")
-                        },
-                        License = new Microsoft.OpenApi.Models.OpenApiLicense()
-                        {
-                            Name = "MIT License",
-                            Url = new Uri("https://opensource.org/licenses/MIT")
-                        }
-                    });
-
-                var xmlCommmentsFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommmentsFile);
-
-                setupAction.IncludeXmlComments(xmlCommentsFullPath);
-
-                setupAction.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
-            });
+            services.AddSwagger();
 
             services.AddSpaStaticFiles(config =>
             {
@@ -159,16 +132,7 @@ namespace TradeTracker.Api
 
             app.UseHttpsRedirection();
 
-            app.UseSwagger();
-
-            app.UseSwaggerUI(setupAction =>
-            {
-                setupAction.SwaggerEndpoint(
-                    "/swagger/TradeTrackerOpenAPISpecification/swagger.json",
-                    "TradeTracker API");
-                
-                setupAction.RoutePrefix = "";
-            });
+            app.ConfigureSwagger();
 
             app.UseIpRateLimiting();
             app.UseAuthentication();
