@@ -67,13 +67,7 @@ namespace TradeTracker.Api
                         Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                 });
 
-            services.AddMemoryCache();
-            services.Configure<IpRateLimitOptions>(
-                Configuration.GetSection("IpRateLimiting"));
-            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
-            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
-            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
-            services.AddHttpContextAccessor();
+            services.AddRateLimiter(Configuration);
 
             services.AddCors(options =>
             {
