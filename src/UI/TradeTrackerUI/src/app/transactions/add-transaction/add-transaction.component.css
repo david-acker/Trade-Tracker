@@ -1,0 +1,29 @@
+table {
+    width: 100%;
+}
+
+label.input-label {
+    display: block;
+    text-align: left
+}
+
+button>fa-icon {
+    vertical-align: middle;
+    width: 25px;
+    height: 25px;
+    margin: 0;
+}
+
+input[type=number] {
+    width: 166px;
+    height: 34px;
+}
+
+input[type=text] {
+    width: 166px;
+    height: 34px;
+}
+
+select {
+    width: 166px;
+}
