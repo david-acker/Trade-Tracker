@@ -13,6 +13,7 @@ import { AccountsModule } from './accounts/accounts.module';
 import { NgbdDatepickerPopupModule } from './datepicker/datepicker-popup.module';
 import { PositionsModule } from './positions/positions.module';
 import { NavMenuComponent } from './nav-menu/nav-menu.component';
+import { UserService } from './core/user.service';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { NavMenuComponent } from './nav-menu/nav-menu.component';
     PositionsModule,
   ],
   providers: [
-    DataService
+    DataService,
+    UserService
   ],
   bootstrap: [AppComponent]
 })
