@@ -6,15 +6,20 @@ namespace TradeTracker.Api.Extensions
 {
     public static class RateLimiterExtensions
     {
-        public static void AddRateLimiter(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddRateLimiter(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddMemoryCache();
+            
             services.Configure<IpRateLimitOptions>(
                 configuration.GetSection("IpRateLimiting"));
+            
             services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
             services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
             services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+            
             services.AddHttpContextAccessor();
+
+            return services;
         }
     }
 }
