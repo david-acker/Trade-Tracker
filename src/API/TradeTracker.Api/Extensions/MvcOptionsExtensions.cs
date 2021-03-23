@@ -5,7 +5,7 @@ namespace TradeTracker.Api.Extensions
 {
     public static class MvcOptionsExtensions
     {
-        public static void ConfigureStatusCodes(this MvcOptions options)
+        public static MvcOptions ConfigureStatusCodes(this MvcOptions options)
         {
             options.Filters.Add(
                 new ProducesDefaultResponseTypeAttribute());
@@ -20,6 +20,8 @@ namespace TradeTracker.Api.Extensions
                 new ProducesResponseTypeAttribute(StatusCodes.Status500InternalServerError));
             
             options.ReturnHttpNotAcceptable = true;
+
+            return options;
         }
     }
 }
