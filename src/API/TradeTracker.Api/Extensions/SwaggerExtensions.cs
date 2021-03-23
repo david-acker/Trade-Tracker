@@ -9,11 +9,11 @@ namespace TradeTracker.Api.Extensions
 {
     public static class SwaggerExtensions
     {
-        public static void AddSwagger(this IServiceCollection services)
+        public static IServiceCollection AddSwagger(this IServiceCollection services)
         {
-            services.AddSwaggerGen(setupAction => 
+            services.AddSwaggerGen(options => 
             {
-                setupAction.SwaggerDoc(
+                options.SwaggerDoc(
                     "TradeTrackerOpenAPISpecification",
                     new Microsoft.OpenApi.Models.OpenApiInfo()
                     {
@@ -36,24 +36,28 @@ namespace TradeTracker.Api.Extensions
                     var xmlCommmentsFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommmentsFile);
 
-                setupAction.IncludeXmlComments(xmlCommentsFullPath);
+                options.IncludeXmlComments(xmlCommentsFullPath);
 
-                setupAction.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+                options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
             });
+
+            return services;
         }
 
-        public static void ConfigureSwagger(this IApplicationBuilder app)
+        public static IApplicationBuilder ConfigureSwagger(this IApplicationBuilder app)
         {
             app.UseSwagger();
             
-            app.UseSwaggerUI(setupAction =>
+            app.UseSwaggerUI(options =>
             {
-                setupAction.SwaggerEndpoint(
+                options.SwaggerEndpoint(
                     "/swagger/TradeTrackerOpenAPISpecification/swagger.json",
                     "TradeTracker API");
                 
-                setupAction.RoutePrefix = "swagger";
+                options.RoutePrefix = "swagger";
             });
+
+            return app;
         }
     }
 }
