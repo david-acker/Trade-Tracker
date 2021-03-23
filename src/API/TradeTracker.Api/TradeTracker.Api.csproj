@@ -21,6 +21,7 @@
 	  <PackageReference Include="MediatR" Version="9.0.0" />
 	  <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.0-preview.1.21103.6" />
 	  <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.3" />
+	  <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.4" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0-preview.1.21102.2">
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	    <PrivateAssets>all</PrivateAssets>
