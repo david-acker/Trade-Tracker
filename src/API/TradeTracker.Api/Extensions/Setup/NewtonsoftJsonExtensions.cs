@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Serialization;
 
-namespace TradeTracker.Api.Extensions
+namespace TradeTracker.Api.Extensions.Setup
 {
     public static class NewtonsoftJsonExtensions
     {

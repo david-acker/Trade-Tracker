@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace TradeTracker.Api.Extensions
+namespace TradeTracker.Api.Extensions.Setup
 {
     public static class MvcOptionsExtensions
     {

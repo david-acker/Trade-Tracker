@@ -2,7 +2,7 @@ using AspNetCoreRateLimit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace TradeTracker.Api.Extensions
+namespace TradeTracker.Api.Extensions.Setup
 {
     public static class RateLimiterExtensions
     {

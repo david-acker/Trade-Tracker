@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Serialization;
 using TradeTracker.Api.Extensions;
+using TradeTracker.Api.Extensions.Setup;
 using TradeTracker.Api.Middleware;
 using TradeTracker.Api.Services;
 using TradeTracker.Application;

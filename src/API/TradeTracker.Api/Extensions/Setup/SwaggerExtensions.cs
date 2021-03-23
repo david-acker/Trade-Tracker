@@ -5,7 +5,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace TradeTracker.Api.Extensions
+namespace TradeTracker.Api.Extensions.Setup
 {
     public static class SwaggerExtensions
     {
