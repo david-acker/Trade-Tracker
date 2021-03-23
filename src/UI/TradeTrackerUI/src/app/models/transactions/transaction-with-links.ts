@@ -1,4 +1,4 @@
-import { Link } from "./link";
+import { Link } from "../shared/link";
 
 export interface TransactionWithLinks {
     transactionId: string;

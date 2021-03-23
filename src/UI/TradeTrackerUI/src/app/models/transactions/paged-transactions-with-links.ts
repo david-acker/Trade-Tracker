@@ -1,5 +1,5 @@
-import { Link } from "./link";
-import { PaginationMetadata } from "./pagination-metadata";
+import { Link } from "../shared/link";
+import { PaginationMetadata } from "../shared/pagination-metadata";
 import { TransactionWithLinks } from "./transaction-with-links";
 
 export interface PagedTransactionsWithLinks {
