@@ -8,7 +8,7 @@ namespace TradeTracker.Api.Extensions
 {
     public static class NewtonsoftJsonExtensions
     {
-        public static void AddNewtonsoftJsonSerializationSettings(this IMvcBuilder builder)
+        public static IMvcBuilder AddNewtonsoftJsonSerializationSettings(this IMvcBuilder builder)
         {
             builder.AddNewtonsoftJson(setupAction => 
             {
@@ -18,12 +18,14 @@ namespace TradeTracker.Api.Extensions
                 setupAction.SerializerSettings.ReferenceLoopHandling =
                     Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
+
+            return builder;
         }
-        public static void SetupNewtonsoftJsonFormatting(this IServiceCollection services)
+        public static IServiceCollection SetupNewtonsoftJsonFormatting(this IServiceCollection services)
         {
-            services.Configure<MvcOptions>(config =>
+            services.Configure<MvcOptions>(options =>
             {
-                var newtonsoftJsonOutputFormatter = config.OutputFormatters
+                var newtonsoftJsonOutputFormatter = options.OutputFormatters
                     .OfType<NewtonsoftJsonOutputFormatter>()?.FirstOrDefault();
 
                 if (newtonsoftJsonOutputFormatter != null)
@@ -40,7 +42,9 @@ namespace TradeTracker.Api.Extensions
                         newtonsoftJsonOutputFormatter.SupportedMediaTypes.Remove("text/plain");
                     }
                 }
-            }); 
+            });
+
+            return services;
         }
     }
 }
