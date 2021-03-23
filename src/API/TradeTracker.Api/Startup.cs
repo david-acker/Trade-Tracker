@@ -42,30 +42,10 @@ namespace TradeTracker.Api
 
             services.AddScoped<ILoggedInUserService, LoggedInUserService>();
         
-            services
-                .AddControllers(setupAction =>
-                {
-                    setupAction.ReturnHttpNotAcceptable = true;
+            services.AddControllers(setupAction => setupAction.ConfigureStatusCodes())
+                .AddNewtonsoftJsonSerializationSettings();
 
-                    setupAction.Filters.Add(
-                        new ProducesResponseTypeAttribute(StatusCodes.Status400BadRequest));
-                    setupAction.Filters.Add(
-                        new ProducesResponseTypeAttribute(StatusCodes.Status406NotAcceptable));
-                    setupAction.Filters.Add(
-                        new ProducesResponseTypeAttribute(StatusCodes.Status429TooManyRequests));
-                    setupAction.Filters.Add(
-                        new ProducesResponseTypeAttribute(StatusCodes.Status500InternalServerError));
-                    setupAction.Filters.Add(
-                        new ProducesDefaultResponseTypeAttribute());
-                })
-                .AddNewtonsoftJson(setupAction => 
-                {
-                    setupAction.SerializerSettings.ContractResolver =
-                        new CamelCasePropertyNamesContractResolver();
-
-                    setupAction.SerializerSettings.ReferenceLoopHandling =
-                        Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-                });
+            services.SetupNewtonsoftJsonFormatting();
 
             services.AddRateLimiter(Configuration);
 
@@ -77,26 +57,7 @@ namespace TradeTracker.Api
                         .AllowAnyMethod());
             });
 
-            services.Configure<MvcOptions>(config =>
-            {
-                var newtonsoftJsonOutputFormatter = config.OutputFormatters
-                    .OfType<NewtonsoftJsonOutputFormatter>()?.FirstOrDefault();
-
-                if (newtonsoftJsonOutputFormatter != null)
-                {
-                    newtonsoftJsonOutputFormatter.SupportedMediaTypes.Add("application/vnd.trade.hateoas+json");
-
-                    if (newtonsoftJsonOutputFormatter.SupportedMediaTypes.Contains("text/json"))
-                    {
-                        newtonsoftJsonOutputFormatter.SupportedMediaTypes.Remove("text/json");
-                    }
-
-                    if (newtonsoftJsonOutputFormatter.SupportedMediaTypes.Contains("text/plain"))
-                    {
-                        newtonsoftJsonOutputFormatter.SupportedMediaTypes.Remove("text/plain");
-                    }
-                }
-            });
+            
 
             services.AddSwagger();
 
