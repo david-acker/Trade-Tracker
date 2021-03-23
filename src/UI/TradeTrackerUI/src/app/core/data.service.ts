@@ -18,13 +18,6 @@ export class DataService {
 
     public pagedTransactionsWithLinks: PagedTransactionsWithLinks;
 
-    // public get loginRequired(): boolean {
-    //     let token: string = JSON.parse(localStorage.getItem('token'));
-    //     let tokenExpiration: Date = new Date(JSON.parse(localStorage.getItem('token-expiration')));
-        
-    //     return token.length == 0 || tokenExpiration > new Date();
-    // }
-
     public login(credentials: Credentials) {
         return this.http.post('/api/account/authenticate', credentials)
             .pipe(
