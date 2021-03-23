@@ -28,7 +28,7 @@ namespace TradeTracker.Application.Interfaces.Infrastructure
             Guid accessKey,
             Guid transactionId);
 
-        Task RefreshForTransactionGroup(
+        Task RefreshForTransactionCollection(
             Guid accessKey,
             string symbol,
             List<Guid> transactionIds);

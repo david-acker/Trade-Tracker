@@ -42,7 +42,7 @@ namespace TradeTracker.Infrastructure.Services
 
             foreach (var entry in transactionMap)
             {
-                await _positionService.RefreshForTransactionGroup(accessKey, entry.Key, entry.Value);
+                await _positionService.RefreshForTransactionCollection(accessKey, entry.Key, entry.Value);
             }
         }
 

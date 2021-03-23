@@ -89,24 +89,24 @@ namespace TradeTracker.Infrastructure.Services
             }
         }
 
-        public async Task RefreshForTransactionGroup(Guid accessKey, string symbol, List<Guid> transactionIds)
+        public async Task RefreshForTransactionCollection(Guid accessKey, string symbol, List<Guid> transactionIds)
         {
-            _logger.LogInformation($"PositionService: {nameof(RefreshForTransactionGroup)} was called for {symbol}.");
+            _logger.LogInformation($"PositionService: {nameof(RefreshForTransactionCollection)} was called for {symbol}.");
 
-            var transactionGroupForSymbol = await _transactionRepository
+            var transactionCollectionForSymbol = await _transactionRepository
                 .GetTransactionCollectionByIdsAsync(accessKey, transactionIds);
 
             var position = await _positionRepository.GetBySymbolAsync(accessKey, symbol);
             if (position != null)
             {
-                AttachBatch(position, transactionGroupForSymbol);
+                AttachBatch(position, transactionCollectionForSymbol);
                 await HandleExistingPosition(position);
             }
             else
             {
                 position = new Position(accessKey, symbol);
 
-                AttachBatch(position, transactionGroupForSymbol);
+                AttachBatch(position, transactionCollectionForSymbol);
                 await HandleNewPosition(position);
             }
         }
