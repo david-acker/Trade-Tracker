@@ -57,8 +57,6 @@ namespace TradeTracker.Api
                         .AllowAnyMethod());
             });
 
-            
-
             services.AddSwagger();
 
             services.AddSpaStaticFiles(config =>
