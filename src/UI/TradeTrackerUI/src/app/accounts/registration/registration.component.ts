@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DataService } from 'src/app/core/data.service';
+
+import { AuthService } from 'src/app/core/auth.service';
 import { Registration } from 'src/app/models/accounts/registration';
 
 @Component({
@@ -9,36 +10,33 @@ import { Registration } from 'src/app/models/accounts/registration';
   styleUrls: ['./registration.component.css']
 })
 export class RegistrationComponent implements OnInit {
-
+  private errorMessage: string = '';
   public registrationForm: FormGroup;
 
-  errorMessage: string = '';
-
   constructor(
-    private data: DataService,
+    private authService: AuthService,
     private fb: FormBuilder, 
     private router: Router) { }
 
   ngOnInit(): void {
     this.registrationForm = this.fb.group({
-      firstName: ['', [Validators.required]],
-      lastName: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      userName: ['', [Validators.required]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      firstName: ['First Name', [Validators.required]],
+      lastName: ['Last Name', [Validators.required]],
+      email: ['Email Address', [Validators.required, Validators.email]],
+      userName: ['Username', [Validators.required]],
+      password: ['Password', [Validators.required, Validators.minLength(6)]]
     });
   }
 
   onRegister() {
-      this.errorMessage = '';
-
       let registration: Registration = this.registrationForm.value;
       
-      this.data.register(registration)
+      this.errorMessage = '';
+      this.authService.register(registration)
           .subscribe(success => {
-              if (success) {
-                  this.router.navigate(['Login']);
-              }
-          }, err => this.errorMessage = 'Failed to register');
+            this.router.navigate(['Login']);
+          }, error => {
+            this.errorMessage = 'Failed to register'
+          });
   }
 }
