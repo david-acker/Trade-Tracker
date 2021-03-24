@@ -1,8 +1,8 @@
 <br>
 <div class='card col-2 offset-5 shadow-sm p-3 mb-5 bg-body rounded'>
     <div class='card-body '>
-        <form #registrationForm='ngForm'
-              (submit)='onRegister()'
+        <form [formGroup]='registrationForm'
+              (ngSubmit)='onRegister()'
               class='login-form justify-content-center text-center'
               novalidate>
             <h1 class='h3 mb-3 fw-normal'>Please register a new account</h1>
@@ -10,53 +10,48 @@
             <div class='form-group'>
                 <input name='firstName'
                        type='text'
-                       [(ngModel)]='registration.firstName'
+                       formControlName='firstName'
                        class='form-control'
-                       placeholder='First Name'
-                       required='required' />
+                       placeholder='First Name' />
             </div>
 
             <div class='form-group'>
                 <input name='lastName'
                        type='text'
-                       [(ngModel)]='registration.lastName'
+                       formControlName='lastName'
                        class='form-control'
-                       placeholder='Last Name'
-                       required='required' />
+                       placeholder='Last Name' />
             </div>
 
             <div class='form-group'>
                 <input name='email'
                        type='email'
-                       [(ngModel)]='registration.email'
+                       formControlName='email'
                        class='form-control'
-                       placeholder='Email Address'
-                       required='required' />
+                       placeholder='Email Address' />
             </div>
 
             <div class='form-group'>
                 <input name='userName'
                        type='text'
-                       [(ngModel)]='registration.userName'
+                       formControlName='userName'
                        class='form-control'
-                       placeholder='UserName'
-                       required='required' />
+                       placeholder='UserName' />
             </div>
         
             <div class='form-group'>
                 <input name='password'
                        type='password'
-                       [(ngModel)]='registration.password'
+                       formControlName='password'
                        class='form-control'
-                       placeholder='Password'
-                       required='required' />
+                       placeholder='Password' />
             </div>
         
             <div class='form-group'>
                 <input type='submit'
-                       value='Login'
+                       value='Register'
                        class='btn btn-primary btn-block'
-                       [disabled]='registrationForm.invalid'>
+                       [disabled]='registrationForm.invalid' />
             </div>
         </form>
     </div>
