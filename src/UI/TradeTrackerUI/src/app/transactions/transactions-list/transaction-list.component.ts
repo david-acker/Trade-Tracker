@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn, FormArray } from '@angular/forms';
 
 import { DataService } from '../../core/data.service';
-import { PagedTransactionsParameters } from '../../models/resource-parameters/paged-transactions-parameters';
-import { PagedTransactionsWithLinks } from '../../models/paged-transactions-with-links';
-import { TransactionWithLinks } from '../../models/transaction-with-links';
+import { PagedTransactionsParameters } from '../../models/transactions/paged-transactions-parameters';
+import { PagedTransactionsWithLinks } from '../../models/transactions/paged-transactions-with-links';
+import { TransactionWithLinks } from '../../models/transactions/transaction-with-links';
 
 @Component({
     templateUrl: './transaction-list.component.html',

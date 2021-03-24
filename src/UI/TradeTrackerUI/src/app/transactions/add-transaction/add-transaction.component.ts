@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DataService } from 'src/app/core/data.service';
-import { TransactionForCreation } from 'src/app/models/transaction-for-creation';
+import { TransactionForCreation } from 'src/app/models/transactions/transaction-for-creation';
 
 @Component({
   templateUrl: './add-transaction.component.html',
