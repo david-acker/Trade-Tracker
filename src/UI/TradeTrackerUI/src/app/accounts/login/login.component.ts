@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { DataService } from '../../core/data.service';
-import { Credentials } from '../../models/credentials';
+import { Credentials } from '../../models/accounts/credentials';
 
 @Component({
     templateUrl: 'login.component.html',
