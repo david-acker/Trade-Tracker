@@ -1,7 +1,7 @@
 import { OnInit } from '@angular/core';
 import { AfterViewInit } from '@angular/core';
 import { Component } from '@angular/core';
-import { UserService } from '../core/user.service';
+import { AuthService } from '../core/auth.service';
 
 @Component({
   selector: 'app-nav-menu',
@@ -12,7 +12,7 @@ export class NavMenuComponent {
 
   isExpanded = false;
 
-  constructor(public user: UserService) { }
+  constructor(public authService: AuthService) { }
 
   collapse() {
     this.isExpanded = false;

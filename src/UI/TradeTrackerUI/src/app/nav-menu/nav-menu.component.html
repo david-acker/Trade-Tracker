@@ -25,22 +25,22 @@
 
             <li class="nav-item" 
                 [routerLinkActive]="['link-active']"
-                *ngIf='user.loginRequired()'>
+                *ngIf='!authService.checkLogin()'>
               <a class="nav-link text-dark" 
                  [routerLink]="['/login']">Login</a>
             </li>
 
             <li class="nav-item"
                 [routerLinkActive]="['link-active']"
-                *ngIf='!user.loginRequired()'>
+                *ngIf='authService.checkLogin()'>
               <a class="nav-link text-dark"
                  [routerLink]="['/']"
-                 (click)='user.logout()'>Logout</a>
+                 (click)='authService.logout()'>Logout</a>
             </li>
 
             <li class="nav-item" 
                 [routerLinkActive]="['link-active']"
-                *ngIf='user.loginRequired()'>
+                *ngIf='!authService.checkLogin()'>
               <a class="nav-link text-dark" 
                  [routerLink]="['/register']">Register</a>
             </li>
