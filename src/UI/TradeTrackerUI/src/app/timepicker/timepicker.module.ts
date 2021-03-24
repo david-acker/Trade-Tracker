@@ -11,4 +11,4 @@ import { NgbdTimepicker } from './timepicker';
   exports: [NgbdTimepicker],
   bootstrap: [NgbdTimepicker]
 })
-export class NgbdTimepickerModule {}
+export class NgbdTimepickerModule { }
