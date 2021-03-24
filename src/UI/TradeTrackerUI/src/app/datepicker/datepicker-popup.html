@@ -1,18 +1,18 @@
-<form class="form-inline">
-    <div class="form-group">
-      <div class="input-group">
+<form>
+    <div>
+      <div class='input-container'>
+        <button class='btn'
+                (click)='d.toggle()' 
+                type='button'>
+          <fa-icon class='icon'
+                   [icon]="['far', 'calendar']"></fa-icon>
+        </button>
         <input [formControl]='input'
-               placeholder="yyyy-mm-dd" 
-               name="dp" 
+               class='input-field'
+               placeholder='Date' 
+               name='dp' 
                ngbDatepicker
-               #d="ngbDatepicker">
-        <div class="calendar-icon input-group-append">
-          <button class="btn btn-outline-secondary calendar" 
-                  (click)="d.toggle()" 
-                  type="button">
-              <fa-icon [icon]='["far", "calendar"]'></fa-icon>
-          </button>
-        </div>
+               #d='ngbDatepicker'>
       </div>
     </div>
 </form>

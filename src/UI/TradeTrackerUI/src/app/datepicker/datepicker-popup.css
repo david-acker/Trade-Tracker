@@ -1,18 +1,31 @@
-input {
-    width: 125px;
-    height: 25px;
+* { box-sizing: border-box; }
+
+.input-container {
+    display: flex;
+    width: 100%;
 }
 
-button {
-    padding: 0;
-    padding-left: 10px;
-    padding-right: 10px;
-} 
+.btn {
+    border-radius: 0;
+    border-color: black;
+    border-style: solid;
+    border-width: 0.1em 0 0.1em 0.1em;
+}
 
-fa-icon {
-    vertical-align: middle;
+.icon {
+    width: auto;
+    height: auto;
+    min-width: 50px;
     text-align: center;
-    width: 25px;
-    height: 25px;
-    margin: 0;
+}
+
+.input-field {
+    text-align: center;
+    
+    width: 80%;
+    width: 100%;
+
+    border-color: black;
+    border-style: solid;
+    border-width: 0.1em;
 }
