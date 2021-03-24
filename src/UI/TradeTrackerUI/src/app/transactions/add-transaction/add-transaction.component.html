@@ -1,5 +1,5 @@
 <br>
-<div class='container-fluid col-3 offset-4.5'>
+<div class='container-fluid col-5 offset-3.5'>
     <div class='card'>
         <div class='card-header text-center'>Add Transaction</div>
         <div class='card-body'>
@@ -39,6 +39,7 @@
                     <div class='col-8'>
                         <input id='symbolId'
                                type='text'
+                               class='input-field'
                                formControlName='symbol' />
                     </div>
                 </div>
@@ -51,6 +52,7 @@
                     <div class='col-8'>
                         <select class='form-select'
                                 id='typeId'
+                                class='input-field'
                                 formControlName='type'>
                             <option value='Buy'>Buy</option>
                             <option value='Sell'>Sell</option>
@@ -67,6 +69,7 @@
                         <input class='form-control'
                                 id='quantityId'
                                 type='number'
+                                class='input-field'
                                 formControlName='quantity' />
                     </div>
                 </div>
@@ -80,6 +83,7 @@
                         <input class='form-control'
                                 id='notionalId'
                                 type='number'
+                                class='input-field'
                                 formControlName='notional' />
                     </div>
                 </div>
@@ -93,12 +97,13 @@
                         <input class='form-control'
                                 id='tradePriceId'
                                 type='number'
+                                class='input-field'
                                 formControlName='tradePrice' />
                     </div>
                 </div>
 
                 <div class='form-group'>
-                    <div>
+                    <div class='text-center'>
                         <button class='btn btn-primary'
                                 type='submit'
                                 [disabled]='!transactionForm.valid'>
