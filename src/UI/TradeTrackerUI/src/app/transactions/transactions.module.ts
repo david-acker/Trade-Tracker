@@ -13,6 +13,7 @@ import { TransactionListComponent } from './transactions-list/transaction-list.c
 import { NgbdDatepickerPopupModule } from '../datepicker/datepicker-popup.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { AddTransactionComponent } from './add-transaction/add-transaction.component';
+import { AuthGuard } from '../core/auth-guard.service';
 
 let routes = [
   {
@@ -20,11 +21,13 @@ let routes = [
     children: [
       {
         path: 'add',
-        component: AddTransactionComponent
+        component: AddTransactionComponent,
+        canActivate: [AuthGuard]
       },
       {
         path: 'view',
-        component: TransactionListComponent
+        component: TransactionListComponent,
+        canActivate: [AuthGuard]
       }
     ]
   }
