@@ -1,46 +1,21 @@
-import { query } from '@angular/animations';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Credentials } from '../models/accounts/credentials';
-import { PagedTransactionsWithLinks } from '../models/transactions/paged-transactions-with-links';
-import { Registration } from '../models/accounts/registration';
+import { Observable } from 'rxjs';
+
 import { PagedTransactionsParameters } from '../models/transactions/paged-transactions-parameters';
+import { PagedTransactionsWithLinks } from '../models/transactions/paged-transactions-with-links';
 import { TransactionForCreation } from '../models/transactions/transaction-for-creation';
 
 @Injectable({
     providedIn: 'root'
 })
 export class DataService {
-    
-    constructor(private http: HttpClient) { }
-
     public pagedTransactionsWithLinks: PagedTransactionsWithLinks;
 
-    public login(credentials: Credentials) {
-        return this.http.post('/api/account/authenticate', credentials)
-            .pipe(
-                map((response: any) => {
-                    localStorage.setItem('token', response.token);
-
-                    let expirationDate = new Date(response.expiration);
-                    localStorage.setItem('token-expiration', expirationDate.toISOString());
-
-                    return true;
-                }));
-    }
-
-    public register(registration: Registration) {
-        return this.http.post('/api/account/register', registration)
-            .pipe(
-                map((response: any) => {
-                    return true;
-                }));
-    }
+    constructor(private http: HttpClient) { }
 
     public addTransaction(transaction: TransactionForCreation) {
-
         let token: string = localStorage.getItem('token');
 
         let headers = new HttpHeaders({
@@ -58,7 +33,6 @@ export class DataService {
     }
 
     public getPagedTransactionsWithLinks(resourceParams: PagedTransactionsParameters): Observable<boolean> {
-
         let token: string = localStorage.getItem('token');
 
         let headers = new HttpHeaders({
