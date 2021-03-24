@@ -3,11 +3,11 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Credentials } from '../models/credentials';
-import { PagedTransactionsWithLinks } from '../models/paged-transactions-with-links';
-import { Registration } from '../models/registration';
-import { PagedTransactionsParameters } from '../models/resource-parameters/paged-transactions-parameters';
-import { TransactionForCreation } from '../models/transaction-for-creation';
+import { Credentials } from '../models/accounts/credentials';
+import { PagedTransactionsWithLinks } from '../models/transactions/paged-transactions-with-links';
+import { Registration } from '../models/accounts/registration';
+import { PagedTransactionsParameters } from '../models/transactions/paged-transactions-parameters';
+import { TransactionForCreation } from '../models/transactions/transaction-for-creation';
 
 @Injectable({
     providedIn: 'root'
