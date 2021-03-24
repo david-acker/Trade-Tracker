@@ -11,12 +11,11 @@ import { TransactionWithLinks } from '../../models/transactions/transaction-with
     styleUrls: ['./transaction-list.component.css']
 })
 export class TransactionListComponent implements OnInit {
+    private errorMessage: string = '';
+    private resourceParameters: PagedTransactionsParameters = 
+        new PagedTransactionsParameters();
 
-    displayedColumns: string[] = ['dateTime', 'symbol', 'type', 'quantity', 'notional', 'tradePrice'];
-
-    transactionsFilters: FormGroup;
-
-    resourceParameters: PagedTransactionsParameters;
+    public transactionsFilters: FormGroup;
 
     response: PagedTransactionsWithLinks;
     transactions: TransactionWithLinks[] = [];
@@ -28,8 +27,13 @@ export class TransactionListComponent implements OnInit {
     sortDirection: string = 'desc';
     sortDirectionName: string = 'Descending';
 
-    constructor (private data: DataService, private fb: FormBuilder) { 
-        this.resourceParameters = new PagedTransactionsParameters();
+    displayedColumns: string[] = [
+        'dateTime', 'symbol', 'type', 
+        'quantity', 'notional', 'tradePrice'];
+
+    constructor (
+        private data: DataService, 
+        private fb: FormBuilder) { 
         this.getPageData();
     }
 
@@ -43,7 +47,7 @@ export class TransactionListComponent implements OnInit {
         });
     }
 
-    onUpdate(): void {
+    public onUpdate(): void {
         this.resourceParameters.rangeStart = parseDateInput(
             this.transactionsFilters.get(['dateRange', 'start']).value);
         
@@ -56,12 +60,12 @@ export class TransactionListComponent implements OnInit {
         this.getPageData();
     }
 
-    onPageChange(pageNumber: number): void {
+    public onPageChange(pageNumber: number): void {
         this.resourceParameters.pageNumber = pageNumber;
         this.getPageData();
     }
 
-    reverseDirection(): void {
+    public reverseDirection(): void {
         if (this.sortDirection == 'desc') {
             this.sortDirection = 'asc';
             this.sortDirectionName = 'Ascending';
@@ -72,7 +76,7 @@ export class TransactionListComponent implements OnInit {
     }
 
     private getPageData(): void {
-        console.log(this.resourceParameters);
+        this.errorMessage = '';
 
         this.data.getPagedTransactionsWithLinks(this.resourceParameters)
             .subscribe(success => {
@@ -82,7 +86,9 @@ export class TransactionListComponent implements OnInit {
                 this.pageNumber = this.response.metadata.pageNumber;
                 this.pageSize = this.response.metadata.pageSize;
                 this.pageCount = this.response.metadata.pageCount;
-            })
+            }, error => {
+                this.errorMessage = 'An error occurred while loading the transactions'
+            });
     }
 }
 
@@ -111,7 +117,7 @@ function parseDateInput(input: any): string | null {
             input.month, 
             input.day);
         return date.toISOString();
-    } else {
-        return null;
     }
+
+    return null;
 }
