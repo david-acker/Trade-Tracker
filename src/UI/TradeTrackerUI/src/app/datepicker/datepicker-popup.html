@@ -1,19 +1,17 @@
 <form>
-    <div>
-      <div class='input-container'>
-        <button class='btn'
-                (click)='d.toggle()' 
-                type='button'>
-          <fa-icon class='icon'
-                   [icon]="['far', 'calendar']"></fa-icon>
-        </button>
-        <input [formControl]='input'
-               class='input-field'
-               placeholder='Date' 
-               name='dp' 
-               ngbDatepicker
-               #d='ngbDatepicker'>
-      </div>
+    <div class='input-container'>
+      <button class='btn'
+              (click)='d.toggle()' 
+              type='button'>
+        <fa-icon class='icon'
+                  [icon]="['far', 'calendar']"></fa-icon>
+      </button>
+      <input [formControl]='input'
+              class='input-field'
+              placeholder='Date' 
+              name='dp' 
+              ngbDatepicker
+              #d='ngbDatepicker'>
     </div>
 </form>
   

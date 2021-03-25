@@ -1,7 +1,5 @@
 import { Component, forwardRef, Input, OnDestroy, Output } from '@angular/core';
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
-import { EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'ngbd-datepicker-popup',

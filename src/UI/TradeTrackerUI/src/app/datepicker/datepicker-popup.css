@@ -16,13 +16,14 @@
     width: auto;
     height: auto;
     min-width: 50px;
+    min-height: 50px;
+
     text-align: center;
 }
 
 .input-field {
     text-align: center;
     
-    width: 80%;
     width: 100%;
 
     border-color: black;
