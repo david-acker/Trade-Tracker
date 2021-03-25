@@ -13,6 +13,9 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
             RuleFor(q => q.AccessKey)
                 .SetValidator(new AccessKeyValidator());
 
+            RuleFor(q => q.Type)
+                .SetValidator(new TransactionTypeForFilteringValidator());
+
             var OrderByFields = new List<string>()
             {
                 "DateTime",

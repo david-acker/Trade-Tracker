@@ -12,6 +12,8 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
         public string OrderBy { get; set; } = "DateTime";
         public SortOrder SortOrder { get; set; } = SortOrder.Descending;
 
+        public string Type { get; set; } = "";
+
         private int _pageNumber = 1;
         public int PageNumber
         {
