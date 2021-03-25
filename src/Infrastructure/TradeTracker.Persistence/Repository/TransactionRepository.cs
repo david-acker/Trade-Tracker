@@ -38,6 +38,20 @@ namespace TradeTracker.Persistence.Repositories
         
             query = query.Where(t => t.AccessKey == parameters.AccessKey);
 
+            switch (parameters.Type)
+            {
+                case "buy":
+                    query = query.Where(t => t.Type == TransactionType.Buy);
+                    break;
+
+                case "sell":
+                    query = query.Where(t => t.Type == TransactionType.Sell);
+                    break;
+                
+                default:
+                    break;
+            }
+
             if (parameters.Including.Count > 0)
             {
                 var inclusionSelection = parameters.Including;
