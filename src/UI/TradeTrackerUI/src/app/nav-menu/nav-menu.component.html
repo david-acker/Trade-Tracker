@@ -1,8 +1,12 @@
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3">
       <div class="container">
+
         <a class="navbar-brand" 
-           [routerLink]="['/']">TradeTracker</a>
+           [routerLink]="['/']">
+          TradeTracker
+        </a>
+
         <button class="navbar-toggler"
                 type="button"
                 data-toggle="collapse"
@@ -12,8 +16,10 @@
                 (click)="toggle()">
           <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end"
              [ngClass]="{ show: isExpanded }">
+
           <ul class="navbar-nav flex-grow">
 
             <li class="nav-item"
@@ -45,18 +51,31 @@
                  [routerLink]="['/register']">Register</a>
             </li>
 
-            <li class="nav-item" 
-                [routerLinkActive]="['link-active']">
-              <a class="nav-link text-dark" 
-                 [routerLink]="['/transactions/view']">View Transactions</a>
-            </li>
+            <li ngbDropdown
+                class="nav-item">
+              
+              <a ngbDropdownToggle
+                 class="nav-link" 
+                 tabindex="0"
+                 id="transactionsDropdown"
+                 role="button">
+                Transactions
+              </a>
 
-            <li class="nav-item" 
-                [routerLinkActive]="['link-active']">
-              <a class="nav-link text-dark" 
-                 [routerLink]="['/transactions/add']">Add Transaction</a>
-            </li>
+              <div ngbDropdownMenu
+                   aria-labelledby="transactionsDropdown"
+                   class="dropdown-menu">
 
+                <a ngbDropdownItem
+                   [routerLink]="['/transactions/add']"
+                   (click)="$event.preventDefault()">Add Transaction</a>
+
+                <a ngbDropdownItem
+                   [routerLink]="['/transactions/view']"
+                   (click)="$event.preventDefault()">View Transactions</a>
+
+              </div>
+            </li>
           </ul>
         </div>
       </div>
