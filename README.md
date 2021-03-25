@@ -26,8 +26,8 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
   - [ ] Aggregate/summary statistics
 - [x] API adherent to [REST Architectural Constraints](https://restfulapi.net/rest-architectural-constraints/) *(pragmatically)*
 - [ ] Basic UI with Angular + TypeScript
-  - [ ] Accounts
-  - [ ] Transactions 
+  - [x] Accounts
+  - [x] Transactions 
   - [ ] Positions
 
 ## Architecture
