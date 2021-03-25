@@ -43,12 +43,19 @@ export class DataService {
 
         let params = new HttpParams()
 
+
+        if (resourceParams.type != '') {
+            params = params.set('Type', resourceParams.type.toString());
+        }
+
         params = params.set('Order', resourceParams.order);
         params = params.set('PageNumber', resourceParams.pageNumber.toString());
         params = params.set('PageSize', resourceParams.pageSize.toString());
+
         if (resourceParams.rangeStart != null) {
             params = params.set('RangeStart', resourceParams.rangeStart.toString());
         }
+        
         if (resourceParams.rangeEnd != null) {
             params = params.set('RangeEnd', resourceParams.rangeEnd.toString());
         }
