@@ -1,37 +1,38 @@
-.center { 
-    text-align: center 
-}
+* { box-sizing: border-box; }
 
-table {
+.input-container {
+    display: flex;
     width: 100%;
 }
 
-label.input-label {
-    display: block;
-    text-align: left
+.btn {
+    border-radius: 0;
+    border-color: black;
+    border-style: solid;
+    border-width: 0.1em 0.1em 0.1em 0.1em;
 }
 
-.orderby-dropdown {
-    width: 125px;
-    height: 34px;
+.btn-secondary {
+    border-radius: 0;
+    border-color: black;
+    border-style: solid;
+    border-width: 0.1em 0 0.1em 0.1em;
 }
 
-button.orderby-button {
-    padding-left: 10px;
-    padding-right: 10px;
+.icon {
+    width: auto;
+    height: auto;
+    min-width: 50px;
+    min-height: 50px;
+    text-align: center;
 }
 
-button>fa-icon {
-    vertical-align: middle;
-    width: 25px;
-    height: 25px;
-    margin: 0;
-}
+.input-field {
+    text-align: center;
+    height: 100%;
+    width: 100%;
 
-.buy {
-    color: rgb(0, 196, 0);
-}
-
-.sell {
-    color: rgb(204, 0, 0);
+    border-color: black;
+    border-style: solid;
+    border-width: 0.1em;
 }

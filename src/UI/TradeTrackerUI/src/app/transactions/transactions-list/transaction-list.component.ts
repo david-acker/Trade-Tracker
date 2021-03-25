@@ -15,7 +15,7 @@ export class TransactionListComponent implements OnInit {
     private resourceParameters: PagedTransactionsParameters = 
         new PagedTransactionsParameters();
 
-    public transactionsFilters: FormGroup;
+    public transactionFilters: FormGroup;
 
     response: PagedTransactionsWithLinks;
     transactions: TransactionWithLinks[] = [];
@@ -38,24 +38,35 @@ export class TransactionListComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.transactionsFilters = this.fb.group({
+        this.transactionFilters = this.fb.group({
+            type: 'Any',
+            orderBy: 'DateTime',
             dateRange: this.fb.group({
                 start: [''],
                 end: ['']
-            }, { validator: dateRangeChecker }),
-            orderBy: 'DateTime'
+            }, { validator: dateRangeChecker })
         });
     }
 
     public onUpdate(): void {
+        let type: string = this.transactionFilters.get('type').value;
+
+        if (type == 'Any') {
+            this.resourceParameters.type = '';
+        } else {
+            this.resourceParameters.type = type;
+        }
+
+        let orderBy: string = this.transactionFilters.get('orderBy').value;
+        this.resourceParameters.order = orderBy + '+' + this.sortDirection;
+
         this.resourceParameters.rangeStart = parseDateInput(
-            this.transactionsFilters.get(['dateRange', 'start']).value);
+            this.transactionFilters.get(['dateRange', 'start']).value);
         
         this.resourceParameters.rangeEnd = parseDateInput(
-            this.transactionsFilters.get(['dateRange', 'end']).value);
+            this.transactionFilters.get(['dateRange', 'end']).value);
 
-        let orderBy = this.transactionsFilters.get('orderBy').value;
-        this.resourceParameters.order = orderBy + '+' + this.sortDirection;
+        console.log(this.resourceParameters);
 
         this.getPageData();
     }
