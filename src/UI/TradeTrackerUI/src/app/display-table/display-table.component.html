@@ -1,0 +1,28 @@
+<table class='table table-sm table-bordered table-hover shadow-sm p-3 mb-5'>
+    <thead class='thead-light'>
+        <tr style='text-align: center'>
+            <th scope='col'>DateTime</th>
+            <th scope='col'>Symbol</th>
+            <th scope='col'>Type</th>
+            <th scope='col'>Quantity</th>
+            <th scope='col'>Notional</th>
+            <th scope='col'>Trade Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr scope='row' 
+            class='center' 
+            *ngFor='let transaction of transactions'>
+            <td>{{ transaction.dateTime | date:'MM/dd/yy hh:mm:ss aa' }}</td>
+            <td>{{ transaction.symbol }}</td>
+            <td [ngClass]='{
+                    "buy": transaction.type === "Buy",
+                    "sell": transaction.type === "Sell" }'>
+                <b>{{ transaction.type }}</b>
+            </td>
+            <td>{{ transaction.quantity | currency }}</td>
+            <td>{{ transaction.notional | currency}}</td>
+            <td>{{ transaction.tradePrice | currency }}</td>
+        </tr>
+    </tbody>
+</table>

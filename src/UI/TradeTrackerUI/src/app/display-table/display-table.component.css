@@ -1,0 +1,15 @@
+.center { 
+    text-align: center 
+}
+
+table {
+    width: 100%;
+}
+
+.buy {
+    color: rgb(0, 196, 0);
+}
+
+.sell {
+    color: rgb(204, 0, 0);
+}
