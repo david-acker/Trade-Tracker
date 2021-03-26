@@ -57,9 +57,15 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
 * Contains repositories, services, and EF Core types for the data access implementation&mdash;currently using SQLite.
 * Provides an extension method for registering services with the ASP.NET Core Dependency Injection container.
 
+### Web UI
+* Contains the single-page application for TradeTracker built with Angular and TypeScript.
+
+#### View Transactions Page
+![ViewTransactionsPage](demo/view-transactions-page.png?raw=true "View Transactions Page")
+
 ## Motivations
-* Learn Clean Architecture application development.
-* Gain experience using ASP.NET Core to create APIs.
+* Learn the basics of application development using Clean Architecture principles.
+* Gain experience using ASP.NET Core to build RESTful APIs.
 
 ## License
 TradeTracker is licensed under the [MIT license](LICENSE).
