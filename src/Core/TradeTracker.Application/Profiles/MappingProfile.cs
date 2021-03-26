@@ -148,13 +148,17 @@ namespace TradeTracker.Application.Profiles
             var selectionList = new List<string>();
 
             var symbolString = input.Split(' ')[0];
-            var selection = symbolString.Split(',');
 
-            if (!String.IsNullOrWhiteSpace(selection[0]))
+            if (SelectionTypeParser(symbolString) == SelectionType.NotSpecified)
             {
-                selectionList.AddRange(selection);
-            }
+                var selection = symbolString.Split(',');
 
+                if (!String.IsNullOrWhiteSpace(selection[0]))
+                {
+                    selectionList.AddRange(selection);
+                }
+            }    
+            
             return selectionList;
         }
 
