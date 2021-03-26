@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { PositionDetailComponent } from './position-detail/position-detail.component';
 
 
-
 @NgModule({
   declarations: [PositionDetailComponent],
   imports: [
