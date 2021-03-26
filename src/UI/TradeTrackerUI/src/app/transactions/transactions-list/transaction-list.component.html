@@ -1,24 +1,26 @@
-<br>
-<div class='container-fluid'>
+<div class='container-fluid mx-1 px-3 py-0 pt-2'>
+
     <div class='row'>
-        <div class='card'>
-            <div class='card-header text-center'>
-                <h3>Filter</h3>
+        <div class='card col-3 px-0'>
+
+            <div class='card-header text-center font-weight-bold'>
+                Filter
             </div>
+
             <div class='card-body'>
                 <form [formGroup]='transactionFilters'
                       (ngSubmit)='onUpdate()'
                       novalidate>
 
                     <div class='form-group row'>
-                        <div class='col-3'>
+                        <div class='col-3 align-self-end'>
                             <label for='typeId'>Type</label>
                         </div>
+
                         <div class='col-9 input-container'>
                             <select id='typeId'
                                     class='form-select input-field'
-                                    formControlName='type'
-                                    aria-label='Any'>
+                                    formControlName='type'>
                                 <option value='Any'>Any</option>
                                 <option value='Buy'>Buy</option>
                                 <option value='Sell'>Sell</option>
@@ -27,11 +29,12 @@
                     </div>
 
                     <div class='form-group row'>
-                        <div class='col-3'>
+                        <div class='col-3 align-self-end'>
                             <label for='orderById'>Order</label>
                         </div>
+
                         <div class='col-9 input-container'>
-                            <button class='btn btn-check btn-secondary'
+                            <button class='btn btn-check'
                                     (click)='reverseDirection()'>
                                 <fa-icon [icon]='["fas", "sort-amount-down"]'
                                          class='icon'
@@ -41,9 +44,8 @@
                                          *ngIf='sortDirection == "asc"'></fa-icon>
                             </button>
                             <select id='orderById'
-                                    class='form-select input-field'
-                                    formControlName='orderBy'
-                                    aria-label='DateTime'>
+                                    class='input-field-attached'
+                                    formControlName='orderBy'>
                                 <option value='DateTime'>DateTime</option>
                                 <option value='Symbol'>Symbol</option>
                                 <option value='Quantity'>Quantity</option>
@@ -54,51 +56,111 @@
 
                     <div formGroupName='dateRange'>
                         <div class='form-group row'>
-                            <div class='col-3'>
+                            <div class='col-3 align-self-end'>
                                 <label for='startRangeId'>Start</label>
                             </div>
+
                             <div class='col-9'>
                                 <ngbd-datepicker-popup id='startRangeId'
-                                                        formControlName='start'>
+                                                       formControlName='start'>
                                 </ngbd-datepicker-popup>
                             </div>
                         </div>
 
                         <div class='form-group row'>
-                            <div class='col-3'>
+                            <div class='col-3 align-self-end'>
                                 <label for='endRangeId'>End</label>
                             </div>
+
                             <div class='col-9'>
                                 <ngbd-datepicker-popup id='endRangeId'
-                                                        formControlName='end'>
+                                                       formControlName='end'>
                                 </ngbd-datepicker-popup>
                             </div>
                         </div>
                     </div>
+                    
+                    <div formGroupName='selection'>
+                        <div class='form-group row'>
+                            <div class='col-3 align-self-end'>
+                                <label for='includingId'>Include</label>
+                            </div>
+                            <div class='col-9'>
+                                <input class='input-field'
+                                       type='text'
+                                       id='includingId'
+                                       formControlName='including'
+                                       (change)='onSelectionChange("including")'
+                                       placeholder='Included Symbols'/>
+                            </div>
+                        </div>
 
-                    <div class='form-group'>
-                        <div class='text-center'>
-                            <button class='btn btn-primary'
-                                    type='submit'
-                                    [disabled]='!transactionFilters.valid'>
-                                Update
-                            </button>
+                        <div class='form-group row mb-0'>
+                            <div class='col-3 align-self-end'>
+                                <label for='excludingId'>Exclude</label>
+                            </div>
+                            <div class='col-9'>
+                                <input class='input-field'
+                                       type='text'
+                                       id='excludingId'
+                                       formControlName='excluding'
+                                       (change)='onSelectionChange("excluding")'
+                                       placeholder='Excluded Symbols'/>
+                            </div>
                         </div>
                     </div>
-
                 </form>
             </div>
-        </div>
-        <div class='col-9'>
-            <div>
-                <display-table [transactions]='transactions'></display-table>
+
+            <div class='card-footer'>
+                <div class='form-group mb-0'>
+                    <div class='text-center'>
+                        <button class='btn btn-primary'
+                                type='submit'
+                                (click)='onUpdate()'
+                                [disabled]='!transactionFilters.valid'>
+                            Update
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div>
-                <ngb-pagination [(page)]='pageNumber'
-                                [collectionSize]='pageCount'
-                                [boundaryLinks]='true'
-                                (pageChange)='onPageChange(pageNumber)'>
-                </ngb-pagination>
+        </div>
+
+        <div class='col-9'>
+            <div class='card'>
+                <div class='card-body p-0'>
+                    <display-table [transactions]='transactions'></display-table>
+                </div>
+                <div class='card-footer'>
+                    <div class='row px-2 pt-3'>
+
+                        <div class='col-2 mb-0 justify-content-end'>
+                            <p class='row'><b>Total Results:</b> &nbsp; {{ totalRecordCount | number }}</p>
+                            <p class='row'><b>Total Pages:</b> &nbsp; {{ pageCount | number }}</p>
+                        </div>
+
+                        <div class='col-4 offset-2 mb-0 justify-content-start'>
+                            <ngb-pagination [(page)]='pageNumber'
+                                            [collectionSize]='pageCount'
+                                            [maxSize]='5'
+                                            [rotate]='true'
+                                            [ellipses]='false'
+                                            [boundaryLinks]='true'
+                                            (pageChange)='onPageChange(pageNumber)'
+                                            class='d-flex justify-content-center'>
+                            </ngb-pagination>
+                        </div>
+
+                        <div class='col-1 offset-3 px-0 mb-0 justify-content-end'>
+                            <select id='pageSizeId'
+                                    (change)='onPageSizeChange($event)'
+                                    class='page-size-dropdown align-self-end'>
+                                <option *ngFor='let size of pageSizes'
+                                        [value]='size'>{{ size }}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
