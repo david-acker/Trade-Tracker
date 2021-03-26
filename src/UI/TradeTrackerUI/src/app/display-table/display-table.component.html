@@ -1,5 +1,5 @@
-<table class='table table-sm table-bordered table-hover shadow-sm p-3 mb-5'>
-    <thead class='thead-light'>
+<table class='table table-bordered px-3 py-3'>
+    <thead class='card-header'>
         <tr style='text-align: center'>
             <th scope='col'>DateTime</th>
             <th scope='col'>Symbol</th>
@@ -9,7 +9,7 @@
             <th scope='col'>Trade Price</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class='card-body table-sm'>
         <tr scope='row' 
             class='center' 
             *ngFor='let transaction of transactions'>
@@ -20,7 +20,7 @@
                     "sell": transaction.type === "Sell" }'>
                 <b>{{ transaction.type }}</b>
             </td>
-            <td>{{ transaction.quantity | currency }}</td>
+            <td>{{ transaction.quantity }}</td>
             <td>{{ transaction.notional | currency}}</td>
             <td>{{ transaction.tradePrice | currency }}</td>
         </tr>
