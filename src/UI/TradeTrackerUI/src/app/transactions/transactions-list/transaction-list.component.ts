@@ -228,7 +228,7 @@ function commaSeparatedValidator(control: AbstractControl): {[key: string]: bool
     if (input != null && input != '') {
         let splitString: string[] = (input.split(','));
 
-        const regex = /[^a-zA-Z\d\s:]/;
+        const regex = /[^a-zA-Z\d.:]/;
 
         let isValid = true;
         splitString.forEach(element => {
