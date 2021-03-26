@@ -49,8 +49,8 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
                 }
             }
         }
-        public List<string> Selection { get; set; }
-        public SelectionType SelectionType { get; set; }
+        public List<string> Selection { get; set; } = new List<string>();
+        public SelectionType SelectionType { get; set; } = SelectionType.NotSpecified;
         public DateTime RangeStart { get; set; } = DateTime.MinValue; 
         public DateTime RangeEnd { get; set; } = DateTime.MaxValue;
     }

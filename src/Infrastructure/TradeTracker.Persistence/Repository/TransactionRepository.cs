@@ -51,10 +51,10 @@ namespace TradeTracker.Persistence.Repositories
                 default:
                     break;
             }
-
-            if (parameters.SelectionType != SelectionType.NotSpecified)
+            
+            if (parameters.Selection.Count() > 0)
             {
-                var selection = parameters.Selection;
+                List<string> selection = parameters.Selection;
 
                 switch (parameters.SelectionType)
                 {

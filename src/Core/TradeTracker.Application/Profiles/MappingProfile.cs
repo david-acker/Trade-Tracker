@@ -63,7 +63,7 @@ namespace TradeTracker.Application.Profiles
                     opt => opt.MapFrom(src => (DateTime.Parse(src.RangeEnd))))
                 .ForMember(
                     dest => dest.Selection,
-                    opt => opt.MapFrom(src => SelectionParser(src.Selection)))
+                    opt => opt.MapFrom(src => SelectionParser(src.Selection) ?? new List<string>()))
                 .ForMember(
                     dest => dest.SelectionType,
                     opt => opt.MapFrom(src => SelectionTypeParser(src.Selection)));
@@ -145,20 +145,29 @@ namespace TradeTracker.Application.Profiles
 
         private List<string> SelectionParser(string input)
         {
-            var selectionList = new List<string>();
+            List<string> selectionList = new List<string>();
 
-            var symbolString = input.Split(' ')[0];
-
-            if (SelectionTypeParser(symbolString) == SelectionType.NotSpecified)
+            if (!String.IsNullOrWhiteSpace(input))
             {
-                var selection = symbolString.Split(',');
+                string[] splitString = input.Split(' ', 
+                    StringSplitOptions.RemoveEmptyEntries) ?? new string[0];
 
-                if (!String.IsNullOrWhiteSpace(selection[0]))
+                if (splitString.Count() > 1)
                 {
-                    selectionList.AddRange(selection);
+                    var symbolString = splitString[0];
+
+                    if (symbolString.Length > 0)
+                    {
+                        var selection = symbolString.Split(',');
+
+                        if (!String.IsNullOrWhiteSpace(selection[0]))
+                        {
+                            selectionList.AddRange(selection);
+                        }
+                    } 
                 }
-            }    
-            
+            }
+        
             return selectionList;
         }
 
@@ -166,27 +175,31 @@ namespace TradeTracker.Application.Profiles
         {
             var selectionType = SelectionType.NotSpecified;
         
-            var splitInput = input.Split(' ');
-            
-            if (splitInput.Count() == 2)
+            if (!String.IsNullOrWhiteSpace(input))
             {
-                var selectionTypeString = splitInput[1];
+                var splitInput = input.Split(' ',
+                    StringSplitOptions.RemoveEmptyEntries);
 
-                switch (selectionTypeString.ToLower())
+                if (splitInput.Count() == 2)
                 {
-                    case "include":
-                        selectionType = SelectionType.Include;
-                        break;
+                    var selectionTypeString = splitInput[1];
 
-                    case "exclude":
-                        selectionType = SelectionType.Exclude;
-                        break;
+                    switch (selectionTypeString.ToLower())
+                    {
+                        case "include":
+                            selectionType = SelectionType.Include;
+                            break;
 
-                    default:
-                        break;
+                        case "exclude":
+                            selectionType = SelectionType.Exclude;
+                            break;
+
+                        default:
+                            break;
+                    }
                 }
             }
-
+            
             return selectionType;
         }
     }
