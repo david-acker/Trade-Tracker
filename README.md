@@ -15,6 +15,7 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
 * [FluentAssertions](https://fluentassertions.com/)
 * [AspNetCoreRateLimit](https://github.com/stefanprodan/AspNetCoreRateLimit)
 * [Swashbuckle](https://github.com/domaindrivendev/Swashbuckle.WebApi)
+* [Postman](https://www.postman.com/) (for testing API endpoints)
 
 ## Objectives
 - [x] CRUD Functionality for Transactions
