@@ -61,7 +61,7 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
 * Contains the single-page application for TradeTracker built with Angular and TypeScript.
 
 <p align="center">
-  <i>View Transactions Page</i>
+  <i><b>View Transactions Page</b></i>
 </p>
 
 ![ViewTransactionsPage](demo/view-transactions-page.png?raw=true "View Transactions Page")
