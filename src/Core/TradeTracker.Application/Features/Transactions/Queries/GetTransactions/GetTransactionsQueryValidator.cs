@@ -28,6 +28,9 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
                 .Must(q => OrderByFields.Contains(q))
                     .WithMessage($"The OrderBy clause requires one of the valid fields: {String.Join(", ", OrderByFields)}.");
             
+            RuleFor(q => q.SortOrder)
+                .SetValidator(new SortOrderValidator());
+
             When(q => (
                 (q.RangeStart != DateTime.MinValue && q.RangeEnd != DateTime.MaxValue) &&
                 (q.RangeEnd != DateTime.MinValue)), () =>
@@ -37,26 +40,13 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
                                 .WithMessage("The RangeEnd must be after the RangeStart.");
                     });
 
-            When(q => (
-                (q.Including.Count() > 0) ||
-                (q.Excluding.Count() > 0)), () => 
-            {
-                RuleFor(q => q)
-                    .Must(q => HasEitherIncludingOrExcluding(q.Including, q.Excluding))
-                        .WithMessage("Including and Excluding parameters cannot be used together");
+            When(q => q.Selection != null || q.Selection.Count() != 0, () => {
+                RuleFor(q => q.Selection)
+                    .SetValidator(new SelectionValidator());
+
+                RuleFor(q => q.SelectionType)
+                    .SetValidator(new SelectionTypeValidator());
             });
-        }
-
-        private bool HasEitherIncludingOrExcluding(List<string> including, List<string> excluding)
-        {
-            var isValid = false;
-            
-            if (including.Count() == 0 || excluding.Count() == 0)
-            {
-                isValid = true;
-            }
-
-            return isValid;
         }
     }
 }

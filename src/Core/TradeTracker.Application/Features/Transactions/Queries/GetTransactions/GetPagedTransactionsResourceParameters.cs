@@ -18,8 +18,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 
         public int PageSize { get; set; } = 25;
 
-        public string Including { get; set; }
-        public string Excluding { get; set; }
+        public string Selection { get; set; }
 
         public string RangeStart { get; set; }
         public string RangeEnd { get; set; }

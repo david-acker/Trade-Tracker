@@ -16,8 +16,8 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
 
-        public List<string> Including { get; set; }
-        public List<string> Excluding { get; set; }
+        public List<string> Selection { get; set; }
+        public SelectionType SelectionType { get; set; }
 
         public DateTime RangeStart { get; set; }
         public DateTime RangeEnd { get; set; }

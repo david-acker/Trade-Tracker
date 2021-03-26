@@ -62,17 +62,11 @@ namespace TradeTracker.Application.Profiles
                     dest => dest.RangeEnd,
                     opt => opt.MapFrom(src => (DateTime.Parse(src.RangeEnd))))
                 .ForMember(
-                    dest => dest.Including,
-                    opt => opt.MapFrom(src => 
-                        (src.Including != null)
-                            ? ArraySelectionParser(src.Including)
-                            : new List<string>()))
+                    dest => dest.Selection,
+                    opt => opt.MapFrom(src => SelectionParser(src.Selection)))
                 .ForMember(
-                    dest => dest.Excluding,
-                    opt => opt.MapFrom(src => 
-                        (src.Excluding != null)
-                            ? ArraySelectionParser(src.Excluding)
-                            : new List<string>()));
+                    dest => dest.SelectionType,
+                    opt => opt.MapFrom(src => SelectionTypeParser(src.Selection)));
 
             CreateMap<GetTransactionsQuery, PagedTransactionsResourceParameters>();
 
@@ -129,9 +123,67 @@ namespace TradeTracker.Application.Profiles
                 {
                     sortOrder = SortOrder.Ascending;
                 }
+
+                switch(sortOrderString.ToLower())
+                {
+                    case "asc":
+                        sortOrder = SortOrder.Ascending;
+                        break;
+
+                    case "desc":
+                        sortOrder = SortOrder.Descending;
+                        break;
+
+                    default:
+                        sortOrder = SortOrder.NotSpecified;
+                        break;
+                }
             }
             
             return sortOrder;
+        }
+
+        private List<string> SelectionParser(string input)
+        {
+            var selectionList = new List<string>();
+
+            var symbolString = input.Split(' ')[0];
+            var selection = symbolString.Split(',');
+
+            if (!String.IsNullOrWhiteSpace(selection[0]))
+            {
+                selectionList.AddRange(selection);
+            }
+
+            return selectionList;
+        }
+
+        private SelectionType SelectionTypeParser(string input)
+        {
+            var selectionType = SelectionType.NotSpecified;
+        
+            var splitInput = input.Split(' ');
+            
+            if (splitInput.Count() == 2)
+            {
+                var selectionTypeString = splitInput[1];
+
+                switch (selectionTypeString.ToLower())
+                {
+                    case "include":
+                        selectionType = SelectionType.Include;
+                        break;
+
+                    case "exclude":
+                        selectionType = SelectionType.Exclude;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            return selectionType;
         }
     }
 }

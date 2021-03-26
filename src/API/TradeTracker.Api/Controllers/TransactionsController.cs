@@ -616,10 +616,10 @@ namespace TradeTracker.Api.Controllers
                         new
                         {
                             order = parameters.Order,
+                            type = parameters.Type,
                             pageNumber = parameters.PageNumber - 1,
                             pageSize = parameters.PageSize,
-                            including = parameters.Including,
-                            excluding = parameters.Excluding,
+                            selection = parameters.Selection,
                             rangeStart = parameters.RangeStart,
                             rangeEnd = parameters.RangeEnd
                         });
@@ -630,10 +630,10 @@ namespace TradeTracker.Api.Controllers
                         new
                         {
                             order = parameters.Order,
+                            type = parameters.Type,
                             pageNumber = parameters.PageNumber + 1,
                             pageSize = parameters.PageSize,
-                            including = parameters.Including,
-                            excluding = parameters.Excluding,
+                            selection = parameters.Selection,
                             rangeStart = parameters.RangeStart,
                             rangeEnd = parameters.RangeEnd
                         });
@@ -645,10 +645,10 @@ namespace TradeTracker.Api.Controllers
                         new
                         {
                             order = parameters.Order,
+                            type = parameters.Type,
                             pageNumber = parameters.PageNumber,
                             pageSize = parameters.PageSize,
-                            including = parameters.Including,
-                            excluding = parameters.Excluding,
+                            selection = parameters.Selection,
                             rangeStart = parameters.RangeStart,
                             rangeEnd = parameters.RangeEnd
                         });

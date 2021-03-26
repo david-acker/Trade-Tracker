@@ -52,16 +52,23 @@ namespace TradeTracker.Persistence.Repositories
                     break;
             }
 
-            if (parameters.Including.Count > 0)
+            if (parameters.SelectionType != SelectionType.NotSpecified)
             {
-                var inclusionSelection = parameters.Including;
-                query = query.Where(t => inclusionSelection.Any(x => x == t.Symbol));
-            }
+                var selection = parameters.Selection;
 
-            if (parameters.Excluding.Count > 0)
-            {
-                var exclusionSelection = parameters.Excluding;
-                query = query.Where(t => !exclusionSelection.Any(x => x == t.Symbol));
+                switch (parameters.SelectionType)
+                {
+                    case SelectionType.Include:
+                        query = query.Where(t => selection.Any(x => x == t.Symbol));
+                        break;
+
+                    case SelectionType.Exclude:
+                        query = query.Where(t => !selection.Any(x => x == t.Symbol));
+                        break;
+
+                    default:
+                        break;
+                }
             }
 
             if (parameters.RangeStart != DateTime.MinValue)
