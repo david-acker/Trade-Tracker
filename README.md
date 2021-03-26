@@ -58,7 +58,7 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
 * Provides an extension method for registering services with the ASP.NET Core Dependency Injection container.
 
 ### Web UI
-* Contains the single-page application built using Angular and TypeScript.
+* Contains the TradeTracker single-page application (SPA) built using Angular and TypeScript.
 
 <p align="center">
   <i><b>View Transactions Page</b></i>
