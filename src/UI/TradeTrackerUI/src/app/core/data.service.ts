@@ -59,6 +59,14 @@ export class DataService {
         if (resourceParams.rangeEnd != null) {
             params = params.set('RangeEnd', resourceParams.rangeEnd.toString());
         }
+
+        if (resourceParams.including != null) {
+            params = params.set('including', resourceParams.including);
+        }
+
+        if (resourceParams.excluding != null) {
+            params = params.set('excluding', resourceParams.excluding);
+        }
         
         return this.http.get('/api/transactions', {
             headers: headers,
