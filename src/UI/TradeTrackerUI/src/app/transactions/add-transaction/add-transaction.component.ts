@@ -50,8 +50,6 @@ export class AddTransactionComponent implements OnInit {
     this.transactionForCreation.notional = this.transactionForm.get('notional').value;
     this.transactionForCreation.tradePrice = this.transactionForm.get('tradePrice').value;
 
-    console.log(this.transactionForCreation);
-
     this.data.addTransaction(this.transactionForCreation)
       .subscribe(success => {
         this.transactionForm.reset();
