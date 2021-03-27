@@ -5,6 +5,5 @@ export class PagedTransactionsParameters {
     public pageSize: number = 10;
     public rangeStart?: string;
     public rangeEnd?: string;
-    public including?: string;
-    public excluding?: string;
+    public selection?: string;
 }
