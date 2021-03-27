@@ -6,12 +6,14 @@ import { Observable } from 'rxjs';
 import { PagedTransactionsParameters } from '../models/transactions/paged-transactions-parameters';
 import { PagedTransactionsWithLinks } from '../models/transactions/paged-transactions-with-links';
 import { TransactionForCreation } from '../models/transactions/transaction-for-creation';
+import { Position } from '../models/positions/position';
 
 @Injectable({
     providedIn: 'root'
 })
 export class DataService {
     public pagedTransactionsWithLinks: PagedTransactionsWithLinks;
+    public position: Position;
 
     constructor(private http: HttpClient) { }
 
@@ -43,7 +45,6 @@ export class DataService {
 
         let params = new HttpParams()
 
-
         if (resourceParams.type != '') {
             params = params.set('Type', resourceParams.type.toString());
         }
@@ -60,12 +61,8 @@ export class DataService {
             params = params.set('RangeEnd', resourceParams.rangeEnd.toString());
         }
 
-        if (resourceParams.including != null) {
-            params = params.set('including', resourceParams.including);
-        }
-
-        if (resourceParams.excluding != null) {
-            params = params.set('excluding', resourceParams.excluding);
+        if (resourceParams.selection != null) {
+            params = params.set('selection', resourceParams.selection);
         }
         
         return this.http.get('/api/transactions', {
@@ -79,4 +76,22 @@ export class DataService {
         );
     }
 
+    public getPositionForSymbol(symbol: string): Observable<boolean> {
+        let token: string = localStorage.getItem('token');
+
+        let headers = new HttpHeaders({
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+        });
+
+        return this.http.get(`api/positions/${symbol}`, {
+            headers: headers
+        }).pipe(
+            map((data: any) => {
+                this.position = data;
+                return true;
+            })
+        )
+    }
 }
