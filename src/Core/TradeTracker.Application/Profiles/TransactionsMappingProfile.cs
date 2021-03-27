@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
+using TradeTracker.Api.Models.Filtering;
 using TradeTracker.Application.Enums;
 using TradeTracker.Application.Features.Positions;
 using TradeTracker.Application.Features.Positions.Queries.GetPositions;
@@ -60,15 +61,15 @@ namespace TradeTracker.Application.Profiles
                     opt => opt.MapFrom(src => (DateTime.Parse(src.RangeStart))))
                 .ForMember(
                     dest => dest.RangeEnd,
-                    opt => opt.MapFrom(src => (DateTime.Parse(src.RangeEnd))))
-                .ForMember(
-                    dest => dest.Selection,
-                    opt => opt.MapFrom(src => SelectionParser(src.Selection) ?? new List<string>()))
-                .ForMember(
-                    dest => dest.SelectionType,
-                    opt => opt.MapFrom(src => SelectionTypeParser(src.Selection)));
+                    opt => opt.MapFrom(src => (DateTime.Parse(src.RangeEnd))));
 
-            CreateMap<GetTransactionsQuery, PagedTransactionsResourceParameters>();
+            CreateMap<GetTransactionsQuery, PagedTransactionsResourceParameters>()
+                .ForMember(
+                        dest => dest.Selection,
+                        opt => opt.MapFrom(src =>
+                            !String.IsNullOrWhiteSpace(src.Selection)
+                                ? new Selection(src.Selection)
+                                : null));
 
             CreateMap<TransactionForReturnDto, TransactionForReturnWithLinksDto>();
         }
@@ -117,66 +118,6 @@ namespace TradeTracker.Application.Profiles
             }
             
             return sortOrder;
-        }
-
-        private List<string> SelectionParser(string input)
-        {
-            List<string> selectionList = new List<string>();
-
-            if (!String.IsNullOrWhiteSpace(input))
-            {
-                string[] splitString = input.Split(' ', 
-                    StringSplitOptions.RemoveEmptyEntries) ?? new string[0];
-
-                if (splitString.Count() > 1)
-                {
-                    var symbolString = splitString[0];
-
-                    if (symbolString.Length > 0)
-                    {
-                        var selection = symbolString.Split(',');
-
-                        if (!String.IsNullOrWhiteSpace(selection[0]))
-                        {
-                            selectionList.AddRange(selection);
-                        }
-                    } 
-                }
-            }
-        
-            return selectionList;
-        }
-
-        private SelectionType SelectionTypeParser(string input)
-        {
-            var selectionType = SelectionType.NotSpecified;
-        
-            if (!String.IsNullOrWhiteSpace(input))
-            {
-                var splitInput = input.Split(' ',
-                    StringSplitOptions.RemoveEmptyEntries);
-
-                if (splitInput.Count() == 2)
-                {
-                    var selectionTypeString = splitInput[1];
-
-                    switch (selectionTypeString.ToLower())
-                    {
-                        case "include":
-                            selectionType = SelectionType.Include;
-                            break;
-
-                        case "exclude":
-                            selectionType = SelectionType.Exclude;
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-            }
-            
-            return selectionType;
         }
     }
 }

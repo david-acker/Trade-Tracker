@@ -52,11 +52,11 @@ namespace TradeTracker.Persistence.Repositories
                     break;
             }
             
-            if (parameters.Selection.Count() > 0)
+            if (parameters.Selection != null)
             {
-                List<string> selection = parameters.Selection;
+                List<string> selection = parameters.Selection.Values;
 
-                switch (parameters.SelectionType)
+                switch (parameters.Selection.Type)
                 {
                     case SelectionType.Include:
                         query = query.Where(t => selection.Any(x => x == t.Symbol));

@@ -11,7 +11,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 
         public string OrderBy { get; set; } = "DateTime";
         public SortOrder SortOrder { get; set; } = SortOrder.Descending;
-
+        
         public string Type { get; set; } = "";
 
         private int _pageNumber = 1;
@@ -49,8 +49,8 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
                 }
             }
         }
-        public List<string> Selection { get; set; } = new List<string>();
-        public SelectionType SelectionType { get; set; } = SelectionType.NotSpecified;
+
+        public string Selection { get; set; }
         public DateTime RangeStart { get; set; } = DateTime.MinValue; 
         public DateTime RangeEnd { get; set; } = DateTime.MaxValue;
     }
