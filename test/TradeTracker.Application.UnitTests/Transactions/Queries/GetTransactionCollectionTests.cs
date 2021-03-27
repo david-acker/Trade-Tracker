@@ -8,13 +8,10 @@ using FluentAssertions;
 using Moq;
 using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Features.Transactions;
-using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
-using TradeTracker.Application.Features.Transactions.Queries.GetTransaction;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Profiles;
 using TradeTracker.Application.UnitTests.Mocks;
-using TradeTracker.Domain.Enums;
 using Xunit;
 
 namespace TradeTracker.Application.UnitTests.Transactions.Queries
