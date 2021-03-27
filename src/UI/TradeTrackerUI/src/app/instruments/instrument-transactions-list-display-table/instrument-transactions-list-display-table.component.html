@@ -1,0 +1,26 @@
+<table class='table table-bordered px-3 py-3'>
+    <thead class='card-header'>
+        <tr style='text-align: center'>
+            <th scope='col'>DateTime</th>
+            <th scope='col'>Type</th>
+            <th scope='col'>Quantity</th>
+            <th scope='col'>Notional</th>
+            <th scope='col'>Trade Price</th>
+        </tr>
+    </thead>
+    <tbody class='card-body table-sm'>
+        <tr scope='row' 
+            class='center' 
+            *ngFor='let transaction of transactions'>
+            <td>{{ transaction.dateTime | date:'MM/dd/yy hh:mm:ss aa' }}</td>
+            <td [ngClass]='{
+                    "buy": transaction.type === "Buy",
+                    "sell": transaction.type === "Sell" }'>
+                <b>{{ transaction.type }}</b>
+            </td>
+            <td>{{ transaction.quantity }}</td>
+            <td>{{ transaction.notional | currency}}</td>
+            <td>{{ transaction.tradePrice | currency }}</td>
+        </tr>
+    </tbody>
+</table>
