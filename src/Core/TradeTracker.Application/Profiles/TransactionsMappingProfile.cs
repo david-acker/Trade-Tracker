@@ -16,9 +16,9 @@ using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Profiles
 {
-    public class MappingProfile : Profile
+    public class TransactionsMappingProfile : Profile
     {
-        public MappingProfile()
+        public TransactionsMappingProfile()
         {
             CreateMap<CreateTransactionCommandDto, CreateTransactionCommand>();
 
@@ -71,30 +71,6 @@ namespace TradeTracker.Application.Profiles
             CreateMap<GetTransactionsQuery, PagedTransactionsResourceParameters>();
 
             CreateMap<TransactionForReturnDto, TransactionForReturnWithLinksDto>();
-
-            CreateMap<GetPagedPositionsResourceParameters, GetPositionsQuery>()
-                .ForMember(
-                    dest => dest.OrderBy,
-                    opt => opt.MapFrom(src => OrderByParser(src.Order)))
-                .ForMember(
-                    dest => dest.SortOrder,
-                    opt => opt.MapFrom(src => SortOrderParser(src.Order)))
-                .ForMember(
-                    dest => dest.Including,
-                    opt => opt.MapFrom(src => 
-                        (src.Including != null)
-                            ? ArraySelectionParser(src.Including)
-                            : new List<string>()))
-                .ForMember(
-                    dest => dest.Excluding,
-                    opt => opt.MapFrom(src => 
-                        (src.Excluding != null)
-                            ? ArraySelectionParser(src.Excluding)
-                            : new List<string>()));
-                
-            CreateMap<GetPositionsQuery, PagedPositionsResourceParameters>();
-
-            CreateMap<Position, PositionForReturnDto>();
         }
 
         private List<string> ArraySelectionParser(string input)
