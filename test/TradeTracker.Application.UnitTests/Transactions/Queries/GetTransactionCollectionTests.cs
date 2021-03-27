@@ -30,7 +30,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
 
             var configurationProvider = new MapperConfiguration(cfg =>
             {
-                cfg.AddProfile<MappingProfile>();
+                cfg.AddProfile<TransactionsMappingProfile>();
             });
 
             _mapper = configurationProvider.CreateMapper();
