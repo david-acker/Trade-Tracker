@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidatorFn, FormArray, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, AbstractControl } from '@angular/forms';
 
 import { DataService } from '../../core/data.service';
 import { PagedTransactionsParameters } from '../../models/transactions/paged-transactions-parameters';
@@ -113,20 +113,22 @@ export class TransactionListComponent implements OnInit {
         } else {
             this.resourceParameters.rangeEnd = null;
         }
-        
+
+        this.resourceParameters.selection = null;
+
         if (!this.isFieldEmpty('including')) {
-            this.resourceParameters.including = 
+            const symbols: string = 
                 this.transactionFilters.get(['selection', 'including']).value;
-        } else {
-            this.resourceParameters.including = null;
-        }
+
+            this.resourceParameters.selection = symbols + '+' + 'Include';
+        } 
 
         if (!this.isFieldEmpty('excluding')) {
-            this.resourceParameters.excluding = 
+            const symbols: string = 
                 this.transactionFilters.get(['selection', 'excluding']).value;
-        } else {
-            this.resourceParameters.excluding = null;
-        }
+
+            this.resourceParameters.selection = symbols + '+' + 'Exclude';
+        } 
 
         console.log(this.resourceParameters);
 

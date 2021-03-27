@@ -12,11 +12,10 @@ import { AppRoutingModule } from './app-routing.module';
 import { AuthGuard } from './core/auth-guard.service';
 import { AuthService } from './core/auth.service';
 import { DataService } from './core/data.service';
-import { DisplayTableModule } from './display-table/display-table.module';
 import { NavMenuComponent } from './nav-menu/nav-menu.component';
 import { NgbdDatepickerPopupModule } from './datepicker/datepicker-popup.module';
-import { PositionsModule } from './positions/positions.module';
 import { TransactionsModule } from './transactions/transactions.module';
+import { InstrumentsModule } from './instruments/instruments.module';
 
 @NgModule({
   declarations: [
@@ -28,13 +27,12 @@ import { TransactionsModule } from './transactions/transactions.module';
     AppRoutingModule,
     BrowserAnimationsModule,
     BrowserModule,
-    DisplayTableModule,
     FontAwesomeModule,
     FormsModule,
     HttpClientModule,
     NgbModule,
     NgbdDatepickerPopupModule,
-    PositionsModule,
+    InstrumentsModule,
     TransactionsModule,
   ],
   providers: [

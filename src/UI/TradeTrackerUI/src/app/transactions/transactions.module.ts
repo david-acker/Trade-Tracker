@@ -14,7 +14,7 @@ import { NgbdDatepickerPopupModule } from '../datepicker/datepicker-popup.module
 import { BrowserModule } from '@angular/platform-browser';
 import { AddTransactionComponent } from './add-transaction/add-transaction.component';
 import { AuthGuard } from '../core/auth-guard.service';
-import { DisplayTableModule } from '../display-table/display-table.module';
+import { TransactionsListDisplayTableComponent } from './transactions-list-display-table/transactions-list-display-table.component';
 
 let routes = [
   {
@@ -38,11 +38,11 @@ let routes = [
   declarations: [
     AddTransactionComponent,
     TransactionListComponent,
+    TransactionsListDisplayTableComponent
   ],
   imports: [
     BrowserModule,
     CommonModule,
-    DisplayTableModule,
     FormsModule,
     FontAwesomeModule,
     MatTableModule,

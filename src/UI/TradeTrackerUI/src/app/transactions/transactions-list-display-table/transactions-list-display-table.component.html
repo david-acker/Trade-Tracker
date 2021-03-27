@@ -14,7 +14,11 @@
             class='center' 
             *ngFor='let transaction of transactions'>
             <td>{{ transaction.dateTime | date:'MM/dd/yy hh:mm:ss aa' }}</td>
-            <td>{{ transaction.symbol }}</td>
+            <td>
+                <a [routerLink]="['/instruments', transaction.symbol]">
+                   {{ transaction.symbol }}
+                </a>
+            </td>
             <td [ngClass]='{
                     "buy": transaction.type === "Buy",
                     "sell": transaction.type === "Sell" }'>
