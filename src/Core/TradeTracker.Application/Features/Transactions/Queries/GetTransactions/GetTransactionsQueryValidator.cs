@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using FluentValidation;
-using TradeTracker.Application.Enums;
 using TradeTracker.Application.Features.Transactions.Shared.Validators;
+using TradeTracker.Application.Features.Transactions.Shared.Validators.Selection;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
@@ -41,12 +40,10 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
                                 .WithMessage("The RangeEnd must be after the RangeStart.");
                     });
 
-            When(q => (q.SelectionType != SelectionType.NotSpecified), () => {
+            When(q => !String.IsNullOrWhiteSpace(q.Selection), () => 
+            {
                 RuleFor(q => q.Selection)
                     .SetValidator(new SelectionValidator());
-
-                RuleFor(q => q.SelectionType)
-                    .SetValidator(new SelectionTypeValidator());
             });
         }
     }
