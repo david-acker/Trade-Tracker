@@ -9,13 +9,13 @@ namespace TradeTracker.Infrastructure
 {
     public class CsvExporter : ICsvExporter
     {
-        public byte[] ExportTransactionsToCsv(List<TransactionsForExportDto> transactionExportDtos)
+        public byte[] ExportTransactionsToCsv(List<TransactionsForExportDto> transactionForExportDtos)
         {
             using var memoryStream = new MemoryStream();
             using (var streamWriter = new StreamWriter(memoryStream))
             {
                 using var csvWriter = new CsvWriter(streamWriter, CultureInfo.InvariantCulture);
-                csvWriter.WriteRecords(transactionExportDtos);
+                csvWriter.WriteRecords(transactionForExportDtos);
             }
 
             return memoryStream.ToArray();
