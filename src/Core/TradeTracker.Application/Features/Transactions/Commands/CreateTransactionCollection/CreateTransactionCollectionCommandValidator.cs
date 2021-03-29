@@ -1,5 +1,4 @@
 using FluentValidation;
-using TradeTracker.Application.Features.Transactions.Shared.Validators;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection
 {
@@ -7,7 +6,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
     {
         public CreateTransactionCollectionCommandValidator()
         {
-            RuleForEach(t => t.Transactions).SetValidator(new TransactionForCreationValidator());
+            RuleForEach(t => t.Transactions).SetValidator(new CreateTransactionCommandBaseValidator());
         }
     }
 }

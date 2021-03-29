@@ -1,15 +1,12 @@
 using System;
-using System.Collections.Generic;
-using TradeTracker.Api.Models.Filtering;
-using TradeTracker.Application.Enums;
+using TradeTracker.Api.Models.Querying;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
     public class PagedTransactionsResourceParameters
     {
         public Guid AccessKey { get; set; }
-
-        public string OrderBy { get; set; }
+        
         public SortOrder SortOrder { get; set; }
 
         public string Type { get; set; }

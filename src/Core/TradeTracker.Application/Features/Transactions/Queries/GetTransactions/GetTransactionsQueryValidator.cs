@@ -1,8 +1,9 @@
 using System;
-using System.Collections.Generic;
 using FluentValidation;
 using TradeTracker.Application.Features.Transactions.Shared.Validators;
-using TradeTracker.Application.Features.Transactions.Shared.Validators.Selection;
+using TradeTracker.Application.Features.Transactions.Validators.Querying;
+using TradeTracker.Application.Validators.Pagination;
+using TradeTracker.Application.Validators.Selection;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
@@ -14,37 +15,76 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
                 .SetValidator(new AccessKeyValidator());
 
             RuleFor(q => q.Type)
-                .SetValidator(new TransactionTypeForFilteringValidator());
+                .SetValidator(new TransactionTypeFilterValidator());
 
-            var OrderByFields = new List<string>()
-            {
-                "DateTime",
-                "Symbol",
-                "Quantity",
-                "Notional"
-            };
+            RuleFor(q => q.Order)
+                .SetValidator(new TransactionOrderValidator());
 
-            RuleFor(q => q.OrderBy)
-                .Must(q => OrderByFields.Contains(q))
-                    .WithMessage($"The OrderBy clause requires one of the valid fields: {String.Join(", ", OrderByFields)}.");
+            RuleFor(q => q.PageNumber)
+                .SetValidator(new PageNumberValidator());
             
-            RuleFor(q => q.SortOrder)
-                .SetValidator(new SortOrderValidator());
+            RuleFor(q => q.PageSize)
+                .SetValidator(new PageSizeValidator());
 
-            When(q => (
-                (q.RangeStart != DateTime.MinValue && q.RangeEnd != DateTime.MaxValue) &&
-                (q.RangeEnd != DateTime.MinValue)), () =>
-                    {
-                        RuleFor(q => new { q.RangeStart, q.RangeEnd })
-                            .Must(q => (q.RangeStart < q.RangeEnd))
-                                .WithMessage("The RangeEnd must be after the RangeStart.");
-                    });
+            RuleFor(q => q.RangeStart)
+                .Must(q => isValidDateTime(q))
+                    .WithMessage("RangeStart must be a valid DateTime.");
+            
+            RuleFor(q => q.RangeEnd)
+                .Must(q => isValidDateTime(q))
+                    .WithMessage("RangeEnd must be a valid DateTime.");
+
+            When(q => bothValidRangeValues(q.RangeStart, q.RangeEnd) 
+                && !isDefaultRangeValues(q.RangeStart, q.RangeEnd), () =>
+                {
+                    RuleFor(q => q)
+                        .Must(q => startIsBeforeEnd(q.RangeStart, q.RangeEnd))
+                            .WithMessage("RangeStart must occur before RangeEnd.");
+                });
 
             When(q => !String.IsNullOrWhiteSpace(q.Selection), () => 
             {
                 RuleFor(q => q.Selection)
                     .SetValidator(new SelectionValidator());
             });
+        }
+
+        private bool isDefaultRangeValues(string rangeStart, string rangeEnd)
+        {
+            var start = DateTime.Parse(rangeStart);
+            var end = DateTime.Parse(rangeEnd);
+
+            bool isStartDefault = start.Date.Equals(DateTime.MinValue.Date);
+            bool isEndDefault = end.Date.Equals(DateTime.MaxValue.Date);
+
+            bool bothDefault = isStartDefault && isEndDefault;
+
+            return bothDefault;
+        }
+
+        private bool startIsBeforeEnd(string rangeStart, string rangeEnd)
+        {
+            var start = DateTime.Parse(rangeStart);
+            var end = DateTime.Parse(rangeEnd);
+
+            return (start < end);
+        }
+
+        private bool bothValidRangeValues(string rangeStart, string rangeEnd)
+        {
+            bool isStartValid = isValidDateTime(rangeStart);
+            bool isEndValid = isValidDateTime(rangeEnd);
+
+            bool bothValid = isStartValid && isEndValid;
+
+            return bothValid;
+        }
+
+        private bool isValidDateTime(string input)
+        {
+            bool isValid = DateTime.TryParse(input, out _);
+
+            return isValid;
         }
     }
 }

@@ -41,12 +41,10 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             var handler = new UpdateTransactionCommandHandler(_mapper, _mockTransactionRepository.Object);
 
             var transactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49");
-            var userAccessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
-
+            
             var command = new UpdateTransactionCommand()
             {
                 TransactionId = transactionId, 
-                AccessKey = userAccessKey,
                 DateTime = new DateTime(2015, 1, 1),
                 Symbol = "XYZ",
                 Type = TransactionType.Buy.ToString(),
@@ -55,11 +53,14 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
                 TradePrice = (decimal)1
             };
 
+            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
+            command.Authenticate(accessKey);
+
             var expectedTransaction = _mapper.Map<Transaction>(command);
 
             // Act
             await handler.Handle(command, CancellationToken.None);
-            var actualTransaction = await _mockTransactionRepository.Object.GetByIdAsync(userAccessKey, transactionId);
+            var actualTransaction = await _mockTransactionRepository.Object.GetByIdAsync(accessKey, transactionId);
 
             // Assert
             using (new AssertionScope())
@@ -124,12 +125,10 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             // Arrange
             var handler = new UpdateTransactionCommandHandler(_mapper, _mockTransactionRepository.Object);
 
-            var userAccessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
-            
-            var command = new UpdateTransactionCommand()
-            {
-                AccessKey = userAccessKey
-            };
+            var command = new UpdateTransactionCommand();
+
+            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
+            command.Authenticate(accessKey);
 
             // Act
             Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
@@ -146,12 +145,10 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             // Arrange
             var handler = new UpdateTransactionCommandHandler(_mapper, _mockTransactionRepository.Object);
 
-            var userAccessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
             var transactionId = Guid.NewGuid();
 
             var command = new UpdateTransactionCommand()
             {
-                AccessKey = userAccessKey,
                 TransactionId = transactionId,
                 DateTime = new DateTime(2015, 1, 1),
                 Symbol = "XYZ",
@@ -160,6 +157,9 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
                 Notional = (decimal)10,
                 TradePrice = (decimal)1
             };
+
+            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
+            command.Authenticate(accessKey);
 
             // Act
             Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
@@ -175,13 +175,11 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
         {
             // Arrange
             var handler = new UpdateTransactionCommandHandler(_mapper, _mockTransactionRepository.Object);
-
-            var userAccessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
+ 
             var transactionId = Guid.Parse("2eb3de2f-7869-41b5-9bfc-3867c844f6e7");
 
             var command = new UpdateTransactionCommand()
             {
-                AccessKey = userAccessKey,
                 TransactionId = transactionId,
                 DateTime = new DateTime(2015, 1, 1),
                 Symbol = "XYZ",
@@ -190,6 +188,9 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
                 Notional = (decimal)10,
                 TradePrice = (decimal)1
             };
+
+            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
+            command.Authenticate(accessKey);
 
             // Act
             Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);

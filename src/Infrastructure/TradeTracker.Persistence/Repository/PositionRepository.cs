@@ -30,22 +30,29 @@ namespace TradeTracker.Persistence.Repositories
         
             query = query.Where(t => t.AccessKey == parameters.AccessKey);
 
-            if (parameters.Including.Count > 0)
+            if (parameters.Selection != null)
             {
-                var inclusionSelection = parameters.Including;
-                query = query.Where(t => inclusionSelection.Any(x => x == t.Symbol));
-            }
+                List<string> selection = parameters.Selection.Values;
 
-            if (parameters.Excluding.Count > 0)
-            {
-                var exclusionSelection = parameters.Excluding;
-                query = query.Where(t => !exclusionSelection.Any(x => x == t.Symbol));
+                switch (parameters.Selection.Type)
+                {
+                    case SelectionType.Include:
+                        query = query.Where(t => selection.Any(x => x == t.Symbol));
+                        break;
+
+                    case SelectionType.Exclude:
+                        query = query.Where(t => !selection.Any(x => x == t.Symbol));
+                        break;
+
+                    default:
+                        break;
+                }
             }
             
-            switch (parameters.OrderBy)
+            switch (parameters.SortOrder.Field)
             {
                 case "Symbol":
-                    if (parameters.SortOrder == SortOrder.Ascending)
+                    if (parameters.SortOrder.Type == SortOrderType.Ascending)
                         query = query.OrderBy(t => t.Symbol);
                     else
                         query = query.OrderByDescending(t => t.Symbol);
@@ -76,10 +83,10 @@ namespace TradeTracker.Persistence.Repositories
             // which does not support Decimal types with OrderBy. Will be removed upon conversion to SQL Server.
             
             IList<Position> orderedPositions;
-            switch (parameters.OrderBy)
+            switch (parameters.SortOrder.Field)
             {
                 case "Quantity":
-                    if (parameters.SortOrder == SortOrder.Ascending)
+                    if (parameters.SortOrder.Type == SortOrderType.Ascending)
                         orderedPositions = pagedPositions
                             .OrderBy(t => t.Quantity)
                             .ToList();

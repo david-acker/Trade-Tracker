@@ -1,6 +1,5 @@
 using System;
-using System.Collections.Generic;
-using TradeTracker.Application.Enums;
+using TradeTracker.Api.Models.Querying;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
@@ -8,15 +7,12 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
     {
         public Guid AccessKey { get; set; }
 
-        public string OrderBy { get; set; }
         public SortOrder SortOrder { get; set; }
 
         public int PageNumber { get; set; }
-
         public int PageSize { get; set; }
 
-        public List<string> Including { get; set; }
-        public List<string> Excluding { get; set; }
+        public Selection Selection { get; set; }
 
         public string Exposure { get; set; }
     }

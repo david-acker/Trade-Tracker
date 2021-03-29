@@ -1,19 +1,19 @@
 using AutoMapper;
 using MediatR;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Requests.ValidatedRequestHandler;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Events;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection
 {
-    public class CreateTransactionCollectionCommandHandler 
-        : IRequestHandler<CreateTransactionCollectionCommand, IEnumerable<TransactionForReturnDto>>
+    public class CreateTransactionCollectionCommandHandler :
+        ValidatableRequestHandler<CreateTransactionCollectionCommand, CreateTransactionCollectionCommandValidator>,
+        IRequestHandler<CreateTransactionCollectionCommand, IEnumerable<TransactionForReturnDto>>
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
@@ -39,17 +39,6 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
             transactionCollection = await _transactionRepository.AddRangeAsync(transactionCollection);
 
             return _mapper.Map<IEnumerable<TransactionForReturnDto>>(transactionCollection);
-        }
-
-        public async Task ValidateRequest(CreateTransactionCollectionCommand request)
-        {
-            var validator = new CreateTransactionCollectionCommandValidator();
-            var validationResult = await validator.ValidateAsync(request);
-            
-            if (validationResult.Errors.Count > 0)
-            {
-                throw new Exceptions.ValidationException(validationResult);
-            }
         }
     }
 }

@@ -37,11 +37,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             // Arrange
             var handler = new CreateTransactionCommandHandler(_mapper, _mockTransactionRepository.Object);
 
-            var userAccessKey = Guid.NewGuid();
-
             var command = new CreateTransactionCommand()
             {
-                AccessKey = userAccessKey,
                 DateTime = new DateTime(2015, 1, 1),
                 Symbol = "XYZ",
                 Type = TransactionType.Buy.ToString(),
@@ -49,6 +46,9 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
                 Notional = (decimal)10,
                 TradePrice = (decimal)1
             };
+            
+            var accessKey = Guid.NewGuid();
+            command.Authenticate(accessKey);
 
             // Act
             var transactionToReturn = await handler.Handle(command, CancellationToken.None);
@@ -64,11 +64,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             // Arrange
             var handler = new CreateTransactionCommandHandler(_mapper, _mockTransactionRepository.Object);
 
-            var userAccessKey = Guid.NewGuid();
-
             var command = new CreateTransactionCommand()
             {
-                AccessKey = userAccessKey,
                 DateTime = new DateTime(2015, 1, 1),
                 Symbol = "XYZ",
                 Type = TransactionType.Buy.ToString(),
@@ -77,9 +74,12 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
                 TradePrice = (decimal)1
             };
 
+            var accessKey = Guid.NewGuid();
+            command.Authenticate(accessKey);
+
             // Act
             await handler.Handle(command, CancellationToken.None);
-            var allTransactionsForUser = await _mockTransactionRepository.Object.ListAllAsync(userAccessKey);
+            var allTransactionsForUser = await _mockTransactionRepository.Object.ListAllAsync(accessKey);
 
             // Assert
             allTransactionsForUser.Should()

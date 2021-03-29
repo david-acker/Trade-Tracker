@@ -1,11 +1,11 @@
 using MediatR;
 using System;
+using TradeTracker.Application.Requests;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
 {
-    public class GetPositionQuery : IRequest<PositionForReturnDto>
+    public class GetPositionQuery : AuthenticatedRequest, IRequest<PositionForReturnDto>
     {
-        public Guid AccessKey { get; set; }
         public string Symbol { get; set; }
     }
 }

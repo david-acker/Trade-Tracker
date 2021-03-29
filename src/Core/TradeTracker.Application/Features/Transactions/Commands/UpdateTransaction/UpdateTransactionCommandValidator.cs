@@ -1,5 +1,6 @@
 using FluentValidation;
 using TradeTracker.Application.Features.Transactions.Shared.Validators;
+using TradeTracker.Application.Features.Transactions.Validators.Transactions;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction
 {

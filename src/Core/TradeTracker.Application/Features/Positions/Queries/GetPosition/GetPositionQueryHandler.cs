@@ -5,11 +5,14 @@ using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Requests.ValidatedRequestHandler;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
 {
-    public class GetPositionQueryHandler : IRequestHandler<GetPositionQuery, PositionForReturnDto>
+    public class GetPositionQueryHandler : 
+        ValidatableRequestHandler<GetPositionQuery, GetPositionQueryValidator>,
+        IRequestHandler<GetPositionQuery, PositionForReturnDto>
     {
         private readonly IMapper _mapper;
         private readonly IPositionRepository _positionRepository;
@@ -43,18 +46,12 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
                     request.AccessKey, 
                     request.Symbol);
 
+            positionForReturn.SourceTransactionMap = await _positionService
+                .CreateSourceTransactionMap(
+                    request.AccessKey,
+                    request.Symbol);
+
             return positionForReturn;
-        }
-
-        private async Task ValidateRequest(GetPositionQuery request)
-        {
-            var validator = new GetPositionQueryValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (validationResult.Errors.Count > 0)
-            {
-                throw new ValidationException(validationResult);
-            }  
         }
     }
 }

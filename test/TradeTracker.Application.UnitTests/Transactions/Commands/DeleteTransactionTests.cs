@@ -39,9 +39,11 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
 
             var command = new DeleteTransactionCommand()
             {
-                TransactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49"),
-                AccessKey =  Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547")
+                TransactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49")
             };
+
+            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
+            command.Authenticate(accessKey);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -58,12 +60,14 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             var handler = new DeleteTransactionCommandHandler(_mapper, _mockTransactionRepository.Object);
 
             var transactionId = Guid.NewGuid();
-
+            
             var command = new DeleteTransactionCommand()
             {
-                AccessKey = Guid.NewGuid(),
                 TransactionId = transactionId
             };
+
+            var accessKey = Guid.NewGuid();
+            command.Authenticate(accessKey);
 
             // Act
             Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
