@@ -3,15 +3,17 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
-using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Requests.ValidatedRequestHandler;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 using TradeTracker.Domain.Events;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction
 {
-    public class UpdateTransactionCommandHandler : IRequestHandler<UpdateTransactionCommand>
+    public class UpdateTransactionCommandHandler : 
+        ValidatableRequestHandler<UpdateTransactionCommand, UpdateTransactionCommandValidator>,
+        IRequestHandler<UpdateTransactionCommand>
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
@@ -50,17 +52,6 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
             await _transactionRepository.UpdateAsync(transaction);
 
             return Unit.Value;
-        }
-
-        public async Task ValidateRequest(UpdateTransactionCommand request)
-        {
-            var validator = new UpdateTransactionCommandValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (validationResult.Errors.Count > 0)
-            {
-                throw new ValidationException(validationResult);
-            }   
         }
     }
 }

@@ -9,11 +9,14 @@ using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Models.Pagination;
+using TradeTracker.Application.Requests.ValidatedRequestHandler;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
-    public class GetPositionsQueryHandler : IRequestHandler<GetPositionsQuery, PagedPositionsBaseDto>
+    public class GetPositionsQueryHandler : 
+        ValidatableRequestHandler<GetPositionsQuery, GetPositionsQueryValidator>,
+        IRequestHandler<GetPositionsQuery, PagedPositionsBaseDto>
     {
         private readonly IMapper _mapper;
         private readonly IPositionRepository _positionRepository;
@@ -39,8 +42,8 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
             
             var positionsForReturn = _mapper.Map<PagedList<Position>, List<PositionForReturnDto>>(pagedPositions);
 
-            var positionsForReturnWithAverageCostBasis = 
-                await AddAverageCostBasis(positionsForReturn, request.AccessKey);
+            var positionsForReturnWithSourceInformation = 
+                await AddSourceInformation(positionsForReturn, request.AccessKey);
 
             return new PagedPositionsBaseDto()
             {
@@ -50,22 +53,11 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
                 TotalCount = pagedPositions.TotalCount,
                 HasPrevious = pagedPositions.HasPrevious,
                 HasNext = pagedPositions.HasNext,
-                Items = positionsForReturnWithAverageCostBasis
+                Items = positionsForReturnWithSourceInformation
             };
         }
-
-        private async Task ValidateRequest(GetPositionsQuery request)
-        {
-            var validator = new GetPositionsQueryValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (validationResult.Errors.Count > 0)
-            {
-                throw new ValidationException(validationResult);
-            }  
-        }
-
-        private async Task<IEnumerable<PositionForReturnDto>> AddAverageCostBasis(
+        
+        private async Task<IEnumerable<PositionForReturnDto>> AddSourceInformation(
             IEnumerable<PositionForReturnDto> positions, 
             Guid accessKey)
         {
@@ -75,13 +67,18 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
                     .CalculateAverageCostBasis(
                         accessKey,
                         position.Symbol);
+
+                position.SourceTransactionMap = await _positionService
+                    .CreateSourceTransactionMap(
+                        accessKey,
+                        position.Symbol);
                 
                 return position;
             });
 
-            var positionsWithAverageCostBasis = await Task.WhenAll(tasks);
+            var positionsWithSourceInformation = await Task.WhenAll(tasks);
 
-            return positionsWithAverageCostBasis;
+            return positionsWithSourceInformation;
         }
     }
 }

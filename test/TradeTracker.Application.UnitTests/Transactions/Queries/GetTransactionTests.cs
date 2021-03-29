@@ -39,14 +39,15 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
             // Arrange
             var handler = new GetTransactionQueryHandler(_mapper, _mockTransactionRepository.Object);
 
-            var userAccessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
+            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
             var transactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49");
 
             var query = new GetTransactionQuery()
             {
-                AccessKey = userAccessKey,
                 TransactionId = transactionId
             };
+
+            query.Authenticate(accessKey);
 
             // Act
             var transaction = await handler.Handle(query, CancellationToken.None);
@@ -62,14 +63,15 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
             // Arrange
             var handler = new GetTransactionQueryHandler(_mapper, _mockTransactionRepository.Object);
 
-            var userAccessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
+            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
             var transactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49");
 
             var query = new GetTransactionQuery()
             {
-                AccessKey = userAccessKey,
                 TransactionId = transactionId
             };
+
+            query.Authenticate(accessKey);
 
             // Act
             var transaction = await handler.Handle(query, CancellationToken.None);
@@ -107,12 +109,11 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
             // Arrange
             var handler = new GetTransactionQueryHandler(_mapper, _mockTransactionRepository.Object);
 
-            var userAccessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
+            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
             
-            var query = new GetTransactionQuery()
-            {
-                AccessKey = userAccessKey
-            };
+            var query = new GetTransactionQuery();
+
+            query.Authenticate(accessKey);
 
             // Act
             Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);
@@ -129,14 +130,15 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
             // Arrange
             var handler = new GetTransactionQueryHandler(_mapper, _mockTransactionRepository.Object);
 
-            var userAccessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
             var transactionId = Guid.NewGuid();
+            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
 
             var query = new GetTransactionQuery()
             {
-                AccessKey = userAccessKey,
                 TransactionId = transactionId
             };
+
+            query.Authenticate(accessKey);
 
             // Act
             Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);
@@ -153,14 +155,15 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
             // Arrange
             var handler = new GetTransactionQueryHandler(_mapper, _mockTransactionRepository.Object);
 
-            var userAccessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
             var transactionId = Guid.Parse("2eb3de2f-7869-41b5-9bfc-3867c844f6e7");
+            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
 
             var query = new GetTransactionQuery()
             {
-                AccessKey = userAccessKey,
                 TransactionId = transactionId
             };
+
+            query.Authenticate(accessKey);
 
             // Act
             Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);

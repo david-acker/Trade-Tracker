@@ -5,13 +5,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Requests.ValidatedRequestHandler;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransactions
 {
-    public class ExportTransactionsQueryHandler : IRequestHandler<ExportTransactionsQuery, TransactionsExportFileVm>
+    public class ExportTransactionsQueryHandler : 
+        ValidatableRequestHandler<ExportTransactionsQuery, ExportTransactionsQueryValidator>,
+        IRequestHandler<ExportTransactionsQuery, TransactionsExportFileVm>
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
@@ -41,17 +43,6 @@ namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransacti
             };
 
             return transactionExportFileDto;
-        }
-
-        public async Task ValidateRequest(ExportTransactionsQuery request)
-        {
-            var validator = new ExportTransactionsQueryValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (validationResult.Errors.Count > 0)
-            {
-                throw new ValidationException(validationResult);
-            }
         }
     }
 }

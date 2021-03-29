@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,7 +45,7 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Get a paged list of positions.
         /// </summary>
-        /// <param name="parameters">The resource parameters for specifying the returned positions</param>
+        /// <param name="query">The resource parameters for specifying the returned positions</param>
         /// <remarks>
         /// Example: \
         /// GET /api/positions \
@@ -73,12 +72,12 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Accept", "application/json")]
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<ActionResult<IEnumerable<PositionForReturnDto>>> GetPositions(
-            [FromQuery] GetPagedPositionsResourceParameters parameters)
+            [FromQuery] GetPositionsQuery query)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositions)} was called.");
 
-            var query = _mapper.Map<GetPositionsQuery>(parameters);
-            query.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            query.Authenticate(accessKey);
 
             var pagedPositionsBase = await _mediator.Send(query);
 
@@ -94,7 +93,7 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Get a paged list of positions.
         /// </summary>
-        /// <param name="parameters">The resource parameters for specifying the returned positions</param>
+        /// <param name="query">The resource parameters for specifying the returned positions</param>
         /// <remarks>
         /// Example: \
         /// GET /api/positions \
@@ -120,12 +119,12 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
         public async Task<ActionResult<PagedPositionsWithLinksDto>> GetPositionsWithLinks(
-            [FromQuery] GetPagedPositionsResourceParameters parameters)
+            [FromQuery] GetPositionsQuery query)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositionsWithLinks)} was called.");
 
-            var query = _mapper.Map<GetPositionsQuery>(parameters);
-            query.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            query.Authenticate(accessKey);
 
             var pagedPositionsBase = await _mediator.Send(query);
 
@@ -144,7 +143,7 @@ namespace TradeTracker.Api.Controllers
             
             pagedPositionsWithLinks.Links = 
                 CreateLinksForPositions(
-                    parameters,
+                    query,
                     pagedPositionsBase.HasNext,
                     pagedPositionsBase.HasPrevious);
 
@@ -205,9 +204,11 @@ namespace TradeTracker.Api.Controllers
 
             var query = new GetPositionQuery()
             {
-                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey")),
                 Symbol = symbol
             };
+
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            query.Authenticate(accessKey);
 
             var position = await _mediator.Send(query);
 
@@ -240,9 +241,11 @@ namespace TradeTracker.Api.Controllers
 
             var query = new GetPositionQuery()
             {
-                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey")),
                 Symbol = symbol
             };
+
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            query.Authenticate(accessKey);
 
             var position = await _mediator.Send(query);
 
@@ -290,7 +293,7 @@ namespace TradeTracker.Api.Controllers
 
 
         private IEnumerable<LinkDto> CreateLinksForPositions(
-            GetPagedPositionsResourceParameters parameters,
+            GetPositionsQuery query,
             bool hasNext,
             bool hasPrevious)
         {
@@ -299,7 +302,7 @@ namespace TradeTracker.Api.Controllers
             links.Add(
                 new LinkDto(
                     CreatePositionsResourceUrl(
-                        parameters, 
+                        query, 
                         ResourceUriType.CurrentPage),
                     "self",
                     "GET"));
@@ -309,7 +312,7 @@ namespace TradeTracker.Api.Controllers
                 links.Add(
                     new LinkDto(
                         CreatePositionsResourceUrl(
-                            parameters, 
+                            query, 
                             ResourceUriType.NextPage),
                         "nextPage",
                         "GET"));
@@ -320,7 +323,7 @@ namespace TradeTracker.Api.Controllers
                 links.Add(
                     new LinkDto(
                         CreatePositionsResourceUrl(
-                            parameters, 
+                            query, 
                             ResourceUriType.PreviousPage),
                         "previousPage",
                         "GET"));
@@ -331,7 +334,7 @@ namespace TradeTracker.Api.Controllers
 
 
         private string CreatePositionsResourceUrl(
-            GetPagedPositionsResourceParameters parameters,
+            GetPositionsQuery query,
             ResourceUriType type)
         {
             switch (type)
@@ -341,12 +344,11 @@ namespace TradeTracker.Api.Controllers
                         "GetPositions",
                         new
                         {
-                            order = parameters.Order,
-                            pageNumber = parameters.PageNumber - 1,
-                            pageSize = parameters.PageSize,
-                            including = parameters.Including,
-                            excluding = parameters.Excluding,
-                            exposure = parameters.Exposure
+                            order = query.Order,
+                            pageNumber = query.PageNumber - 1,
+                            pageSize = query.PageSize,
+                            selection = query.Selection,
+                            exposure = query.Exposure
                         });
 
                 case ResourceUriType.NextPage:
@@ -354,12 +356,11 @@ namespace TradeTracker.Api.Controllers
                         "GetPositions",
                         new
                         {
-                            order = parameters.Order,
-                            pageNumber = parameters.PageNumber + 1,
-                            pageSize = parameters.PageSize,
-                            including = parameters.Including,
-                            excluding = parameters.Excluding,
-                            exposure = parameters.Exposure
+                            order = query.Order,
+                            pageNumber = query.PageNumber + 1,
+                            pageSize = query.PageSize,
+                            selection = query.Selection,
+                            exposure = query.Exposure
                         });
 
                 case ResourceUriType.CurrentPage:
@@ -368,12 +369,11 @@ namespace TradeTracker.Api.Controllers
                         "GetPositions",
                         new
                         {
-                            order = parameters.Order,
-                            pageNumber = parameters.PageNumber,
-                            pageSize = parameters.PageSize,
-                            including = parameters.Including,
-                            excluding = parameters.Excluding,
-                            exposure = parameters.Exposure
+                            order = query.Order,
+                            pageNumber = query.PageNumber,
+                            pageSize = query.PageSize,
+                            selection = query.Selection,
+                            exposure = query.Exposure
                         });
             }
         }

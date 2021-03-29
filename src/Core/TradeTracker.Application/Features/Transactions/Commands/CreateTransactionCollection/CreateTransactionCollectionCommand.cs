@@ -5,6 +5,6 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
 {
     public class CreateTransactionCollectionCommand : IRequest<IEnumerable<TransactionForReturnDto>>
     {
-        public IEnumerable<TransactionForCreationCommandBase> Transactions { get; set; }
+        public IEnumerable<CreateTransactionCommandBase> Transactions { get; set; }
     }
 }

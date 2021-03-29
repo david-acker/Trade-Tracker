@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -27,45 +28,6 @@ namespace TradeTracker.Infrastructure.Services
             _logger = logger;
             _positionRepository = positionRepository;
             _transactionRepository = transactionRepository;
-        }
-
-        public async Task<decimal> CalculateAverageCostBasis(Guid accessKey, string symbol)
-        {
-            _logger.LogInformation($"PositionTrackingService: {nameof(CalculateAverageCostBasis)} was called.");
-        
-            var position = await _positionRepository.GetBySymbolAsync(accessKey, symbol);
-
-            var transactionsForSymbol = await _transactionRepository
-                .GetAllOpenTransactionsForSymbolAsync(
-                    accessKey,
-                    symbol);
-
-            var totalQuantity = position.Quantity;
-
-            var totalNotional = Decimal.Zero;
-
-            var remainingOpenQuantity = totalQuantity;
-
-            foreach (var transaction in transactionsForSymbol)
-            {
-                var quantity = transaction.Quantity;
-                var tradePrice = transaction.TradePrice;
-
-                if (remainingOpenQuantity > quantity)
-                {
-                    totalNotional += quantity * tradePrice;
-
-                    remainingOpenQuantity -= quantity;
-                }
-                else
-                {
-                    totalNotional += remainingOpenQuantity * tradePrice;
-
-                    break;
-                }
-            }
-
-            return Math.Round(totalNotional / totalQuantity, 2);
         }
 
         public async Task RefreshForTransaction(Guid accessKey, Guid transactionId)
@@ -122,7 +84,6 @@ namespace TradeTracker.Infrastructure.Services
             }
         }
 
-
         public async Task HandleNewPosition(Position position)
         {
             if (!position.IsClosed)
@@ -142,7 +103,6 @@ namespace TradeTracker.Infrastructure.Services
                 await ClosePosition(position);
             }            
         }
-
 
         public async Task AddPosition(Position position)
         {
@@ -164,7 +124,6 @@ namespace TradeTracker.Infrastructure.Services
 
             _logger.LogInformation($"PositionService: {nameof(UpdatePosition)} - Updating position for {position.Symbol}.");
         }
-
 
         public async Task AttachToPosition(Guid accessKey, string symbol, TransactionType transactionType, decimal quantity)
         {
@@ -204,7 +163,6 @@ namespace TradeTracker.Infrastructure.Services
             }
         }
 
-
         public async Task RecalculateForSymbol(Guid accessKey, string symbol)
         {
             _logger.LogInformation($"PositionService: {nameof(RecalculateForSymbol)} was called for {symbol}.");
@@ -224,6 +182,71 @@ namespace TradeTracker.Infrastructure.Services
             }
 
             await HandleNewPosition(position);
+        }
+
+        public async Task<decimal> CalculateAverageCostBasis(Guid accessKey, string symbol)
+        {
+            _logger.LogInformation($"PositionTrackingService: {nameof(CalculateAverageCostBasis)} was called.");
+
+            Dictionary<Guid, (decimal quantity, decimal tradePrice)> positionSourceMap = 
+                await CreatePositionSourceMap(accessKey, symbol);
+
+            var quantityCostPairs = 
+                new List<(decimal quantity, decimal tradePrice)>(positionSourceMap.Values);
+
+            decimal totalNotional = quantityCostPairs.Sum(p => p.quantity * p.tradePrice);
+            decimal totalQuantity = quantityCostPairs.Sum(p => p.quantity);
+
+            return Math.Round(totalNotional / totalQuantity, 2);
+        }
+
+        public async Task<Dictionary<Guid, decimal>> CreateSourceTransactionMap(Guid accessKey, string symbol)
+        {
+            var positionSourceMap = await CreatePositionSourceMap(accessKey, symbol);
+
+            return positionSourceMap.ToDictionary(p => p.Key, p => p.Value.quantity);
+        }
+
+        private async Task<Dictionary<Guid, (decimal quantity, decimal tradePrice)>> CreatePositionSourceMap(
+            Guid accessKey, string symbol)
+        {
+            _logger.LogInformation($"PositionTrackingService: {nameof(CreatePositionSourceMap)} was called.");
+        
+            var position = await _positionRepository.GetBySymbolAsync(accessKey, symbol);
+
+            var transactionsForSymbol = await _transactionRepository
+                .GetAllOpenTransactionsForSymbolAsync(
+                    accessKey,
+                    symbol);
+
+            var remainingOpenQuantity = position.Quantity;
+
+            var positionSourceMap = new Dictionary<Guid, (decimal quantity, decimal tradePrice)>();
+            
+            foreach (var transaction in transactionsForSymbol)
+            {
+                var quantity = transaction.Quantity;
+                var tradePrice = transaction.TradePrice;
+
+                if (remainingOpenQuantity > quantity)
+                {
+                    positionSourceMap.Add(
+                        transaction.TransactionId, 
+                        (quantity, tradePrice));
+
+                    remainingOpenQuantity -= quantity;
+                }
+                else
+                {
+                    positionSourceMap.Add(
+                        transaction.TransactionId, 
+                        (remainingOpenQuantity, tradePrice));
+
+                    break;
+                }
+            }
+
+            return positionSourceMap;
         }
     }
 }

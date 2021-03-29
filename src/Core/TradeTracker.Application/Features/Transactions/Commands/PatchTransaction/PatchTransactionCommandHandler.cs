@@ -1,20 +1,21 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Requests.ValidatedRequestHandler;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 using TradeTracker.Domain.Events;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransaction
 {
-    public class PatchTransactionCommandHandler : IRequestHandler<PatchTransactionCommand>
+    public class PatchTransactionCommandHandler :
+        ValidatableRequestHandler<UpdateTransactionCommand, UpdateTransactionCommandValidator>,
+        IRequestHandler<PatchTransactionCommand>
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
@@ -56,25 +57,14 @@ namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransacti
             return Unit.Value;
         }
 
-        private async Task ValidateRequest(UpdateTransactionCommand request)
-        {
-            var validator = new UpdateTransactionCommandValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (validationResult.Errors.Count > 0)
-            {
-                throw new ValidationException(validationResult);
-            }    
-        }
-
         private UpdateTransactionCommand ApplyPatch(PatchTransactionCommand request, Transaction existingTransaction)
         {
             var transactionForPatch = _mapper.Map<UpdateTransactionCommand>(existingTransaction);
 
-            JsonPatchDocument<UpdateTransactionCommandDto> patchDocument = request.PatchDocument;
+            JsonPatchDocument<UpdateTransactionCommandBase> patchDocument = request.PatchDocument;
             patchDocument.ApplyTo(transactionForPatch);
             
-            transactionForPatch.AccessKey = request.AccessKey;
+            transactionForPatch.Authenticate(request.AccessKey);
             transactionForPatch.TransactionId = request.TransactionId;
 
             return transactionForPatch;

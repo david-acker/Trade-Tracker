@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +15,7 @@ using TradeTracker.Api.Helpers;
 using TradeTracker.Api.Models.Pagination;
 using TradeTracker.Api.Utilities;
 using TradeTracker.Application.Features.Transactions;
+using TradeTracker.Application.Features.Transactions.Commands;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.DeleteTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.PatchTransaction;
@@ -53,7 +53,7 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Get a paged list of transactions.
         /// </summary>
-        /// <param name="parameters">The resource parameters for specifying the returned transactions</param>
+        /// <param name="query">The resource parameters for specifying the returned transactions</param>
         /// <remarks>
         /// Sample request: \
         /// GET /api/transactions \
@@ -81,12 +81,12 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/json")]
         public async Task<ActionResult<IEnumerable<TransactionForReturnDto>>> GetPagedTransactions(
-            [FromQuery] GetPagedTransactionsResourceParameters parameters)
+            [FromQuery] GetTransactionsQuery query)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetPagedTransactions)} was called.");
 
-            var query = _mapper.Map<GetTransactionsQuery>(parameters);
-            query.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            query.Authenticate(accessKey);
 
             var pagedTransactionsBase = await _mediator.Send(query);
 
@@ -102,7 +102,7 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Get a paged list of transactions.
         /// </summary>
-        /// <param name="parameters">The resource parameters for specifying the returned transactions</param>
+        /// <param name="query">The resource parameters for specifying the returned transactions</param>
         /// <remarks>
         /// Example: \
         /// GET /api/transactions \
@@ -130,12 +130,12 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<ActionResult<PagedTransactionsWithLinksDto>> GetPagedTransactionsWithLinks(
-            [FromQuery] GetPagedTransactionsResourceParameters parameters)
+            [FromQuery] GetTransactionsQuery query)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetPagedTransactionsWithLinks)} was called.");
-
-            var query = _mapper.Map<GetTransactionsQuery>(parameters);
-            query.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            query.Authenticate(accessKey); 
 
             var pagedTransactionsBase = await _mediator.Send(query);
 
@@ -155,7 +155,7 @@ namespace TradeTracker.Api.Controllers
             
             pagedTransactionsWithLinks.Links = 
                 CreateLinksForTransactions(
-                    parameters,
+                    query,
                     pagedTransactionsBase.HasNext,
                     pagedTransactionsBase.HasPrevious);
             
@@ -175,7 +175,7 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Create a transaction.
         /// </summary>
-        /// <param name="commandDto">The transaction to be created</param>
+        /// <param name="command">The transaction to be created</param>
         /// <remarks>
         /// Example: \
         /// POST /api/transactions \
@@ -197,12 +197,12 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/json")]
         public async Task<IActionResult> CreateTransaction(
-            [FromBody] CreateTransactionCommandDto commandDto)
+            [FromBody] CreateTransactionCommand command)
         {
             _logger.LogInformation($"TransactionsController: {nameof(CreateTransaction)} was called.");
 
-            var command = _mapper.Map<CreateTransactionCommand>(commandDto);
-            command.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            command.Authenticate(accessKey);
 
             var transactionCreated = await _mediator.Send(command);
 
@@ -216,7 +216,7 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Create a transaction.
         /// </summary>
-        /// <param name="commandDto">The transaction to be created</param>
+        /// <param name="command">The transaction to be created</param>
         /// <remarks>
         /// Example: \
         /// POST /api/transactions \
@@ -238,12 +238,12 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
         public async Task<ActionResult<TransactionForReturnWithLinksDto>> CreateTransactionWithLinks(
-            [FromBody] CreateTransactionCommandDto commandDto)
+            [FromBody] CreateTransactionCommand command)
         {
             _logger.LogInformation($"TransactionsController: {nameof(CreateTransaction)} was called.");
 
-            var command = _mapper.Map<CreateTransactionCommand>(commandDto);
-            command.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            command.Authenticate(accessKey);
 
             var transactionCreated = await _mediator.Send(command);
 
@@ -301,9 +301,11 @@ namespace TradeTracker.Api.Controllers
 
             var query = new GetTransactionQuery()
             {
-                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey")),
                 TransactionId = transactionId
             };
+
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            query.Authenticate(accessKey);
             
             var transaction = await _mediator.Send(query);
 
@@ -334,9 +336,11 @@ namespace TradeTracker.Api.Controllers
 
             var query = new GetTransactionQuery()
             {
-                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey")),
                 TransactionId = transactionId
             };
+
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            query.Authenticate(accessKey);
             
             var transaction = await _mediator.Send(query);
 
@@ -352,7 +356,7 @@ namespace TradeTracker.Api.Controllers
         /// Update a transaction.
         /// </summary>
         /// <param name="transactionId">The id for the transaction to be updated</param>
-        /// <param name="commandDto">The transaction with updated values</param>
+        /// <param name="command">The transaction with updated values</param>
         /// <response code="422">Validation Error</response>
         /// <remarks>
         /// Example: \
@@ -373,14 +377,15 @@ namespace TradeTracker.Api.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public async Task<ActionResult> UpdateTransaction(
             [FromRoute] Guid transactionId, 
-            [FromBody] UpdateTransactionCommandDto commandDto)
+            [FromBody] UpdateTransactionCommand command)
         {
             _logger.LogInformation($"TransactionsController: {nameof(UpdateTransaction)} was called.");
 
-            var command = _mapper.Map<UpdateTransactionCommand>(commandDto);
-            command.AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
             command.TransactionId = transactionId;
 
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            command.Authenticate(accessKey);
+            
             await _mediator.Send(command);
             return NoContent();
         }
@@ -413,16 +418,18 @@ namespace TradeTracker.Api.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         public async Task<ActionResult> PatchTransaction(
             [FromRoute] Guid transactionId, 
-            JsonPatchDocument<UpdateTransactionCommandDto> patchDocument)
+            JsonPatchDocument<UpdateTransactionCommandBase> patchDocument)
         {
             _logger.LogInformation($"TransactionsController: {nameof(PatchTransaction)} was called.");
 
             var command = new PatchTransactionCommand()
             {
-                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey")),
                 TransactionId = transactionId,
                 PatchDocument = patchDocument
             };
+
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            command.Authenticate(accessKey);
 
             await _mediator.Send(command);
             return NoContent();
@@ -447,9 +454,11 @@ namespace TradeTracker.Api.Controllers
 
             var command = new DeleteTransactionCommand() 
             {
-                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey")),
                 TransactionId = transactionId
             };
+
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            command.Authenticate(accessKey);
 
             await _mediator.Send(command);
             return NoContent();
@@ -490,10 +499,10 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionsController: {nameof(ExportTransactions)} was called.");
 
-            var query = new ExportTransactionsQuery()
-            {
-                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey"))
-            };
+            var query = new ExportTransactionsQuery();
+
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            query.Authenticate(accessKey);
 
             var fileExportDto = await _mediator.Send(query);
             return File(
@@ -564,7 +573,7 @@ namespace TradeTracker.Api.Controllers
 
 
         private IEnumerable<LinkDto> CreateLinksForTransactions(
-            GetPagedTransactionsResourceParameters parameters,
+            GetTransactionsQuery query,
             bool hasNext,
             bool hasPrevious)
         {
@@ -573,7 +582,7 @@ namespace TradeTracker.Api.Controllers
             links.Add(
                 new LinkDto(
                     CreateTransactionsResourceUrl(
-                        parameters, 
+                        query, 
                         ResourceUriType.CurrentPage),
                     "self",
                     "GET"));
@@ -583,7 +592,7 @@ namespace TradeTracker.Api.Controllers
                 links.Add(
                     new LinkDto(
                         CreateTransactionsResourceUrl(
-                            parameters, 
+                            query, 
                             ResourceUriType.NextPage),
                         "nextPage",
                         "GET"));
@@ -594,7 +603,7 @@ namespace TradeTracker.Api.Controllers
                 links.Add(
                     new LinkDto(
                         CreateTransactionsResourceUrl(
-                            parameters, 
+                            query, 
                             ResourceUriType.PreviousPage),
                         "previousPage",
                         "GET"));
@@ -605,7 +614,7 @@ namespace TradeTracker.Api.Controllers
 
 
         private string CreateTransactionsResourceUrl(
-            GetPagedTransactionsResourceParameters parameters,
+            GetTransactionsQuery query,
             ResourceUriType type)
         {
             switch (type)
@@ -615,13 +624,13 @@ namespace TradeTracker.Api.Controllers
                         "GetTransactions",
                         new
                         {
-                            order = parameters.Order,
-                            type = parameters.Type,
-                            pageNumber = parameters.PageNumber - 1,
-                            pageSize = parameters.PageSize,
-                            selection = parameters.Selection,
-                            rangeStart = parameters.RangeStart,
-                            rangeEnd = parameters.RangeEnd
+                            order = query.Order,
+                            type = query.Type,
+                            pageNumber = query.PageNumber - 1,
+                            pageSize = query.PageSize,
+                            selection = query.Selection,
+                            rangeStart = query.RangeStart,
+                            rangeEnd = query.RangeEnd
                         });
 
                 case ResourceUriType.NextPage:
@@ -629,13 +638,13 @@ namespace TradeTracker.Api.Controllers
                         "GetTransactions",
                         new
                         {
-                            order = parameters.Order,
-                            type = parameters.Type,
-                            pageNumber = parameters.PageNumber + 1,
-                            pageSize = parameters.PageSize,
-                            selection = parameters.Selection,
-                            rangeStart = parameters.RangeStart,
-                            rangeEnd = parameters.RangeEnd
+                            order = query.Order,
+                            type = query.Type,
+                            pageNumber = query.PageNumber + 1,
+                            pageSize = query.PageSize,
+                            selection = query.Selection,
+                            rangeStart = query.RangeStart,
+                            rangeEnd = query.RangeEnd
                         });
 
                 case ResourceUriType.CurrentPage:
@@ -644,13 +653,13 @@ namespace TradeTracker.Api.Controllers
                         "GetTransactions",
                         new
                         {
-                            order = parameters.Order,
-                            type = parameters.Type,
-                            pageNumber = parameters.PageNumber,
-                            pageSize = parameters.PageSize,
-                            selection = parameters.Selection,
-                            rangeStart = parameters.RangeStart,
-                            rangeEnd = parameters.RangeEnd
+                            order = query.Order,
+                            type = query.Type,
+                            pageNumber = query.PageNumber,
+                            pageSize = query.PageSize,
+                            selection = query.Selection,
+                            rangeStart = query.RangeStart,
+                            rangeEnd = query.RangeEnd
                         });
             }
         }        

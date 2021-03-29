@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
 using TradeTracker.Api.Helpers;
 using TradeTracker.Application.Features.Transactions;
-using TradeTracker.Application.Features.Transactions.Commands;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
@@ -46,7 +45,7 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Create a collection of transactions.
         /// </summary>
-        /// <param name="commandDtos">The transactions to be created</param>
+        /// <param name="command">The transactions to be created</param>
         /// <remarks>
         /// Example: \
         /// POST /api/transactioncollections \
@@ -78,20 +77,15 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/json")]
         public async Task<ActionResult<IEnumerable<TransactionForReturnDto>>> CreateTransactionCollection(
-            [FromBody] IEnumerable<TransactionForCreationDto> commandDtos)
+            [FromBody] CreateTransactionCollectionCommand command)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(CreateTransactionCollection)} was called.");
 
-            var command = new CreateTransactionCollectionCommand()
-            {
-                Transactions = _mapper.Map<IEnumerable<TransactionForCreationCommandBase>>(commandDtos)
-            };
-            
             var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
             command.Transactions = command.Transactions
                 .Select(transaction => 
                 {
-                    transaction.AccessKey = accessKey;
+                    transaction.Authenticate(accessKey);
 
                     return transaction;
                 });
@@ -111,7 +105,7 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Create a collection of transactions.
         /// </summary>
-        /// <param name="commandDtos">The transactions to be created</param>
+        /// <param name="command">The transactions to be created</param>
         /// <remarks>
         /// Example: \
         /// POST /api/transactioncollections \
@@ -143,20 +137,15 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
         public async Task<ActionResult<TransactionCollectionCreatedWithLinksDto>> CreateTransactionCollectionWithLinks(
-            [FromBody] IEnumerable<TransactionForCreationDto> commandDtos)
+            [FromBody] CreateTransactionCollectionCommand command)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(CreateTransactionCollectionWithLinks)} was called.");
 
-            var command = new CreateTransactionCollectionCommand()
-            {
-                Transactions = _mapper.Map<IEnumerable<TransactionForCreationCommandBase>>(commandDtos)
-            };
-            
             var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
             command.Transactions = command.Transactions
                 .Select(transaction => 
                 {
-                    transaction.AccessKey = accessKey;
+                    transaction.Authenticate(accessKey);
 
                     return transaction;
                 });
@@ -238,9 +227,11 @@ namespace TradeTracker.Api.Controllers
 
             var query = new GetTransactionCollectionQuery()
             {
-                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey")),
                 TransactionIds = transactionIds
             };
+
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            query.Authenticate(accessKey);
 
             var transactionCollection = await _mediator.Send(query);
 
@@ -271,9 +262,11 @@ namespace TradeTracker.Api.Controllers
 
             var query = new GetTransactionCollectionQuery()
             {
-                AccessKey = Guid.Parse(User.FindFirstValue("AccessKey")),
                 TransactionIds = transactionIds
             };
+            
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            query.Authenticate(accessKey);
 
             var transactionCollection = await _mediator.Send(query);
 

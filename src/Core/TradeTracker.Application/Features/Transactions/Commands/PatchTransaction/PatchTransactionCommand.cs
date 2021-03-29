@@ -1,14 +1,13 @@
 using System;
 using MediatR;
 using Microsoft.AspNetCore.JsonPatch;
-using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
+using TradeTracker.Application.Requests;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransaction
 {
-    public class PatchTransactionCommand : IRequest
+    public class PatchTransactionCommand : AuthenticatedRequest, IRequest
     {
-        public Guid AccessKey { get; set; }
         public Guid TransactionId { get; set; }
-        public JsonPatchDocument<UpdateTransactionCommandDto> PatchDocument { get; set; }
+        public JsonPatchDocument<UpdateTransactionCommandBase> PatchDocument { get; set; }
     }
 }

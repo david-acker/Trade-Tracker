@@ -36,5 +36,9 @@ namespace TradeTracker.Application.Interfaces.Infrastructure
         Task<decimal> CalculateAverageCostBasis(
             Guid accessKey,
             string symbol);
+
+        Task<Dictionary<Guid, decimal>> CreateSourceTransactionMap(
+            Guid accessKey, 
+            string symbol);
     }
 }

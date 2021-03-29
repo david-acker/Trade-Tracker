@@ -82,10 +82,10 @@ namespace TradeTracker.Persistence.Repositories
                 query = query.Where(t => (t.DateTime < parameters.RangeEnd));
             }
             
-            switch (parameters.OrderBy)
+            switch (parameters.SortOrder.Field)
             {
                 case "Symbol":
-                    if (parameters.SortOrder == SortOrder.Ascending)
+                    if (parameters.SortOrder.Type == SortOrderType.Ascending)
                         query = query.OrderBy(t => t.Symbol);
                     else
                         query = query.OrderByDescending(t => t.Symbol);
@@ -101,7 +101,7 @@ namespace TradeTracker.Persistence.Repositories
 
                 case "DateTime":
                 default:
-                    if (parameters.SortOrder == SortOrder.Ascending)
+                    if (parameters.SortOrder.Type == SortOrderType.Ascending)
                         query = query.OrderBy(t => t.DateTime);
                     else
                         query = query.OrderByDescending(t => t.DateTime);
@@ -113,10 +113,10 @@ namespace TradeTracker.Persistence.Repositories
             // Temporary workaround for OrderBy clauses on Decimal types (Quantity, Notional) while using SQLite,
             // which does not support Decimal types with OrderBy. Will be removed upon conversion to SQL Server.
             IList<Transaction> orderedTransactions;
-            switch (parameters.OrderBy)
+            switch (parameters.SortOrder.Field)
             {
                 case "Quantity":
-                    if (parameters.SortOrder == SortOrder.Ascending)
+                    if (parameters.SortOrder.Type == SortOrderType.Ascending)
                         orderedTransactions = pagedTransactions
                             .OrderBy(t => t.Quantity)
                             .ToList();
@@ -130,7 +130,7 @@ namespace TradeTracker.Persistence.Repositories
                     break;
 
                 case "Notional":
-                    if (parameters.SortOrder == SortOrder.Ascending)
+                    if (parameters.SortOrder.Type == SortOrderType.Ascending)
                         orderedTransactions = pagedTransactions
                             .OrderBy(t => t.Notional)
                             .ToList();

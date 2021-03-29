@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace TradeTracker.Application.Features.Positions
 {
     public class PositionForReturnDto
@@ -9,6 +12,8 @@ namespace TradeTracker.Application.Features.Positions
         public decimal Quantity { get; set; }
 
         public decimal AverageCostBasis { get; set; }
+
+        public Dictionary<Guid, decimal> SourceTransactionMap { get; set; }
     }
 }
 

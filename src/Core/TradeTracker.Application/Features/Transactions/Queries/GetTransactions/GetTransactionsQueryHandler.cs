@@ -1,18 +1,18 @@
 using AutoMapper;
 using MediatR;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Models.Pagination;
+using TradeTracker.Application.Requests.ValidatedRequestHandler;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionsQueryHandler : IRequestHandler<GetTransactionsQuery, PagedTransactionsBaseDto>
+    public class GetTransactionsQueryHandler : 
+        ValidatableRequestHandler<GetTransactionsQuery, GetTransactionsQueryValidator>,
+        IRequestHandler<GetTransactionsQuery, PagedTransactionsBaseDto>
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
@@ -45,17 +45,6 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
                 HasNext = pagedTransactions.HasNext,
                 Items = transactionsForReturn
             };
-        }
-
-        public async Task ValidateRequest(GetTransactionsQuery request)
-        {
-            var validator = new GetTransactionsQueryValidator();
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (validationResult.Errors.Count > 0)
-            {
-                throw new ValidationException(validationResult);
-            }  
         }
     }
 }

@@ -1,11 +1,11 @@
 using MediatR;
 using System;
+using TradeTracker.Application.Requests;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.DeleteTransaction
 {
-    public class DeleteTransactionCommand : IRequest
+    public class DeleteTransactionCommand : AuthenticatedRequest, IRequest
     {
-        public Guid AccessKey { get; set; }
         public Guid TransactionId { get; set; }
     }
 }
