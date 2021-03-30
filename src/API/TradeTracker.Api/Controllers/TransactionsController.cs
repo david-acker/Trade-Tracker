@@ -248,7 +248,7 @@ namespace TradeTracker.Api.Controllers
             var transactionCreated = await _mediator.Send(command);
 
             var transactionCreatedWithLinks =
-                new TransactionForReturnWithLinksDto();
+                _mapper.Map<TransactionForReturnWithLinksDto>(transactionCreated);
 
             transactionCreatedWithLinks.Links = CreateLinksForTransaction(
                 transactionCreatedWithLinks.TransactionId);
