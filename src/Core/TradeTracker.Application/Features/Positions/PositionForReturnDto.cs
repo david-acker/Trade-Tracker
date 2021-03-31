@@ -13,7 +13,7 @@ namespace TradeTracker.Application.Features.Positions
 
         public decimal AverageCostBasis { get; set; }
 
-        public Dictionary<Guid, decimal> SourceTransactionMap { get; set; }
+        public IEnumerable<SourceTransactionLink> SourceTransactionMap { get; set; }
     }
 }
 
