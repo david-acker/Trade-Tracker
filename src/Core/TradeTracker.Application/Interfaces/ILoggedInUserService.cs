@@ -1,8 +1,10 @@
+using System;
+
 namespace TradeTracker.Application.Interfaces
 {
     public interface ILoggedInUserService
     {
-        string AccessKey { get; }
+        Guid AccessKey { get; }
         string UserId { get; }
     }
 }
