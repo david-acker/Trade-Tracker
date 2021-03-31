@@ -1,10 +1,12 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.JsonPatch;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
+using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
@@ -17,18 +19,30 @@ namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransacti
         ValidatableRequestHandler<UpdateTransactionCommand>,
         IRequestHandler<PatchTransactionCommand>
     {
+        private readonly ILoggedInUserService _loggedInUserService;
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
 
-        public PatchTransactionCommandHandler(IMapper mapper, ITransactionRepository transactionRepository)
+        public PatchTransactionCommandHandler(
+            ILoggedInUserService loggedInUserService,
+            IMapper mapper, 
+            ITransactionRepository transactionRepository)
         {
+            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
             _transactionRepository = transactionRepository;
         }
 
         public async Task<Unit> Handle(PatchTransactionCommand request, CancellationToken cancellationToken)
         {
-            var existingTransaction = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
+            Guid userAccessKey = _loggedInUserService.AccessKey;
+            
+            if (userAccessKey == Guid.Empty)
+            {
+                throw new ValidationException("The current session has expired. Please reload and log back in.");
+            }
+
+            var existingTransaction = await _transactionRepository.GetByIdAsync(userAccessKey, request.TransactionId);
 
             if (existingTransaction == null)
             {
@@ -39,7 +53,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransacti
             TransactionType typeBeforeModification = existingTransaction.Type;
             decimal quantityBeforeModification = existingTransaction.Quantity;           
 
-            var updatedTransactionCommand = ApplyPatch(request, existingTransaction);
+            var updatedTransactionCommand = ApplyPatch(userAccessKey, request, existingTransaction);
             await ValidateRequest(updatedTransactionCommand);
 
             var transaction = _mapper.Map<Transaction>(updatedTransactionCommand);
@@ -57,14 +71,17 @@ namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransacti
             return Unit.Value;
         }
 
-        private UpdateTransactionCommand ApplyPatch(PatchTransactionCommand request, Transaction existingTransaction)
+        private UpdateTransactionCommand ApplyPatch(
+            Guid accessKey,
+            PatchTransactionCommand request, 
+            Transaction existingTransaction)
         {
             var transactionForPatch = _mapper.Map<UpdateTransactionCommand>(existingTransaction);
 
             JsonPatchDocument<UpdateTransactionCommandBase> patchDocument = request.PatchDocument;
             patchDocument.ApplyTo(transactionForPatch);
             
-            transactionForPatch.Authenticate(request.AccessKey);
+            transactionForPatch.Authenticate(accessKey);
             transactionForPatch.TransactionId = request.TransactionId;
 
             return transactionForPatch;
