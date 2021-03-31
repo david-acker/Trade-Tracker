@@ -48,7 +48,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
             var positionsForReturn = _mapper.Map<PagedList<Position>, List<PositionForReturnDto>>(pagedPositions);
 
             var positionsForReturnWithSourceInformation = 
-                await AddSourceInformation(positionsForReturn, request.AccessKey);
+                await AddSourceInformation(positionsForReturn, userAccessKey);
 
             return new PagedPositionsBaseDto()
             {
