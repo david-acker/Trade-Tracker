@@ -212,13 +212,7 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(GetTransactionCollection)} was called.");
 
-            var query = new GetTransactionCollectionQuery()
-            {
-                TransactionIds = transactionIds
-            };
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
+            var query = new GetTransactionCollectionQuery() { TransactionIds = transactionIds };
 
             var transactionCollection = await _mediator.Send(query);
 
@@ -246,13 +240,7 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(GetTransactionCollectionWithLinks)} was called.");
 
-            var query = new GetTransactionCollectionQuery()
-            {
-                TransactionIds = transactionIds
-            };
-            
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
+            var query = new GetTransactionCollectionQuery() { TransactionIds = transactionIds };
 
             var transactionCollection = await _mediator.Send(query);
 
