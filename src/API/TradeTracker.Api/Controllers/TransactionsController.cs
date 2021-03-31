@@ -87,9 +87,6 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetPagedTransactions)} was called.");
 
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
-
             var pagedTransactionsBase = await _mediator.Send(query);
 
             Response.Headers.Add("X-Paging-PageNumber", pagedTransactionsBase.CurrentPage.ToString());
@@ -137,9 +134,6 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetPagedTransactionsWithLinks)} was called.");
             
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey); 
-
             var pagedTransactionsBase = await _mediator.Send(query);
 
             var pagedTransactionsWithLinks = new PagedTransactionsWithLinksDto();
@@ -301,13 +295,7 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetTransaction)} was called.");
 
-            var query = new GetTransactionQuery()
-            {
-                TransactionId = transactionId
-            };
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
+            var query = new GetTransactionQuery() { TransactionId = transactionId };
             
             var transaction = await _mediator.Send(query);
 
@@ -335,13 +323,7 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetTransactionWithLinks)} was called.");
 
-            var query = new GetTransactionQuery()
-            {
-                TransactionId = transactionId
-            };
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
+            var query = new GetTransactionQuery() { TransactionId = transactionId };
             
             var transaction = await _mediator.Send(query);
 
@@ -497,9 +479,6 @@ namespace TradeTracker.Api.Controllers
             _logger.LogInformation($"TransactionsController: {nameof(ExportTransactions)} was called.");
 
             var query = new ExportTransactionsQuery();
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
 
             var fileExportDto = await _mediator.Send(query);
             return File(
