@@ -28,6 +28,7 @@ namespace TradeTracker.Application.Profiles
             CreateMap<Transaction, TransactionsForExportDto>();
 
             CreateMap<Transaction, TransactionForReturnDto>();
+            CreateMap<Transaction, TransactionForReturnWithLinksDto>();
             CreateMap<TransactionForReturnDto, TransactionForReturnWithLinksDto>();
 
             CreateMap<Transaction, CreateTransactionCollectionCommand>()

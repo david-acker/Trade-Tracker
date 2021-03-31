@@ -65,7 +65,7 @@ namespace TradeTracker.Api.Controllers
         /// <response code="422">Validation Error</response>
         [HttpGet(Name = "GetPositions")]
         [Consumes("application/json")]
-        [Produces("application/json", "application/json")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
@@ -190,12 +190,10 @@ namespace TradeTracker.Api.Controllers
         /// <response code="200">Returns the requested position</response>
         /// <response code="422">Validation Error</response>
         [HttpGet("{symbol}", Name = "GetPosition")]
-        [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/json")]
         public async Task<ActionResult<PositionForReturnDto>> GetPosition(
             [FromRoute] string symbol)
@@ -226,13 +224,11 @@ namespace TradeTracker.Api.Controllers
         /// </remarks>
         /// <response code="200">Returns the requested position</response>
         /// <response code="422">Validation Error</response>
-        [HttpGet("{symbol}", Name = "GetPosition")]
-        [Consumes("application/json")]
+        [HttpGet("{symbol}", Name = "GetPositionWithLinks")]
         [Produces("application/vnd.trade.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
         public async Task<ActionResult<PositionForReturnWithLinksDto>> GetPositionWithLinks(
             [FromRoute] string symbol)
@@ -254,6 +250,57 @@ namespace TradeTracker.Api.Controllers
             positionWithLinks.Links = CreateLinksForPosition(symbol);
 
             return Ok(positionWithLinks);
+        }
+
+
+        /// <summary>
+        /// Gets a position by symbol of its security.
+        /// </summary>
+        /// <param name="symbol">The symbol for the position</param>
+        /// <remarks>
+        /// Example: \
+        /// GET /api/positions/{symbol} 
+        /// </remarks>
+        /// <response code="200">Returns the requested position</response>
+        /// <response code="422">Validation Error</response>
+        [HttpGet("{symbol}", Name = "GetDetailedPositionWithLinks")]
+        [Produces("application/vnd.trade.detailedposition.hateoas+json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.detailedposition.hateoas+json")]
+        public async Task<ActionResult<PositionForReturnWithLinksDto>> GetDetailedPositionWithLinks(
+            [FromRoute] string symbol)
+        {
+            _logger.LogInformation($"PositionsController: {nameof(GetPositionWithLinks)} was called.");
+
+            var query = new GetDetailedPositionQuery()
+            {
+                Symbol = symbol
+            };
+
+            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
+            query.Authenticate(accessKey);
+
+            var detailedPosition = await _mediator.Send(query);
+
+            var detailedPositionWithLinks = 
+                _mapper.Map<DetailedPositionForReturnWithLinksDto>(detailedPosition);
+
+            detailedPositionWithLinks.SourceTransactionMap =
+                detailedPositionWithLinks.SourceTransactionMap
+                    .Select(fullSourceLink => 
+                    {
+                        fullSourceLink.Transaction.Links = 
+                            CreateLinksForTransaction(fullSourceLink.Transaction.TransactionId);
+
+                        return fullSourceLink;
+
+                    }).ToList();
+
+            detailedPositionWithLinks.Links = CreateLinksForPosition(symbol);
+
+            return Ok(detailedPositionWithLinks);
         }
 
 
@@ -377,7 +424,47 @@ namespace TradeTracker.Api.Controllers
                         });
             }
         }
-    }
 
+        private IEnumerable<LinkDto> CreateLinksForTransaction(
+            Guid transactionId)
+        {
+            var links = new List<LinkDto>();
+
+            links.Add(
+                new LinkDto(
+                    Url.Link(
+                        "GetTransaction", 
+                        new { transactionId }),
+                "self",
+                "GET"));
+
+            links.Add(
+                new LinkDto(
+                    Url.Link(
+                        "UpdateTransaction",
+                        new { transactionId }),
+                    "update transaction",
+                    "PUT"));
+                
+            links.Add(
+                new LinkDto(
+                    Url.Link(
+                        "PatchTransaction",
+                        new { transactionId }),
+                    "patch transaction",
+                    "PATCH"));
+
+            links.Add(
+                new LinkDto(
+                    Url.Link(
+                        "DeleteTransaction",
+                        new { transactionId }),
+                    "delete transaction",
+                    "DELETE"));
+
+            return links;
+        }
+    }
+    
     #pragma warning restore CS1591
 }

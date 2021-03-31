@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using TradeTracker.Application.Features.Positions;
 using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Interfaces.Persistence;
@@ -188,29 +189,21 @@ namespace TradeTracker.Infrastructure.Services
         {
             _logger.LogInformation($"PositionTrackingService: {nameof(CalculateAverageCostBasis)} was called.");
 
-            Dictionary<Guid, (decimal quantity, decimal tradePrice)> positionSourceMap = 
-                await CreatePositionSourceMap(accessKey, symbol);
+            var sourceTransactionMap = await CreateSourceTransactionMap(accessKey, symbol);
 
-            var quantityCostPairs = 
-                new List<(decimal quantity, decimal tradePrice)>(positionSourceMap.Values);
+            decimal totalNotional = sourceTransactionMap
+                .Sum(p => p.LinkedQuantity * p.TradePrice);
 
-            decimal totalNotional = quantityCostPairs.Sum(p => p.quantity * p.tradePrice);
-            decimal totalQuantity = quantityCostPairs.Sum(p => p.quantity);
+            decimal totalQuantity = sourceTransactionMap
+                .Sum(p => p.LinkedQuantity);
 
             return Math.Round(totalNotional / totalQuantity, 2);
         }
 
-        public async Task<Dictionary<Guid, decimal>> CreateSourceTransactionMap(Guid accessKey, string symbol)
-        {
-            var positionSourceMap = await CreatePositionSourceMap(accessKey, symbol);
-
-            return positionSourceMap.ToDictionary(p => p.Key, p => p.Value.quantity);
-        }
-
-        private async Task<Dictionary<Guid, (decimal quantity, decimal tradePrice)>> CreatePositionSourceMap(
+        public async Task<IEnumerable<SourceTransactionLink>> CreateSourceTransactionMap(
             Guid accessKey, string symbol)
         {
-            _logger.LogInformation($"PositionTrackingService: {nameof(CreatePositionSourceMap)} was called.");
+            _logger.LogInformation($"PositionTrackingService: {nameof(CreateSourceTransactionMap)} was called.");
         
             var position = await _positionRepository.GetBySymbolAsync(accessKey, symbol);
 
@@ -221,7 +214,7 @@ namespace TradeTracker.Infrastructure.Services
 
             var remainingOpenQuantity = position.Quantity;
 
-            var positionSourceMap = new Dictionary<Guid, (decimal quantity, decimal tradePrice)>();
+            var sourceTransactionMap = new List<SourceTransactionLink>();
             
             foreach (var transaction in transactionsForSymbol)
             {
@@ -230,23 +223,33 @@ namespace TradeTracker.Infrastructure.Services
 
                 if (remainingOpenQuantity > quantity)
                 {
-                    positionSourceMap.Add(
-                        transaction.TransactionId, 
-                        (quantity, tradePrice));
+                    sourceTransactionMap.Add(
+                        new SourceTransactionLink()
+                        {
+                            DateTime = transaction.DateTime,
+                            LinkedQuantity = quantity,
+                            TradePrice = transaction.TradePrice,
+                            TransactionId = transaction.TransactionId
+                        });
 
                     remainingOpenQuantity -= quantity;
                 }
                 else
                 {
-                    positionSourceMap.Add(
-                        transaction.TransactionId, 
-                        (remainingOpenQuantity, tradePrice));
+                    sourceTransactionMap.Add(
+                        new SourceTransactionLink()
+                        {
+                            DateTime = transaction.DateTime,
+                            LinkedQuantity = remainingOpenQuantity,
+                            TradePrice = transaction.TradePrice,
+                            TransactionId = transaction.TransactionId
+                        });
 
                     break;
                 }
             }
 
-            return positionSourceMap;
+            return sourceTransactionMap;
         }
     }
 }

@@ -5,17 +5,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Models.Pagination;
-using TradeTracker.Application.Requests.ValidatedRequestHandler;
+using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
     public class GetPositionsQueryHandler : 
-        ValidatableRequestHandler<GetPositionsQuery, GetPositionsQueryValidator>,
+        ValidatableRequestHandler<GetPositionsQuery>,
         IRequestHandler<GetPositionsQuery, PagedPositionsBaseDto>
     {
         private readonly IMapper _mapper;

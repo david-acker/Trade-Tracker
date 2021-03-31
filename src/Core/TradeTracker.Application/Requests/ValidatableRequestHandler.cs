@@ -2,13 +2,18 @@ using FluentValidation;
 using System;
 using System.Threading.Tasks;
 
-namespace TradeTracker.Application.Requests.ValidatedRequestHandler
+namespace TradeTracker.Application.Requests
 {
-    public class ValidatableRequestHandler<TRequest, TValidator> where TValidator : AbstractValidator<TRequest>
+    public class ValidatableRequestHandler<TRequest>
     {
         protected async Task ValidateRequest(TRequest request) 
         {
-            AbstractValidator<TRequest> validator = Activator.CreateInstance<TValidator>();
+            Type requestType = typeof(TRequest);
+
+            var validator = 
+                (AbstractValidator<TRequest>)Activator.CreateInstance(
+                    Type.GetType($"{requestType.ToString()}Validator")
+                );
 
             var validationResult = await validator.ValidateAsync(request);
             

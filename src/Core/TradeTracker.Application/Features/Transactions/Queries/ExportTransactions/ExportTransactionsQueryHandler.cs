@@ -7,12 +7,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Requests.ValidatedRequestHandler;
+using TradeTracker.Application.Requests;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransactions
 {
     public class ExportTransactionsQueryHandler : 
-        ValidatableRequestHandler<ExportTransactionsQuery, ExportTransactionsQueryValidator>,
+        ValidatableRequestHandler<ExportTransactionsQuery>,
         IRequestHandler<ExportTransactionsQuery, TransactionsExportFileVm>
     {
         private readonly ITransactionRepository _transactionRepository;

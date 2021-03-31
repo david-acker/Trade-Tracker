@@ -6,7 +6,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
     public class GetTransactionsQuery : AuthenticatedRequest, IRequest<PagedTransactionsBaseDto>
     {
-        public string Order { get; set; } = "DateTime+Descending";
+        public string Order { get; set; } = "DateTime Descending";
         
         public string Type { get; set; }
 

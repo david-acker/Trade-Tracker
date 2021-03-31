@@ -4,6 +4,7 @@ using TradeTracker.Application.Models.Authentication;
 using TradeTracker.Application.Interfaces.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
+using TradeTracker.Api.ActionConstraints;
 
 namespace TradeTracker.Api.Controllers
 {
@@ -40,8 +41,11 @@ namespace TradeTracker.Api.Controllers
         /// <response code="422">Validation Error</response>
         [HttpPost("authenticate", Name="Authenticate")]
         [Consumes("application/json")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
+        [RequestHeaderMatchesMediaType("Accept", "application/json")]
         public async Task<ActionResult<AuthenticationResponse>> Authenticate(
             AuthenticationRequest authenticationRequest)
         {
@@ -89,8 +93,11 @@ namespace TradeTracker.Api.Controllers
         /// <response code="422">Validation Error</response>
         [HttpPost("register", Name="Register")]
         [Consumes("application/json")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
+        [RequestHeaderMatchesMediaType("Accept", "application/json")]
         public async Task<ActionResult<RegistrationResponse>> Register(
             RegistrationRequest registrationRequest)
         {
