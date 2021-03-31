@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Models.Pagination;
@@ -17,15 +18,18 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
         ValidatableRequestHandler<GetPositionsQuery>,
         IRequestHandler<GetPositionsQuery, PagedPositionsBaseDto>
     {
+        private readonly ILoggedInUserService _loggedInUserService;
         private readonly IMapper _mapper;
         private readonly IPositionRepository _positionRepository;
         private readonly IPositionService _positionService;
 
         public GetPositionsQueryHandler(
+            ILoggedInUserService loggedInUserService,
             IMapper mapper, 
             IPositionRepository positionRepository,
             IPositionService positionService)
         {
+            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
             _positionRepository = positionRepository;
             _positionService = positionService;
@@ -35,9 +39,11 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
         {
             await ValidateRequest(request);
 
+            var userAccessKey = _loggedInUserService.AccessKey;
+
             var parameters = _mapper.Map<PagedPositionsResourceParameters>(request);
 
-            var pagedPositions = await _positionRepository.GetPagedPositionsAsync(parameters);
+            var pagedPositions = await _positionRepository.GetPagedPositionsAsync(userAccessKey, parameters);
             
             var positionsForReturn = _mapper.Map<PagedList<Position>, List<PositionForReturnDto>>(pagedPositions);
 
