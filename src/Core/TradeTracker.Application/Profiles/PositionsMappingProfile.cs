@@ -26,6 +26,12 @@ namespace TradeTracker.Application.Profiles
                                     : null));
 
             CreateMap<Position, PositionForReturnDto>();
+
+            CreateMap<Position, DetailedPositionForReturnDto>();
+
+            CreateMap<PositionForReturnDto, PositionForReturnWithLinksDto>();
+
+            CreateMap<DetailedPositionForReturnDto, DetailedPositionForReturnWithLinksDto>();
         }
     }
 }
