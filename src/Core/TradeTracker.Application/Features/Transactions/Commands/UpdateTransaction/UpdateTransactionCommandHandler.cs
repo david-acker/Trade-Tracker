@@ -1,8 +1,10 @@
 using AutoMapper;
 using MediatR;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
+using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
@@ -15,17 +17,29 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
         ValidatableRequestHandler<UpdateTransactionCommand>,
         IRequestHandler<UpdateTransactionCommand>
     {
+        private readonly ILoggedInUserService _loggedInUserService;
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
 
-        public UpdateTransactionCommandHandler(IMapper mapper, ITransactionRepository transactionRepository)
+        public UpdateTransactionCommandHandler(
+            ILoggedInUserService loggedInUserService,
+            IMapper mapper, 
+            ITransactionRepository transactionRepository)
         {
+            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
             _transactionRepository = transactionRepository;
         }
 
         public async Task<Unit> Handle(UpdateTransactionCommand request, CancellationToken cancellationToken)
         {
+            Guid userAccessKey = _loggedInUserService.AccessKey;
+            
+            if (userAccessKey == Guid.Empty)
+            {
+                throw new ValidationException("The current session has expired. Please reload and log back in.");
+            }
+
             await ValidateRequest(request);
 
             var transaction = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
