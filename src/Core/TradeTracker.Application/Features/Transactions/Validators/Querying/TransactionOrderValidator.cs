@@ -11,7 +11,7 @@ namespace TradeTracker.Application.Features.Transactions.Validators.Querying
             RuleFor(s => s)
                 .Cascade(CascadeMode.Stop)
                 .Must(s => hasCorrectNumberOfElements(s, 2))
-                    .WithMessage("Selection must include both an OrderBy field and a SortOrder.")
+                    .WithMessage("Order must include both an OrderBy field and a SortOrder.")
                 .SetValidator(new TransactionOrderComponentsValidator());
         }
 
