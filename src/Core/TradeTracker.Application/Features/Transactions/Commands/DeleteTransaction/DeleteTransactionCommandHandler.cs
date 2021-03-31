@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 using TradeTracker.Domain.Events;

@@ -1,6 +1,5 @@
 using System.Linq;
 using FluentValidation;
-using TradeTracker.Application.Features.Transactions.Shared.Validators;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection
 {

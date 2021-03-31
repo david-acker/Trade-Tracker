@@ -1,7 +1,6 @@
 using System;
 using FluentValidation;
 using TradeTracker.Application.Features.Positions.Validators.Querying;
-using TradeTracker.Application.Features.Transactions.Shared.Validators;
 using TradeTracker.Application.Validators.Pagination;
 using TradeTracker.Application.Validators.Selection;
 
@@ -11,9 +10,6 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
     {
         public GetPositionsQueryValidator()
         {
-            RuleFor(t => t.AccessKey)
-                .SetValidator(new AccessKeyValidator());
-
             When(q => !String.IsNullOrWhiteSpace(q.Exposure), () =>
             {
                 RuleFor(q => q.Exposure)

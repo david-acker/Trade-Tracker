@@ -5,8 +5,6 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
     public class PagedPositionsResourceParameters
     {
-        public Guid AccessKey { get; set; }
-
         public SortOrder SortOrder { get; set; }
 
         public int PageNumber { get; set; }

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace TradeTracker.Application.Features.Positions
