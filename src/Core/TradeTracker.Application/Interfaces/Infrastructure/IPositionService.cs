@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TradeTracker.Application.Features.Positions;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 
@@ -37,7 +38,7 @@ namespace TradeTracker.Application.Interfaces.Infrastructure
             Guid accessKey,
             string symbol);
 
-        Task<Dictionary<Guid, decimal>> CreateSourceTransactionMap(
+        Task<IEnumerable<SourceTransactionLink>> CreateSourceTransactionMap(
             Guid accessKey, 
             string symbol);
     }
