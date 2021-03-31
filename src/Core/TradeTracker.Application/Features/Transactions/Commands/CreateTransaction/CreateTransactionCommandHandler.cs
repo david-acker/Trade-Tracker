@@ -1,7 +1,10 @@
 using AutoMapper;
 using MediatR;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+using TradeTracker.Application.Exceptions;
+using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
@@ -13,11 +16,16 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
         ValidatableRequestHandler<CreateTransactionCommand>,
         IRequestHandler<CreateTransactionCommand, TransactionForReturnDto>
     {
+        private readonly ILoggedInUserService _loggedInUserService;
         private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
 
-        public CreateTransactionCommandHandler(IMapper mapper, ITransactionRepository transactionRepository)
+        public CreateTransactionCommandHandler(
+            ILoggedInUserService loggedInUserService,
+            IMapper mapper, 
+            ITransactionRepository transactionRepository)
         {
+            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
             _transactionRepository = transactionRepository;
         }
@@ -25,6 +33,13 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
         public async Task<TransactionForReturnDto> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
+
+            Guid userAccessKey = _loggedInUserService.AccessKey;
+            
+            if (userAccessKey == Guid.Empty)
+            {
+                throw new ValidationException("The current session has expired. Please reload and log back in.");
+            }
 
             var transaction = _mapper.Map<Transaction>(request);
 
