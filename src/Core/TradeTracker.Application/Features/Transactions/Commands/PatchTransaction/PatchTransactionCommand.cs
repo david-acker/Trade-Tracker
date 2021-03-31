@@ -1,7 +1,6 @@
 using System;
 using MediatR;
 using Microsoft.AspNetCore.JsonPatch;
-using TradeTracker.Application.Requests;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransaction
 {
