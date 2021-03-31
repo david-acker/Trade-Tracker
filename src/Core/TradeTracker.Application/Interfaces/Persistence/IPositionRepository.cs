@@ -8,8 +8,12 @@ namespace TradeTracker.Application.Interfaces.Persistence
 {
     public interface IPositionRepository : IAsyncRepository<Position>
     {
-        Task<Position> GetBySymbolAsync(Guid accessKey, string symbol);
+        Task<Position> GetBySymbolAsync(
+            Guid accessKey, 
+            string symbol);
 
-        Task<PagedList<Position>> GetPagedPositionsAsync(PagedPositionsResourceParameters parameters);
+        Task<PagedList<Position>> GetPagedPositionsAsync(
+            Guid userAccessKey, 
+            PagedPositionsResourceParameters parameters);
     }
 }

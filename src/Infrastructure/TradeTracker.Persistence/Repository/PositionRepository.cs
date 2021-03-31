@@ -24,11 +24,13 @@ namespace TradeTracker.Persistence.Repositories
                 .FirstOrDefaultAsync(t => t.Symbol == symbol);
         }
 
-        public async Task<PagedList<Position>> GetPagedPositionsAsync(PagedPositionsResourceParameters parameters)
+        public async Task<PagedList<Position>> GetPagedPositionsAsync(
+            Guid userAccessKey, 
+            PagedPositionsResourceParameters parameters)
         {
             var query = (IQueryable<Position>)_context.Positions;
         
-            query = query.Where(t => t.AccessKey == parameters.AccessKey);
+            query = query.Where(t => t.AccessKey == userAccessKey);
 
             if (parameters.Selection != null)
             {

@@ -32,11 +32,13 @@ namespace TradeTracker.Persistence.Repositories
                 .ToListAsync();
         }
 
-        public async Task<PagedList<Transaction>> GetPagedTransactionsAsync(PagedTransactionsResourceParameters parameters)
+        public async Task<PagedList<Transaction>> GetPagedTransactionsAsync(
+            Guid userAccessKey,
+            PagedTransactionsResourceParameters parameters)
         {
             var query = (IQueryable<Transaction>)_context.Transactions;
         
-            query = query.Where(t => t.AccessKey == parameters.AccessKey);
+            query = query.Where(t => t.AccessKey == userAccessKey);
 
             switch (parameters.Type)
             {

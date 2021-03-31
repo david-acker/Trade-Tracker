@@ -9,14 +9,23 @@ namespace TradeTracker.Application.Interfaces.Persistence
 {
     public interface ITransactionRepository : IAsyncRepository<Transaction>
     {
-        Task<PagedList<Transaction>> GetPagedTransactionsAsync(PagedTransactionsResourceParameters parameters);
+        Task<PagedList<Transaction>> GetPagedTransactionsAsync(
+            Guid userAccessKey, 
+            PagedTransactionsResourceParameters parameters);
 
-        Task<IEnumerable<Transaction>> GetTransactionCollectionByIdsAsync(Guid AccessKey, IEnumerable<Guid> ids);
+        Task<IEnumerable<Transaction>> GetTransactionCollectionByIdsAsync(
+            Guid AccessKey, 
+            IEnumerable<Guid> ids);
 
-        Task<IEnumerable<Transaction>> GetAllTransactionsForSymbolAsync(Guid AccessKey, string symbol);
+        Task<IEnumerable<Transaction>> GetAllTransactionsForSymbolAsync(
+            Guid AccessKey, 
+            string symbol);
 
-        Task<IEnumerable<Transaction>> GetAllOpenTransactionsForSymbolAsync(Guid AccessKey, string symbol);
+        Task<IEnumerable<Transaction>> GetAllOpenTransactionsForSymbolAsync(
+            Guid AccessKey, 
+            string symbol);
 
-        HashSet<string> GetSetOfSymbolsForAllTransactionsByUser(Guid accessKey);
+        HashSet<string> GetSetOfSymbolsForAllTransactionsByUser(
+            Guid accessKey);
     }
 }
