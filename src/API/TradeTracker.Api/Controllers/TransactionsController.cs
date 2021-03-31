@@ -413,9 +413,6 @@ namespace TradeTracker.Api.Controllers
                 PatchDocument = patchDocument
             };
 
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            command.Authenticate(accessKey);
-
             await _mediator.Send(command);
             return NoContent();
         }
