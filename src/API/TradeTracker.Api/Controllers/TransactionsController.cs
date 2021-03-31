@@ -75,11 +75,13 @@ namespace TradeTracker.Api.Controllers
         [HttpGet(Name = "GetPagedTransactions")]
         [Consumes("application/json")]
         [Produces("application/json",
-            "application/vnd.trade.hateoas+json")]
+            "application/vnd.trade.pagedtransactions+json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
-        [RequestHeaderMatchesMediaType("Accept", "application/json")]
+        [RequestHeaderMatchesMediaType("Accept", 
+            "application/json",
+            "application/vnd.trade.pagedtransactions+json")]
         public async Task<ActionResult<IEnumerable<TransactionForReturnDto>>> GetPagedTransactions(
             [FromQuery] GetTransactionsQuery query)
         {
@@ -123,11 +125,12 @@ namespace TradeTracker.Api.Controllers
         /// <response code="422">Validation Error</response>
         [HttpGet(Name = "GetPagedTransactionsWithLinks")]
         [Consumes("application/json")]
-        [Produces("application/vnd.trade.hateoas+json")]
+        [Produces("application/vnd.trade.pagedtransactions.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
-        [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
+        [RequestHeaderMatchesMediaType("Accept", 
+            "application/vnd.trade.pagedtransactions.hateoas+json")]
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<ActionResult<PagedTransactionsWithLinksDto>> GetPagedTransactionsWithLinks(
             [FromQuery] GetTransactionsQuery query)
@@ -191,11 +194,14 @@ namespace TradeTracker.Api.Controllers
         /// <response code="422">Validation Error</response>
         [HttpPost(Name = "CreateTransaction")]
         [Consumes("application/json")]
-        [Produces("application/json")]
+        [Produces("application/json",
+            "application/vnd.trade.transaction+json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
-        [RequestHeaderMatchesMediaType("Accept", "application/json")]
+        [RequestHeaderMatchesMediaType("Accept", 
+            "application/json",
+            "application/vnd.trade.transaction+json")]
         public async Task<IActionResult> CreateTransaction(
             [FromBody] CreateTransactionCommand command)
         {
@@ -232,11 +238,12 @@ namespace TradeTracker.Api.Controllers
         /// <response code="422">Validation Error</response>
         [HttpPost(Name = "CreateTransactionWithLinks")]
         [Consumes("application/json")]
-        [Produces("application/vnd.trade.hateoas+json")]
+        [Produces("application/vnd.trade.transaction.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
-        [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
+        [RequestHeaderMatchesMediaType("Accept", 
+            "application/vnd.trade.transaction.hateoas+json")]
         public async Task<ActionResult<TransactionForReturnWithLinksDto>> CreateTransactionWithLinks(
             [FromBody] CreateTransactionCommand command)
         {
@@ -288,10 +295,13 @@ namespace TradeTracker.Api.Controllers
         /// </remarks>
         /// <response code="200">Returns the requested transaction</response>
         [HttpGet("{transactionId}", Name = "GetTransaction")]
-        [Produces("application/json")]
+        [Produces("application/json",
+            "application/vnd.trade.transaction+json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [RequestHeaderMatchesMediaType("Accept", "application/json")]
+        [RequestHeaderMatchesMediaType("Accept", 
+            "application/json",
+            "application/vnd.trade.transaction+json")]
         public async Task<ActionResult<TransactionForReturnDto>> GetTransaction(
             [FromRoute] Guid transactionId)
         {
@@ -321,10 +331,11 @@ namespace TradeTracker.Api.Controllers
         /// </remarks>
         /// <response code="200">Returns the requested transaction</response>
         [HttpGet("{transactionId}", Name = "GetTransactionWithLinks")]
-        [Produces("application/vnd.trade.hateoas+json")]
+        [Produces("application/vnd.trade.transaction.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
+        [RequestHeaderMatchesMediaType("Accept", 
+            "application/vnd.trade.transaction.hateoas+json")]
         public async Task<ActionResult<TransactionForReturnWithLinksDto>> GetTransactionWithLinks(
             [FromRoute] Guid transactionId)
         {
