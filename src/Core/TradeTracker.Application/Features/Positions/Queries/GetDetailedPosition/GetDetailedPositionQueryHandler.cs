@@ -1,5 +1,6 @@
 using AutoMapper;
 using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -8,13 +9,13 @@ using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Requests.ValidatedRequestHandler;
+using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
 {
     public class GetDetailedPositionQueryHandler : 
-        ValidatableRequestHandler<GetDetailedPositionQuery, GetDetailedPositionQueryValidator>,
+        ValidatableRequestHandler<GetDetailedPositionQuery>,
         IRequestHandler<GetDetailedPositionQuery, DetailedPositionForReturnDto>
     {
         private readonly IMapper _mapper;
@@ -57,30 +58,39 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
                     request.AccessKey,
                     request.Symbol);
 
-            IEnumerable<FullSourceTransactionLink> fullSourceTransactionMap =
-                sourceTransactionMap.Select(sourceLink => 
-                {
-                    var transaction = _transactionRepository
-                        .GetByIdAsync(request.AccessKey, sourceLink.TransactionId);
-                    
-                    var transactionWithLinks = 
-                        _mapper.Map<TransactionForReturnWithLinksDto>(transaction);
-
-                    var fullSourceLink = new FullSourceTransactionLink()
+            var tasks = sourceTransactionMap
+                .Select(async (sourceLink) => 
                     {
-                        DateTime = sourceLink.DateTime,
-                        LinkedQuantity = sourceLink.LinkedQuantity,
-                        TradePrice = sourceLink.TradePrice,
-                        Transaction = transactionWithLinks
-                    };
+                        return await CreateFullLink(
+                            request.AccessKey, 
+                            sourceLink);
+                    })
+                .ToList();
 
-                    return fullSourceLink;
-
-                }).ToList();
+            var fullSourceTransactionMap = await Task.WhenAll(tasks);
 
             positionForReturn.SourceTransactionMap = fullSourceTransactionMap;
 
             return positionForReturn;
         }
+
+        private async Task<FullSourceTransactionLink> CreateFullLink(
+            Guid accessKey,
+            SourceTransactionLink sourceLink)
+        {
+            var transaction = await _transactionRepository
+                .GetByIdAsync(accessKey, sourceLink.TransactionId);
+
+            var transactionWithLinks = 
+                _mapper.Map<TransactionForReturnWithLinksDto>(transaction);
+
+            return new FullSourceTransactionLink()
+            {
+                DateTime = sourceLink.DateTime,
+                LinkedQuantity = sourceLink.LinkedQuantity,
+                TradePrice = sourceLink.TradePrice,
+                Transaction = transactionWithLinks
+            };
+        } 
     }
 }
