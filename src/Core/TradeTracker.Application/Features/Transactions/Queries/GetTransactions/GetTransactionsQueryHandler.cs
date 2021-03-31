@@ -5,13 +5,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Models.Pagination;
-using TradeTracker.Application.Requests.ValidatedRequestHandler;
+using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
     public class GetTransactionsQueryHandler : 
-        ValidatableRequestHandler<GetTransactionsQuery, GetTransactionsQueryValidator>,
+        ValidatableRequestHandler<GetTransactionsQuery>,
         IRequestHandler<GetTransactionsQuery, PagedTransactionsBaseDto>
     {
         private readonly ITransactionRepository _transactionRepository;

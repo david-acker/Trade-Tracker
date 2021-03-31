@@ -6,13 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Requests.ValidatedRequestHandler;
+using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection
 {
     public class GetTransactionCollectionQueryHandler :
-        ValidatableRequestHandler<GetTransactionCollectionQuery, GetTransactionCollectionQueryValidator>,
+        ValidatableRequestHandler<GetTransactionCollectionQuery>,
         IRequestHandler<GetTransactionCollectionQuery, IEnumerable<TransactionForReturnDto>>
     {
         private readonly ITransactionRepository _transactionRepository;

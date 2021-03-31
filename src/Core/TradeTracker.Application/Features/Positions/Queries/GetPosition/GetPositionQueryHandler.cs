@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Requests.ValidatedRequestHandler;
+using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
 {
     public class GetPositionQueryHandler : 
-        ValidatableRequestHandler<GetPositionQuery, GetPositionQueryValidator>,
+        ValidatableRequestHandler<GetPositionQuery>,
         IRequestHandler<GetPositionQuery, PositionForReturnDto>
     {
         private readonly IMapper _mapper;

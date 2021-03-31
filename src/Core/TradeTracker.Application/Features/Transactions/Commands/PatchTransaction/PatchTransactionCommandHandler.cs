@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Requests.ValidatedRequestHandler;
+using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 using TradeTracker.Domain.Events;
@@ -14,7 +14,7 @@ using TradeTracker.Domain.Events;
 namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransaction
 {
     public class PatchTransactionCommandHandler :
-        ValidatableRequestHandler<UpdateTransactionCommand, UpdateTransactionCommandValidator>,
+        ValidatableRequestHandler<UpdateTransactionCommand>,
         IRequestHandler<PatchTransactionCommand>
     {
         private readonly ITransactionRepository _transactionRepository;
