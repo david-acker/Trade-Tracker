@@ -8,9 +8,6 @@ namespace TradeTracker.Application.Features.Transactions.Commands
     {
         public CreateTransactionCommandBaseValidator ()
         {
-            RuleFor(t => t.AccessKey)
-                .SetValidator(new AccessKeyValidator());
-
             RuleFor(t => t.DateTime)
                 .SetValidator(new DateTimeValidator());
             
