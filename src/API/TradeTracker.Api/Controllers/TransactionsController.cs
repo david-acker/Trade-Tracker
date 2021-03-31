@@ -230,7 +230,7 @@ namespace TradeTracker.Api.Controllers
         /// } 
         /// </remarks>
         /// <response code="422">Validation Error</response>
-        [HttpPost(Name = "CreateTransaction")]
+        [HttpPost(Name = "CreateTransactionWithLinks")]
         [Consumes("application/json")]
         [Produces("application/vnd.trade.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -248,7 +248,7 @@ namespace TradeTracker.Api.Controllers
             var transactionCreated = await _mediator.Send(command);
 
             var transactionCreatedWithLinks =
-                new TransactionForReturnWithLinksDto();
+                _mapper.Map<TransactionForReturnWithLinksDto>(transactionCreated); 
 
             transactionCreatedWithLinks.Links = CreateLinksForTransaction(
                 transactionCreatedWithLinks.TransactionId);
