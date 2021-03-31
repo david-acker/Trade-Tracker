@@ -207,9 +207,6 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionsController: {nameof(CreateTransaction)} was called.");
 
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            command.Authenticate(accessKey);
-
             var transactionCreated = await _mediator.Send(command);
 
             return CreatedAtAction(
@@ -248,9 +245,6 @@ namespace TradeTracker.Api.Controllers
             [FromBody] CreateTransactionCommand command)
         {
             _logger.LogInformation($"TransactionsController: {nameof(CreateTransaction)} was called.");
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            command.Authenticate(accessKey);
 
             var transactionCreated = await _mediator.Send(command);
 
@@ -461,13 +455,7 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionsController: {nameof(DeleteTransaction)} was called.");
 
-            var command = new DeleteTransactionCommand() 
-            {
-                TransactionId = transactionId
-            };
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            command.Authenticate(accessKey);
+            var command = new DeleteTransactionCommand() { TransactionId = transactionId };
 
             await _mediator.Send(command);
             return NoContent();
