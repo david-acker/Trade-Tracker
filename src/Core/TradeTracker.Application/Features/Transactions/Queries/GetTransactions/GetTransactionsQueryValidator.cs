@@ -1,6 +1,5 @@
 using System;
 using FluentValidation;
-using TradeTracker.Application.Features.Transactions.Shared.Validators;
 using TradeTracker.Application.Features.Transactions.Validators.Querying;
 using TradeTracker.Application.Validators.Pagination;
 using TradeTracker.Application.Validators.Selection;
@@ -11,9 +10,6 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
     {
         public GetTransactionsQueryValidator()
         {
-            RuleFor(q => q.AccessKey)
-                .SetValidator(new AccessKeyValidator());
-
             RuleFor(q => q.Type)
                 .SetValidator(new TransactionTypeFilterValidator());
 

@@ -1,8 +1,10 @@
 using AutoMapper;
 using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Models.Pagination;
 using TradeTracker.Application.Requests;
@@ -14,13 +16,16 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
         ValidatableRequestHandler<GetTransactionsQuery>,
         IRequestHandler<GetTransactionsQuery, PagedTransactionsBaseDto>
     {
-        private readonly ITransactionRepository _transactionRepository;
+        private readonly ILoggedInUserService _loggedInUserService;
         private readonly IMapper _mapper;
+        private readonly ITransactionRepository _transactionRepository;
         
         public GetTransactionsQueryHandler(
+            ILoggedInUserService loggedInUserService,
             IMapper mapper, 
             ITransactionRepository transactionRepository)
         {
+            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
             _transactionRepository = transactionRepository;
         }
@@ -28,10 +33,12 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
         public async Task<PagedTransactionsBaseDto> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
+            
+            var userAccessKey = _loggedInUserService.AccessKey;
 
             var parameters = _mapper.Map<PagedTransactionsResourceParameters>(request);
 
-            var pagedTransactions = await _transactionRepository.GetPagedTransactionsAsync(parameters);
+            var pagedTransactions = await _transactionRepository.GetPagedTransactionsAsync(userAccessKey, parameters);
             
             var transactionsForReturn = _mapper.Map<PagedList<Transaction>, List<TransactionForReturnDto>>(pagedTransactions);
 

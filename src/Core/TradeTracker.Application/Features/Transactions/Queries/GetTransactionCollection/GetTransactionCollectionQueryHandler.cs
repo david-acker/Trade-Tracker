@@ -1,10 +1,12 @@
 using AutoMapper;
 using MediatR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
+using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
@@ -15,11 +17,16 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
         ValidatableRequestHandler<GetTransactionCollectionQuery>,
         IRequestHandler<GetTransactionCollectionQuery, IEnumerable<TransactionForReturnDto>>
     {
-        private readonly ITransactionRepository _transactionRepository;
+        private readonly ILoggedInUserService _loggedInUserService;
         private readonly IMapper _mapper;
+        private readonly ITransactionRepository _transactionRepository;
 
-        public GetTransactionCollectionQueryHandler(IMapper mapper, ITransactionRepository transactionRepository)
+        public GetTransactionCollectionQueryHandler(
+            ILoggedInUserService loggedInUserService,
+            IMapper mapper, 
+            ITransactionRepository transactionRepository)
         {
+            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
             _transactionRepository = transactionRepository;
         }
@@ -28,7 +35,9 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
         {
             await ValidateRequest(request);
 
-            var transactionCollection = await _transactionRepository.GetTransactionCollectionByIdsAsync(request.AccessKey, request.TransactionIds);
+            Guid userAccessKey = _loggedInUserService.AccessKey;
+
+            var transactionCollection = await _transactionRepository.GetTransactionCollectionByIdsAsync(userAccessKey, request.TransactionIds);
             
             if (transactionCollection.Count() != request.TransactionIds.Count())
             {

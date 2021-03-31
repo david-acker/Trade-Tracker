@@ -8,9 +8,6 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
     {
         public GetTransactionCollectionQueryValidator()
         {
-            RuleFor(t => t.AccessKey)
-                .SetValidator(new AccessKeyValidator());
-
             RuleFor(t => t.TransactionIds)
                 .NotNull()
                 .NotEmpty()

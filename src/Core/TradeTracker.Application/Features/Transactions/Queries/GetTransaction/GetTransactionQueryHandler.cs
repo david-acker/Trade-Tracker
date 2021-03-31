@@ -1,8 +1,10 @@
 using AutoMapper;
 using MediatR;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
+using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
@@ -13,11 +15,16 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
         ValidatableRequestHandler<GetTransactionQuery>,
         IRequestHandler<GetTransactionQuery, TransactionForReturnDto>
     {
-        private readonly ITransactionRepository _transactionRepository;
+        private readonly ILoggedInUserService _loggedInUserService;
         private readonly IMapper _mapper;
+        private readonly ITransactionRepository _transactionRepository;
 
-        public GetTransactionQueryHandler(IMapper mapper, ITransactionRepository transactionRepository)
+        public GetTransactionQueryHandler(
+            ILoggedInUserService loggedInUserService,
+            IMapper mapper, 
+            ITransactionRepository transactionRepository)
         {
+            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
             _transactionRepository = transactionRepository;
         }
@@ -26,7 +33,9 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
         {
             await ValidateRequest(request);
 
-            var transaction = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
+            Guid userAccessKey = _loggedInUserService.AccessKey;
+
+            var transaction = await _transactionRepository.GetByIdAsync(userAccessKey, request.TransactionId);
             
             if (transaction == null)
             {

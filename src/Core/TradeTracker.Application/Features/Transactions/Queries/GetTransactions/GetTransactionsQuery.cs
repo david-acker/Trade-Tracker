@@ -1,10 +1,9 @@
 using System;
 using MediatR;
-using TradeTracker.Application.Requests;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionsQuery : AuthenticatedRequest, IRequest<PagedTransactionsBaseDto>
+    public class GetTransactionsQuery : IRequest<PagedTransactionsBaseDto>
     {
         public string Order { get; set; } = "DateTime Descending";
         

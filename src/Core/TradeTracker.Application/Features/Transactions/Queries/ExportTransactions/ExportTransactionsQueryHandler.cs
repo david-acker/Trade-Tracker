@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Requests;
@@ -15,25 +16,36 @@ namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransacti
         ValidatableRequestHandler<ExportTransactionsQuery>,
         IRequestHandler<ExportTransactionsQuery, TransactionsExportFileVm>
     {
-        private readonly ITransactionRepository _transactionRepository;
-        private readonly IMapper _mapper;
         private readonly ICsvExporter _csvExporter;
+        private readonly ILoggedInUserService _loggedInUserService;
+        private readonly IMapper _mapper;
+        private readonly ITransactionRepository _transactionRepository;
 
-        public ExportTransactionsQueryHandler(IMapper mapper, ITransactionRepository transactionRepository, ICsvExporter csvExporter)
+        public ExportTransactionsQueryHandler(
+            ICsvExporter csvExporter,
+            ILoggedInUserService loggedInUserService,
+            IMapper mapper, 
+            ITransactionRepository transactionRepository)
         {
+            _csvExporter = csvExporter;
+            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
             _transactionRepository = transactionRepository;
-            _csvExporter = csvExporter;
         }
 
         public async Task<TransactionsExportFileVm> Handle(ExportTransactionsQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
-            var allTransactions = _mapper.Map<List<TransactionsForExportDto>>(
-                (await _transactionRepository.ListAllAsync(request.AccessKey)).OrderBy(x => x.DateTime));
+            Guid userAccessKey = _loggedInUserService.AccessKey;
 
-            var fileData = _csvExporter.ExportTransactionsToCsv(allTransactions);
+            var transactions = (await _transactionRepository
+                .ListAllAsync(userAccessKey))
+                .OrderBy(x => x.DateTime);
+
+            var transactionsForReturn= _mapper.Map<List<TransactionsForExportDto>>(transactions);
+
+            var fileData = _csvExporter.ExportTransactionsToCsv(transactionsForReturn);
 
             var transactionExportFileDto = new TransactionsExportFileVm() 
             { 
