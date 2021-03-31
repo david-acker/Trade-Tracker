@@ -5,7 +5,7 @@ using TradeTracker.Application.Requests;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransaction
 {
-    public class PatchTransactionCommand : AuthenticatedRequest, IRequest
+    public class PatchTransactionCommand : IRequest
     {
         public Guid TransactionId { get; set; }
         public JsonPatchDocument<UpdateTransactionCommandBase> PatchDocument { get; set; }
