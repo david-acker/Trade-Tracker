@@ -34,11 +34,6 @@ namespace TradeTracker.Application.Features.Transactions.Commands.DeleteTransact
         {
             Guid userAccessKey = _loggedInUserService.AccessKey;
             
-            if (userAccessKey == Guid.Empty)
-            {
-                throw new ValidationException("The current session has expired. Please reload and log back in.");
-            }
-
             var transaction = await _transactionRepository.GetByIdAsync(userAccessKey, request.TransactionId);
 
             if (transaction == null)

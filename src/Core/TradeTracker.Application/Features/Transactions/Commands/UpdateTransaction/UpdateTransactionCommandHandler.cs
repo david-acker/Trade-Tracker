@@ -33,16 +33,11 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
 
         public async Task<Unit> Handle(UpdateTransactionCommand request, CancellationToken cancellationToken)
         {
-            Guid userAccessKey = _loggedInUserService.AccessKey;
-            
-            if (userAccessKey == Guid.Empty)
-            {
-                throw new ValidationException("The current session has expired. Please reload and log back in.");
-            }
-
             await ValidateRequest(request);
 
-            var transaction = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
+            Guid userAccessKey = _loggedInUserService.AccessKey;
+
+            var transaction = await _transactionRepository.GetByIdAsync(userAccessKey, request.TransactionId);
 
             if (transaction == null)
             {

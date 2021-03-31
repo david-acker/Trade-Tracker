@@ -39,14 +39,17 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
         {
             await ValidateRequest(request);
 
-            Guid userAccessKey = _loggedInUserService.AccessKey;
-            
-            if (userAccessKey == Guid.Empty)
-            {
-                throw new ValidationException("The current session has expired. Please reload and log back in.");
-            }
+            var userAccessKey = _loggedInUserService.AccessKey;
 
             var transactionCollection = _mapper.Map<IEnumerable<Transaction>>(request.Transactions);
+
+            transactionCollection = transactionCollection
+                .Select(transaction =>
+                {
+                    transaction.AccessKey = userAccessKey;
+                    return transaction;
+                })
+                .ToList();
 
             var lastTransaction = transactionCollection.Last();
             lastTransaction.DomainEvents.Add(

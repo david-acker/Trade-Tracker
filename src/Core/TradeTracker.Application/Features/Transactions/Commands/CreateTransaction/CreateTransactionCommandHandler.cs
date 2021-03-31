@@ -33,15 +33,10 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
         public async Task<TransactionForReturnDto> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
-
-            Guid userAccessKey = _loggedInUserService.AccessKey;
             
-            if (userAccessKey == Guid.Empty)
-            {
-                throw new ValidationException("The current session has expired. Please reload and log back in.");
-            }
-
             var transaction = _mapper.Map<Transaction>(request);
+            
+            transaction.AccessKey = _loggedInUserService.AccessKey;
 
             transaction.DomainEvents.Add(
                 new TransactionCreatedEvent(

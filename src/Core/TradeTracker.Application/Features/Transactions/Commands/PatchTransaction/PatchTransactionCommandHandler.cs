@@ -37,11 +37,6 @@ namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransacti
         {
             Guid userAccessKey = _loggedInUserService.AccessKey;
             
-            if (userAccessKey == Guid.Empty)
-            {
-                throw new ValidationException("The current session has expired. Please reload and log back in.");
-            }
-
             var existingTransaction = await _transactionRepository.GetByIdAsync(userAccessKey, request.TransactionId);
 
             if (existingTransaction == null)
