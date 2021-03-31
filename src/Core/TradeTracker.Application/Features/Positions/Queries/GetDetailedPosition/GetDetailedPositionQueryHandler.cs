@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
+using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Application.Requests;
@@ -18,17 +19,20 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
         ValidatableRequestHandler<GetDetailedPositionQuery>,
         IRequestHandler<GetDetailedPositionQuery, DetailedPositionForReturnDto>
     {
+        private readonly ILoggedInUserService _loggedInUserService;        
         private readonly IMapper _mapper;
         private readonly IPositionRepository _positionRepository;
         private readonly IPositionService _positionService;
         private readonly ITransactionRepository _transactionRepository;
 
         public GetDetailedPositionQueryHandler(
+            ILoggedInUserService loggedInUserService,
             IMapper mapper, 
             IPositionRepository positionRepository,
             IPositionService positionService,
             ITransactionRepository transactionRepository)
         {
+            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
             _positionRepository = positionRepository;
             _positionService = positionService;
@@ -39,7 +43,9 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
         {
             await ValidateRequest(request);
 
-            var position = await _positionRepository.GetBySymbolAsync(request.AccessKey, request.Symbol);
+            var userAccessKey = _loggedInUserService.AccessKey;
+
+            var position = await _positionRepository.GetBySymbolAsync(userAccessKey, request.Symbol);
 
             if (position == null)
             {
@@ -50,19 +56,19 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
 
             positionForReturn.AverageCostBasis = await _positionService
                 .CalculateAverageCostBasis(
-                    request.AccessKey, 
+                    userAccessKey,
                     request.Symbol);
 
             var sourceTransactionMap = await _positionService
                 .CreateSourceTransactionMap(
-                    request.AccessKey,
+                    userAccessKey,
                     request.Symbol);
 
             var tasks = sourceTransactionMap
                 .Select(async (sourceLink) => 
                     {
                         return await CreateFullLink(
-                            request.AccessKey, 
+                            userAccessKey,
                             sourceLink);
                     })
                 .ToList();
