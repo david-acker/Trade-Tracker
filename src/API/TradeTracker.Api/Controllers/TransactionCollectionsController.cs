@@ -214,11 +214,9 @@ namespace TradeTracker.Api.Controllers
         /// </remarks>
         /// <response code="200">Returns the requested transactions</response>
         [HttpGet("{transactionIds}", Name = "GetTransactionCollection")]
-        [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/json")]
         public async Task<ActionResult<IEnumerable<TransactionForReturnDto>>> GetTransactionCollection(
             [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> transactionIds)
@@ -249,11 +247,9 @@ namespace TradeTracker.Api.Controllers
         /// </remarks>
         /// <response code="200">Returns the requested transactions</response>
         [HttpGet("{transactionIds}", Name = "GetTransactionCollectionWithLinks")]
-        [Consumes("application/json")]
         [Produces("application/vnd.trade.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
         public async Task<ActionResult<TransactionCollectionWithLinksDto>> GetTransactionCollectionWithLinks(
             [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> transactionIds)
