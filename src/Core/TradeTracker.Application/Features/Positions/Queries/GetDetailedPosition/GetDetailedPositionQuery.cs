@@ -1,5 +1,4 @@
 using MediatR;
-using TradeTracker.Application.Requests;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
 {
