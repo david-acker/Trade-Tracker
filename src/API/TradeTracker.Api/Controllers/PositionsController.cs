@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Policy;
 using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
 using TradeTracker.Api.Helpers;
@@ -66,7 +65,7 @@ namespace TradeTracker.Api.Controllers
         /// <response code="422">Validation Error</response>
         [HttpGet(Name = "GetPositions")]
         [Consumes("application/json")]
-        [Produces("application/json", "application/json")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
@@ -191,12 +190,10 @@ namespace TradeTracker.Api.Controllers
         /// <response code="200">Returns the requested position</response>
         /// <response code="422">Validation Error</response>
         [HttpGet("{symbol}", Name = "GetPosition")]
-        [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/json")]
         public async Task<ActionResult<PositionForReturnDto>> GetPosition(
             [FromRoute] string symbol)
@@ -228,12 +225,10 @@ namespace TradeTracker.Api.Controllers
         /// <response code="200">Returns the requested position</response>
         /// <response code="422">Validation Error</response>
         [HttpGet("{symbol}", Name = "GetPositionWithLinks")]
-        [Consumes("application/json")]
         [Produces("application/vnd.trade.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.hateoas+json")]
         public async Task<ActionResult<PositionForReturnWithLinksDto>> GetPositionWithLinks(
             [FromRoute] string symbol)
@@ -269,12 +264,10 @@ namespace TradeTracker.Api.Controllers
         /// <response code="200">Returns the requested position</response>
         /// <response code="422">Validation Error</response>
         [HttpGet("{symbol}", Name = "GetDetailedPositionWithLinks")]
-        [Consumes("application/json")]
         [Produces("application/vnd.trade.detailedposition.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.detailedposition.hateoas+json")]
         public async Task<ActionResult<PositionForReturnWithLinksDto>> GetDetailedPositionWithLinks(
             [FromRoute] string symbol)
