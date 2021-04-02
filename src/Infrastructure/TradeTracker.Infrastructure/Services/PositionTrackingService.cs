@@ -1,14 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MediatR;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Models;
-using TradeTracker.Domain.Common;
+using TradeTracker.Application.Interfaces.Persistence.Transactions;
 using TradeTracker.Domain.Enums;
 
 namespace TradeTracker.Infrastructure.Services
@@ -17,16 +13,16 @@ namespace TradeTracker.Infrastructure.Services
     {
         private readonly ILogger<PositionTrackingService> _logger;
         private readonly IPositionService _positionService;
-        private readonly ITransactionRepository _transactionRepository;
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
 
         public PositionTrackingService(
             ILogger<PositionTrackingService> logger, 
             IPositionService positionService, 
-            ITransactionRepository transactionRepository)
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
         {
             _logger = logger;
             _positionService = positionService;
-            _transactionRepository = transactionRepository;
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
         }
 
         public async Task RefreshAfterCreation(Guid accessKey, Guid transactionId)
@@ -42,7 +38,7 @@ namespace TradeTracker.Infrastructure.Services
 
             foreach (var entry in transactionMap)
             {
-                await _positionService.RefreshForTransactionCollection(accessKey, entry.Key, entry.Value);
+                await _positionService.RefreshForTransactionCollection(entry.Key, entry.Value, accessKey);
             }
         }
 
@@ -55,7 +51,7 @@ namespace TradeTracker.Infrastructure.Services
         {
             _logger.LogInformation($"PositionTrackingService: {nameof(RefreshAfterModification)} was called.");
 
-            var transaction = await _transactionRepository.GetByIdAsync(accessKey, transactionId);
+            var transaction = await _authenticatedTransactionRepository.GetByIdAsync(transactionId);
 
             string symbolForDetachment;
             if (symbolBeforeModification != transaction.Symbol)

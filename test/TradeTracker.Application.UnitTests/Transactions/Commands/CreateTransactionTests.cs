@@ -1,12 +1,15 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using FluentAssertions;
+using FluentAssertions.Execution;
 using Moq;
 using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
-using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Interfaces;
+using TradeTracker.Application.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Profiles;
 using TradeTracker.Application.UnitTests.Mocks;
 using TradeTracker.Domain.Enums;
@@ -16,12 +19,14 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
 {
     public class CreateTransactionTests
     {
+        private readonly Mock<ILoggedInUserService> _loggedInUserService;
         private readonly IMapper _mapper;
-        private readonly Mock<ITransactionRepository> _mockTransactionRepository;
+        private readonly Mock<IAuthenticatedTransactionRepository> _mockAuthenticatedTransactionRepository;
 
         public CreateTransactionTests()
         {
-            _mockTransactionRepository = TransactionRepositoryMock.GetRepository();
+            _loggedInUserService = LoggedInUserServiceMock.GetUserService();
+            _mockAuthenticatedTransactionRepository = AuthenticatedTransactionRepositoryMock.GetRepository();
 
             var configurationProvider = new MapperConfiguration(cfg =>
             {
@@ -35,7 +40,9 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
         public async Task Handle_ValidTransaction_ReturnsTransactionForReturnDto()
         {
             // Arrange
-            var handler = new CreateTransactionCommandHandler(_mapper, _mockTransactionRepository.Object);
+            var handler = new CreateTransactionCommandHandler(
+                _mapper, 
+                _mockAuthenticatedTransactionRepository.Object);
 
             var command = new CreateTransactionCommand()
             {
@@ -46,9 +53,6 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
                 Notional = (decimal)10,
                 TradePrice = (decimal)1
             };
-            
-            var accessKey = Guid.NewGuid();
-            command.Authenticate(accessKey);
 
             // Act
             var transactionToReturn = await handler.Handle(command, CancellationToken.None);
@@ -62,7 +66,9 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
         public async Task Handle_ValidTransaction_TransactionAddedToRepo()
         {
             // Arrange
-            var handler = new CreateTransactionCommandHandler(_mapper, _mockTransactionRepository.Object);
+            var handler = new CreateTransactionCommandHandler(
+                _mapper, 
+                _mockAuthenticatedTransactionRepository.Object);
 
             var command = new CreateTransactionCommand()
             {
@@ -74,16 +80,34 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
                 TradePrice = (decimal)1
             };
 
-            var accessKey = Guid.NewGuid();
-            command.Authenticate(accessKey);
-
             // Act
             await handler.Handle(command, CancellationToken.None);
-            var allTransactionsForUser = await _mockTransactionRepository.Object.ListAllAsync(accessKey);
+
+            var transactionFromRepo = 
+                (await _mockAuthenticatedTransactionRepository.Object.GetUnpagedResponseAsync(null))
+                .FirstOrDefault();
 
             // Assert
-            allTransactionsForUser.Should()
-                .ContainSingle();
+            using (new AssertionScope())
+            {
+                transactionFromRepo.DateTime.Should()
+                    .Be(command.DateTime);
+
+                transactionFromRepo.Symbol.Should()
+                    .Be(command.Symbol);
+
+                transactionFromRepo.Type.Should()
+                    .Be((TransactionType)Enum.Parse(typeof(TransactionType), command.Type));
+
+                transactionFromRepo.Quantity.Should()
+                    .Be(command.Quantity);
+
+                transactionFromRepo.Notional.Should()
+                    .Be(command.Notional);
+
+                transactionFromRepo.TradePrice.Should()
+                    .Be(command.TradePrice);
+            }
         }
     }
 }

@@ -2,15 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Moq;
-using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Interfaces.Persistence.Transactions;
+using TradeTracker.Application.ResourceParameters.Unpaged;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 
 namespace TradeTracker.Application.UnitTests.Mocks
 {
-    public class TransactionRepositoryMock
+    public class AuthenticatedTransactionRepositoryMock
     {
-        public static Mock<ITransactionRepository> GetRepository()
+        public static Mock<IAuthenticatedTransactionRepository> GetRepository()
         {
             var userAccessKeys = new Dictionary<int, Guid>()
             {
@@ -77,43 +78,30 @@ namespace TradeTracker.Application.UnitTests.Mocks
                 }
             };
 
-            var mockTransactionRepository = new Mock<ITransactionRepository>();
+            var mockTransactionRepository = new Mock<IAuthenticatedTransactionRepository>();
             
             mockTransactionRepository
-                .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
-                .ReturnsAsync((Guid accessKey, Guid transactionId) => 
+                .Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>()))
+                .ReturnsAsync((Guid transactionId) => 
                 {
                     return transactions
-                        .Where(t => t.AccessKey == accessKey)
                         .FirstOrDefault(t => t.TransactionId == transactionId);
                 });
             
             mockTransactionRepository
-                .Setup(repo => repo.GetTransactionCollectionByIdsAsync(It.IsAny<Guid>(), It.IsAny<IEnumerable<Guid>>()))
-                .ReturnsAsync((Guid accessKey, IEnumerable<Guid> ids) =>
+                .Setup(repo => repo.GetTransactionCollectionByIdsAsync(It.IsAny<IEnumerable<Guid>>()))
+                .ReturnsAsync((IEnumerable<Guid> ids) =>
                 {
                     return transactions
-                        .Where(t => t.AccessKey == accessKey && ids.Contains(t.TransactionId))
+                        .Where(t => ids.Contains(t.TransactionId))
                         .ToList();
                 });
-
+            
             mockTransactionRepository
-                .Setup(repo => repo.GetAllTransactionsForSymbolAsync(It.IsAny<Guid>(), It.IsAny<string>()))
-                .ReturnsAsync((Guid accessKey, string symbol) =>
+                .Setup(repo => repo.GetUnpagedResponseAsync(It.IsAny<UnpagedTransactionsResourceParameters>()))
+                .ReturnsAsync((UnpagedTransactionsResourceParameters parameters) =>
                 {
-                    return transactions
-                        .Where(t => t.AccessKey == accessKey && t.Symbol == symbol)
-                        .OrderByDescending(t => t.DateTime)
-                        .ToList();
-                });
-
-            mockTransactionRepository
-                .Setup(repo => repo.ListAllAsync(It.IsAny<Guid>()))
-                .ReturnsAsync((Guid accessKey) =>
-                {
-                    return transactions
-                        .Where(t => t.AccessKey == accessKey)
-                        .ToList();
+                    return transactions.ToList();
                 });
             
             mockTransactionRepository

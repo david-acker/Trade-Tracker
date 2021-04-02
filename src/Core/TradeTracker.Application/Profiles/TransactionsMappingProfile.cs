@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using AutoMapper;
 using TradeTracker.Api.Models.Querying;
 using TradeTracker.Application.Features.Transactions;
@@ -10,6 +9,7 @@ using TradeTracker.Application.Features.Transactions.Commands.CreateTransactionC
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using TradeTracker.Application.Features.Transactions.Queries.ExportTransactions;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
+using TradeTracker.Application.ResourceParameters.Paged;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Profiles

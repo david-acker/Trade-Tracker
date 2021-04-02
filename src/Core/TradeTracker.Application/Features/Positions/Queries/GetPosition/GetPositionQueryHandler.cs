@@ -6,6 +6,7 @@ using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Interfaces.Persistence.Positions;
 using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 
@@ -17,18 +18,18 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
     {
         private readonly ILoggedInUserService _loggedInUserService;   
         private readonly IMapper _mapper;
-        private readonly IPositionRepository _positionRepository;
+        private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
         private readonly IPositionService _positionService;
 
         public GetPositionQueryHandler(
             ILoggedInUserService loggedInUserService,
-            IMapper mapper, 
-            IPositionRepository positionRepository,
+            IMapper mapper,
+            IAuthenticatedPositionRepository authenticatedPositionRepository,
             IPositionService positionService)
         {
             _loggedInUserService = loggedInUserService;
             _mapper = mapper;
-            _positionRepository = positionRepository;
+            _authenticatedPositionRepository = authenticatedPositionRepository;
             _positionService = positionService;
         }
 
@@ -36,9 +37,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
         {
             await ValidateRequest(request);
 
-            var userAccessKey = _loggedInUserService.AccessKey;
-
-            var position = await _positionRepository.GetBySymbolAsync(userAccessKey, request.Symbol);
+            var position = await _authenticatedPositionRepository.GetBySymbolAsync(request.Symbol);
 
             if (position == null)
             {
@@ -48,13 +47,11 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
             var positionForReturn = _mapper.Map<PositionForReturnDto>(position);
 
             positionForReturn.AverageCostBasis = await _positionService
-                .CalculateAverageCostBasis(
-                    userAccessKey, 
+                .CalculateAverageCostBasis( 
                     request.Symbol);
 
             positionForReturn.SourceTransactionMap = await _positionService
                 .CreateSourceTransactionMap(
-                    userAccessKey,
                     request.Symbol);
 
             return positionForReturn;

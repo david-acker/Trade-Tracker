@@ -1,11 +1,9 @@
 using AutoMapper;
 using MediatR;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
-using TradeTracker.Application.Interfaces;
-using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
@@ -17,27 +15,21 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
         ValidatableRequestHandler<UpdateTransactionCommand>,
         IRequestHandler<UpdateTransactionCommand>
     {
-        private readonly ILoggedInUserService _loggedInUserService;
-        private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
-
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         public UpdateTransactionCommandHandler(
-            ILoggedInUserService loggedInUserService,
             IMapper mapper, 
-            ITransactionRepository transactionRepository)
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
         {
-            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
-            _transactionRepository = transactionRepository;
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
         }
 
         public async Task<Unit> Handle(UpdateTransactionCommand request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
-            Guid userAccessKey = _loggedInUserService.AccessKey;
-
-            var transaction = await _transactionRepository.GetByIdAsync(userAccessKey, request.TransactionId);
+            var transaction = await _authenticatedTransactionRepository.GetByIdAsync(request.TransactionId);
 
             if (transaction == null)
             {
@@ -52,13 +44,13 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
 
             transaction.DomainEvents.Add(
                 new TransactionModifiedEvent(
-                    accessKey: transaction.AccessKey, 
-                    transactionId: transaction.TransactionId, 
-                    symbolBeforeModification: symbolBeforeModification,
-                    typeBeforeModification: typeBeforeModification,
-                    quantityBeforeModification: quantityBeforeModification));
+                    transaction.AccessKey, 
+                    transaction.TransactionId, 
+                    symbolBeforeModification,
+                    typeBeforeModification,
+                    quantityBeforeModification));
 
-            await _transactionRepository.UpdateAsync(transaction);
+            await _authenticatedTransactionRepository.UpdateAsync(transaction);
 
             return Unit.Value;
         }

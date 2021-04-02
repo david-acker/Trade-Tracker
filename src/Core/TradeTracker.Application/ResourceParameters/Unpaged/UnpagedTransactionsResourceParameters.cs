@@ -1,19 +1,13 @@
 using System;
 using TradeTracker.Api.Models.Querying;
 
-namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
+namespace TradeTracker.Application.ResourceParameters.Unpaged
 {
-    public class PagedTransactionsResourceParameters
+    public class UnpagedTransactionsResourceParameters : IUnpagedResourceParameters
     {
         public SortOrder SortOrder { get; set; }
-
         public string Type { get; set; }
-
-        public int PageNumber { get; set; }
-        public int PageSize { get; set; }
-
         public Selection Selection { get; set; } 
-
         public DateTime RangeStart { get; set; }
         public DateTime RangeEnd { get; set; }
     }

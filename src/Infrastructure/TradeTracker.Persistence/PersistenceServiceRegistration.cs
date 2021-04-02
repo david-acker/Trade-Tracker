@@ -1,9 +1,8 @@
-using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Interfaces.Persistence.Positions;
+using TradeTracker.Application.Interfaces.Persistence.Transactions;
 using TradeTracker.Persistence.Repositories;
 
 namespace TradeTracker.Persistence
@@ -17,10 +16,11 @@ namespace TradeTracker.Persistence
                 options.UseSqlite(configuration.GetConnectionString("TradeTrackerConnectionString"));
             });
                 
-            services.AddScoped(typeof(IAsyncRepository<>), typeof(BaseRepository<>));
-
             services.AddScoped<ITransactionRepository, TransactionRepository>();
+            services.AddScoped<IAuthenticatedTransactionRepository, AuthenticatedTransactionRepository>();
+
             services.AddScoped<IPositionRepository, PositionRepository>();
+            services.AddScoped<IAuthenticatedPositionRepository, AuthenticatedPositionRepository>();
 
             return services;    
         }

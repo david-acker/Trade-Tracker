@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Interfaces.Persistence.Transactions;
 using TradeTracker.Identity;
 using TradeTracker.Identity.Models;
 using TradeTracker.Persistence;
@@ -114,7 +115,7 @@ namespace TradeTracker.Api
 
                     foreach (var symbol in symbolsForUser)
                     {
-                        await positionService.RecalculateForSymbol(key, symbol);
+                        await positionService.RecalculateForSymbol(symbol, key);
                     }
 
                     Log.Information($"ForceRefreshUserPositions: Recalculated positions for {symbolsForUser.Count()} symbols.");

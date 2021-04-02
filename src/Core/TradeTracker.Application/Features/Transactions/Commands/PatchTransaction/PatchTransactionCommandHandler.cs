@@ -1,13 +1,11 @@
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.JsonPatch;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
-using TradeTracker.Application.Interfaces;
-using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
@@ -19,25 +17,19 @@ namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransacti
         ValidatableRequestHandler<UpdateTransactionCommand>,
         IRequestHandler<PatchTransactionCommand>
     {
-        private readonly ILoggedInUserService _loggedInUserService;
-        private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
-
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         public PatchTransactionCommandHandler(
-            ILoggedInUserService loggedInUserService,
             IMapper mapper, 
-            ITransactionRepository transactionRepository)
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
         {
-            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
-            _transactionRepository = transactionRepository;
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
         }
 
         public async Task<Unit> Handle(PatchTransactionCommand request, CancellationToken cancellationToken)
         {
-            Guid userAccessKey = _loggedInUserService.AccessKey;
-            
-            var existingTransaction = await _transactionRepository.GetByIdAsync(userAccessKey, request.TransactionId);
+            var existingTransaction = await _authenticatedTransactionRepository.GetByIdAsync(request.TransactionId);
 
             if (existingTransaction == null)
             {
@@ -48,26 +40,25 @@ namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransacti
             TransactionType typeBeforeModification = existingTransaction.Type;
             decimal quantityBeforeModification = existingTransaction.Quantity;           
 
-            var updatedTransactionCommand = ApplyPatch(userAccessKey, request, existingTransaction);
+            var updatedTransactionCommand = ApplyPatch(request, existingTransaction);
             await ValidateRequest(updatedTransactionCommand);
 
             var transaction = _mapper.Map<Transaction>(updatedTransactionCommand);
 
             transaction.DomainEvents.Add(
                 new TransactionModifiedEvent(
-                    accessKey: transaction.AccessKey,
-                    transactionId: transaction.TransactionId, 
-                    symbolBeforeModification: symbolBeforeModification,
-                    typeBeforeModification: typeBeforeModification,
-                    quantityBeforeModification: quantityBeforeModification));
+                    transaction.AccessKey,
+                    transaction.TransactionId, 
+                    symbolBeforeModification,
+                    typeBeforeModification,
+                    quantityBeforeModification));
         
-            await _transactionRepository.UpdateAsync(transaction);
+            await _authenticatedTransactionRepository.UpdateAsync(transaction);
 
             return Unit.Value;
         }
 
         private UpdateTransactionCommand ApplyPatch(
-            Guid accessKey,
             PatchTransactionCommand request, 
             Transaction existingTransaction)
         {
@@ -75,9 +66,6 @@ namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransacti
 
             JsonPatchDocument<UpdateTransactionCommandBase> patchDocument = request.PatchDocument;
             patchDocument.ApplyTo(transactionForPatch);
-            
-            transactionForPatch.Authenticate(accessKey);
-            transactionForPatch.TransactionId = request.TransactionId;
 
             return transactionForPatch;
         }

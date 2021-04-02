@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using AutoMapper;
 using TradeTracker.Api.Models.Querying;
-using TradeTracker.Application.Enums;
 using TradeTracker.Application.Features.Positions;
 using TradeTracker.Application.Features.Positions.Queries.GetPositions;
+using TradeTracker.Application.ResourceParameters.Paged;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Profiles

@@ -3,7 +3,7 @@ using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Interfaces;
-using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Events;
@@ -14,18 +14,15 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
         ValidatableRequestHandler<CreateTransactionCommand>,
         IRequestHandler<CreateTransactionCommand, TransactionForReturnDto>
     {
-        private readonly ILoggedInUserService _loggedInUserService;
-        private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
 
         public CreateTransactionCommandHandler(
-            ILoggedInUserService loggedInUserService,
             IMapper mapper, 
-            ITransactionRepository transactionRepository)
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
         {
-            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
-            _transactionRepository = transactionRepository;
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
         }
 
         public async Task<TransactionForReturnDto> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
@@ -33,15 +30,8 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
             await ValidateRequest(request);
             
             var transaction = _mapper.Map<Transaction>(request);
-            
-            transaction.AccessKey = _loggedInUserService.AccessKey;
 
-            transaction.DomainEvents.Add(
-                new TransactionCreatedEvent(
-                    accessKey: transaction.AccessKey, 
-                    transactionId: transaction.TransactionId));
-
-            transaction = await _transactionRepository.AddAsync(transaction);
+            transaction = await _authenticatedTransactionRepository.AddAsync(transaction);
 
             return _mapper.Map<TransactionForReturnDto>(transaction);
         }

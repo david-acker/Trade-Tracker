@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Infrastructure;
 using TradeTracker.Application.Models;
 using TradeTracker.Domain.Common;

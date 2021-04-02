@@ -6,9 +6,8 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using Moq;
 using TradeTracker.Application.Exceptions;
-using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
-using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Profiles;
 using TradeTracker.Application.UnitTests.Mocks;
 using TradeTracker.Domain.Entities;
@@ -20,11 +19,11 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
     public class UpdateTransactionTests
     {
         private readonly IMapper _mapper;
-        private readonly Mock<ITransactionRepository> _mockTransactionRepository;
+        private readonly Mock<IAuthenticatedTransactionRepository> _mockAuthenticatedTransactionRepository;
 
         public UpdateTransactionTests()
         {
-            _mockTransactionRepository = TransactionRepositoryMock.GetRepository();
+            _mockAuthenticatedTransactionRepository = AuthenticatedTransactionRepositoryMock.GetRepository();
 
             var configurationProvider = new MapperConfiguration(cfg =>
             {
@@ -38,7 +37,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
         public async Task Handle_ValidTransaction_UpdatesExistingTransaction()
         {
             // Arrange
-            var handler = new UpdateTransactionCommandHandler(_mapper, _mockTransactionRepository.Object);
+            var handler = new UpdateTransactionCommandHandler(
+                _mapper, _mockAuthenticatedTransactionRepository.Object);
 
             var transactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49");
             
@@ -53,82 +53,46 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
                 TradePrice = (decimal)1
             };
 
-            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
-            command.Authenticate(accessKey);
-
             var expectedTransaction = _mapper.Map<Transaction>(command);
 
             // Act
             await handler.Handle(command, CancellationToken.None);
-            var actualTransaction = await _mockTransactionRepository.Object.GetByIdAsync(accessKey, transactionId);
+            var actualTransaction = await _mockAuthenticatedTransactionRepository.Object.GetByIdAsync(transactionId);
 
             // Assert
             using (new AssertionScope())
             {
                 actualTransaction.TransactionId.Should()
-                    .Be(expectedTransaction.TransactionId);
-
-                actualTransaction.AccessKey.Should()
-                    .Be(expectedTransaction.AccessKey);
+                    .Be(command.TransactionId);
 
                 actualTransaction.DateTime.Should()
-                    .Be(expectedTransaction.DateTime);
+                    .Be(command.DateTime);
 
                 actualTransaction.Symbol.Should()
-                    .Be(expectedTransaction.Symbol);
+                    .Be(command.Symbol);
 
                 actualTransaction.Type.Should()
-                    .Be(expectedTransaction.Type);
+                    .Be((TransactionType)Enum.Parse(typeof(TransactionType), command.Type));
 
                 actualTransaction.Quantity.Should()
-                    .Be(expectedTransaction.Quantity);
+                    .Be(command.Quantity);
 
                 actualTransaction.Notional.Should()
-                    .Be(expectedTransaction.Notional);
+                    .Be(command.Notional);
 
                 actualTransaction.TradePrice.Should()
-                    .Be(expectedTransaction.TradePrice);
+                    .Be(command.TradePrice);
             }
-        }
-
-        [Fact]
-        public async Task Handle_InvalidRequestMissingAccessKey_ThrowsValidationException()
-        {
-            // Arrange
-            var handler = new UpdateTransactionCommandHandler(_mapper, _mockTransactionRepository.Object);
-
-            var transactionId = Guid.NewGuid();
-            
-            var command = new UpdateTransactionCommand()
-            {
-                TransactionId = transactionId,
-                DateTime = new DateTime(2015, 1, 1),
-                Symbol = "XYZ",
-                Type = TransactionType.Buy.ToString(),
-                Quantity = (decimal)10,
-                Notional = (decimal)10,
-                TradePrice = (decimal)1
-            };
-
-            // Act
-            Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
-            
-            // Assert
-            await act.Should()
-                .ThrowAsync<ValidationException>()
-                .Where(e => e.ValdationErrors.Contains("An authentication issue has occurred. Please refresh and try again."));
         }
 
         [Fact]
         public async Task Handle_InvalidRequestMissingTransactionId_ThrowsValidationException()
         {
             // Arrange
-            var handler = new UpdateTransactionCommandHandler(_mapper, _mockTransactionRepository.Object);
+            var handler = new UpdateTransactionCommandHandler(
+                _mapper, _mockAuthenticatedTransactionRepository.Object);
 
             var command = new UpdateTransactionCommand();
-
-            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
-            command.Authenticate(accessKey);
 
             // Act
             Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
@@ -136,14 +100,15 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             // Assert
             await act.Should()
                 .ThrowAsync<ValidationException>()
-                .Where(e => e.ValdationErrors.Contains("A valid TransactionId is required."));
+                .Where(e => e.ValidationErrors.Contains("A valid TransactionId is required."));
         }
 
         [Fact]
         public async Task Handle_NonExistentTransaction_ThrowsNotFoundException()
         {
             // Arrange
-            var handler = new UpdateTransactionCommandHandler(_mapper, _mockTransactionRepository.Object);
+            var handler = new UpdateTransactionCommandHandler(
+                _mapper, _mockAuthenticatedTransactionRepository.Object);
 
             var transactionId = Guid.NewGuid();
 
@@ -157,9 +122,6 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
                 Notional = (decimal)10,
                 TradePrice = (decimal)1
             };
-
-            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
-            command.Authenticate(accessKey);
 
             // Act
             Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
@@ -174,7 +136,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
         public async Task Handle_TransactionNotAssociatedWithAccessKey_ThrowsNotFoundException()
         {
             // Arrange
-            var handler = new UpdateTransactionCommandHandler(_mapper, _mockTransactionRepository.Object);
+            var handler = new UpdateTransactionCommandHandler(
+                _mapper, _mockAuthenticatedTransactionRepository.Object);
  
             var transactionId = Guid.Parse("2eb3de2f-7869-41b5-9bfc-3867c844f6e7");
 
@@ -188,9 +151,6 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
                 Notional = (decimal)10,
                 TradePrice = (decimal)1
             };
-
-            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
-            command.Authenticate(accessKey);
 
             // Act
             Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);

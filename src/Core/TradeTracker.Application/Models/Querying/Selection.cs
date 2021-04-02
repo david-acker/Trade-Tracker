@@ -7,9 +7,15 @@ namespace TradeTracker.Api.Models.Querying
 {
     public class Selection
     {
-        public List<string> Values { get; } = new List<string>();
-        public SelectionType Type { get; } = SelectionType.NotSpecified;
+        public List<string> Values { get; set; } = new List<string>();
+        public SelectionType Type { get; set; } = SelectionType.NotSpecified;
 
+        public Selection(List<string> values, SelectionType type)
+        {
+            Values = values;
+            Type = type;
+        }
+        
         public Selection(string selectionString)
         {
             Values = extractValues(selectionString);

@@ -10,6 +10,7 @@ namespace TradeTracker.Api.Models.Querying
         public string Field { get; } = "DateTime";
         public SortOrderType Type { get; } = SortOrderType.Descending;
 
+        public SortOrder() { }
         public SortOrder(string sortOrderString)
         {
             var cleanedSortOrderString = sortOrderString.Trim();

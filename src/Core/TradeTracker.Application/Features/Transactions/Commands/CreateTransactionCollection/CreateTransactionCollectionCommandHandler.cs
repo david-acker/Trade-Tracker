@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Interfaces;
-using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Events;
@@ -16,19 +16,16 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
         ValidatableRequestHandler<CreateTransactionCollectionCommand>,
         IRequestHandler<CreateTransactionCollectionCommand, IEnumerable<TransactionForReturnDto>>
     {
-
-        private readonly ILoggedInUserService _loggedInUserService;
-        private readonly ITransactionRepository _transactionRepository;
         private readonly IMapper _mapper;
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
+        
 
         public CreateTransactionCollectionCommandHandler(
-            ILoggedInUserService loggedInUserService,
             IMapper mapper, 
-            ITransactionRepository transactionRepository)
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
         {
-            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
-            _transactionRepository = transactionRepository;
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
         }
 
         public async Task<IEnumerable<TransactionForReturnDto>> Handle(
@@ -37,23 +34,9 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
         {
             await ValidateRequest(request);
 
-            var userAccessKey = _loggedInUserService.AccessKey;
-
             var transactionCollection = _mapper.Map<IEnumerable<Transaction>>(request.Transactions);
 
-            transactionCollection = transactionCollection
-                .Select(transaction =>
-                {
-                    transaction.AccessKey = userAccessKey;
-                    return transaction;
-                })
-                .ToList();
-
-            var lastTransaction = transactionCollection.Last();
-            lastTransaction.DomainEvents.Add(
-                new TransactionCollectionCreatedEvent(transactionCollection));
-
-            transactionCollection = await _transactionRepository.AddRangeAsync(transactionCollection);
+            transactionCollection = await _authenticatedTransactionRepository.AddRangeAsync(transactionCollection);
 
             return _mapper.Map<IEnumerable<TransactionForReturnDto>>(transactionCollection);
         }

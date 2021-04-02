@@ -3,10 +3,12 @@ using MediatR;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Models.Pagination;
 using TradeTracker.Application.Requests;
+using TradeTracker.Application.ResourceParameters;
+using TradeTracker.Application.ResourceParameters.Paged;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
@@ -15,29 +17,24 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
         ValidatableRequestHandler<GetTransactionsQuery>,
         IRequestHandler<GetTransactionsQuery, PagedTransactionsBaseDto>
     {
-        private readonly ILoggedInUserService _loggedInUserService;
         private readonly IMapper _mapper;
-        private readonly ITransactionRepository _transactionRepository;
-        
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         public GetTransactionsQueryHandler(
-            ILoggedInUserService loggedInUserService,
             IMapper mapper, 
-            ITransactionRepository transactionRepository)
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
         {
-            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
-            _transactionRepository = transactionRepository;
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
         }
 
         public async Task<PagedTransactionsBaseDto> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
-            
-            var userAccessKey = _loggedInUserService.AccessKey;
 
             var parameters = _mapper.Map<PagedTransactionsResourceParameters>(request);
 
-            var pagedTransactions = await _transactionRepository.GetPagedTransactionsAsync(userAccessKey, parameters);
+            var pagedTransactions = await _authenticatedTransactionRepository
+                .GetPagedResponseAsync(parameters);
             
             var transactionsForReturn = _mapper.Map<PagedList<Transaction>, List<TransactionForReturnDto>>(pagedTransactions);
 

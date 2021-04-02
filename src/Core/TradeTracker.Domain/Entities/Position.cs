@@ -2,11 +2,13 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using TradeTracker.Domain.Common;
 using TradeTracker.Domain.Enums;
+using TradeTracker.Domain.Interfaces;
 
 namespace TradeTracker.Domain.Entities
 {
-    public class Position : AuditableEntity
+    public class Position : AuditableEntity, IAuthorizableEntity
     {
+        public Position() { }
         public Position(Guid accessKey, string symbol)
         {
             AccessKey = accessKey;
@@ -16,9 +18,9 @@ namespace TradeTracker.Domain.Entities
         [Key]
         public Guid PositionId { get; private set; } = Guid.NewGuid();
 
-        public Guid AccessKey { get; init; }
+        public Guid AccessKey { get; set; }
 
-        public string Symbol { get; init; }
+        public string Symbol { get; set; }
 
         public string Exposure { get; private set; } = ExposureType.None.ToString();
 

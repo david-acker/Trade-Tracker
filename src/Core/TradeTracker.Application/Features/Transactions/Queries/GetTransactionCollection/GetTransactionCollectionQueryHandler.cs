@@ -1,13 +1,12 @@
 using AutoMapper;
 using MediatR;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Exceptions;
-using TradeTracker.Application.Interfaces;
 using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 
@@ -17,27 +16,22 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
         ValidatableRequestHandler<GetTransactionCollectionQuery>,
         IRequestHandler<GetTransactionCollectionQuery, IEnumerable<TransactionForReturnDto>>
     {
-        private readonly ILoggedInUserService _loggedInUserService;
         private readonly IMapper _mapper;
-        private readonly ITransactionRepository _transactionRepository;
-
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         public GetTransactionCollectionQueryHandler(
-            ILoggedInUserService loggedInUserService,
             IMapper mapper, 
-            ITransactionRepository transactionRepository)
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
         {
-            _loggedInUserService = loggedInUserService;
             _mapper = mapper;
-            _transactionRepository = transactionRepository;
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
         }
 
         public async Task<IEnumerable<TransactionForReturnDto>> Handle(GetTransactionCollectionQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
-            Guid userAccessKey = _loggedInUserService.AccessKey;
-
-            var transactionCollection = await _transactionRepository.GetTransactionCollectionByIdsAsync(userAccessKey, request.TransactionIds);
+            var transactionCollection = await _authenticatedTransactionRepository
+                .GetTransactionCollectionByIdsAsync(request.TransactionIds);
             
             if (transactionCollection.Count() != request.TransactionIds.Count())
             {

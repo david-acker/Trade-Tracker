@@ -366,9 +366,6 @@ namespace TradeTracker.Api.Controllers
             _logger.LogInformation($"TransactionsController: {nameof(UpdateTransaction)} was called.");
 
             command.TransactionId = transactionId;
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            command.Authenticate(accessKey);
             
             await _mediator.Send(command);
             return NoContent();

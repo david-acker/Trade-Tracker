@@ -10,36 +10,34 @@ namespace TradeTracker.Application.Interfaces.Infrastructure
     public interface IPositionService
     { 
         Task AttachToPosition(
-            Guid accessKey, 
             string symbol, 
             TransactionType transactionType, 
-            decimal quantity);
+            decimal quantity,
+            Guid accessKey);
 
         Task DetachFromPosition(
-            Guid accessKey, 
             string symbol, 
             TransactionType transactionType, 
-            decimal quantity);
+            decimal quantity,
+            Guid accessKey);
         
         Task RecalculateForSymbol(
-            Guid accessKey, 
-            string symbol);
+            string symbol,
+            Guid accessKey);
 
         Task RefreshForTransaction(
-            Guid accessKey,
-            Guid transactionId);
+            Guid transactionId,
+            Guid accessKey);
 
         Task RefreshForTransactionCollection(
-            Guid accessKey,
             string symbol,
-            List<Guid> transactionIds);
+            List<Guid> transactionIds,
+            Guid accessKey);
 
         Task<decimal> CalculateAverageCostBasis(
-            Guid accessKey,
             string symbol);
 
         Task<IEnumerable<SourceTransactionLink>> CreateSourceTransactionMap(
-            Guid accessKey, 
             string symbol);
     }
 }

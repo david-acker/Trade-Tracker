@@ -79,9 +79,6 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositions)} was called.");
 
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
-
             var pagedPositionsBase = await _mediator.Send(query);
 
             Response.Headers.Add("X-Paging-PageNumber", pagedPositionsBase.CurrentPage.ToString());
@@ -127,9 +124,6 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositionsWithLinks)} was called.");
 
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
-
             var pagedPositionsBase = await _mediator.Send(query);
 
             var pagedPositionsWithLinks = new PagedPositionsWithLinksDto();
@@ -141,7 +135,6 @@ namespace TradeTracker.Api.Controllers
                 .Select(position => 
                 {
                     position.Links = CreateLinksForPosition(position.Symbol);
-                
                     return position;
                 });
             
@@ -207,13 +200,7 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPosition)} was called.");
 
-            var query = new GetPositionQuery()
-            {
-                Symbol = symbol
-            };
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
+            var query = new GetPositionQuery() { Symbol = symbol };
 
             var position = await _mediator.Send(query);
 
@@ -243,13 +230,7 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositionWithLinks)} was called.");
 
-            var query = new GetPositionQuery()
-            {
-                Symbol = symbol
-            };
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
+            var query = new GetPositionQuery() { Symbol = symbol };
 
             var position = await _mediator.Send(query);
 
@@ -282,13 +263,7 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositionWithLinks)} was called.");
 
-            var query = new GetDetailedPositionQuery()
-            {
-                Symbol = symbol
-            };
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
+            var query = new GetDetailedPositionQuery() { Symbol = symbol };
 
             var detailedPosition = await _mediator.Send(query);
 
