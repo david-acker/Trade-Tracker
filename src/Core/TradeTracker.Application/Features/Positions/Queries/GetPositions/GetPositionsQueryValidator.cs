@@ -2,7 +2,7 @@ using System;
 using FluentValidation;
 using TradeTracker.Application.Common.Validation.Pagination;
 using TradeTracker.Application.Common.Validation.Selection;
-using TradeTracker.Application.Features.Positions.Validators;
+using TradeTracker.Application.Features.Positions.Querying.Validators;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {

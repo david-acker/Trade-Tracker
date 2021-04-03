@@ -4,7 +4,7 @@ using FluentValidation;
 using TradeTracker.Application.Common.Enums;
 using TradeTracker.Application.Common.Helpers;
 
-namespace TradeTracker.Application.Features.Positions.Validators
+namespace TradeTracker.Application.Features.Positions.Querying.Validators
 {
     public class PositionOrderByComponentsValidator : AbstractValidator<string>
     {

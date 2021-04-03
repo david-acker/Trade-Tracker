@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using FluentValidation;
 
-namespace TradeTracker.Application.Features.Positions.Validators
+namespace TradeTracker.Application.Features.Positions.Querying.Validators
 {
     public class ExposureTypeFilterValidator : AbstractValidator<string>
     {
