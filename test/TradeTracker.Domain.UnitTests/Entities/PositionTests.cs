@@ -1,10 +1,9 @@
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
+using TradeTracker.Domain.Extensions;
 using Xunit;
 
 namespace TradeTracker.Domain.UnitTests.Entities
@@ -24,9 +23,9 @@ namespace TradeTracker.Domain.UnitTests.Entities
                     .Be(Decimal.Zero);
 
                 position.Exposure.Should()
-                    .Be("None");
+                    .Be(ExposureType.None);
 
-                position.IsClosed.Should()
+                position.IsClosed().Should()
                     .BeTrue();
             }
         }
@@ -47,13 +46,13 @@ namespace TradeTracker.Domain.UnitTests.Entities
             // Assert
             using (new AssertionScope())
             {
+                position.Exposure.Should()
+                    .Be(ExposureType.None);
+
                 position.Quantity.Should()
                     .Be(Decimal.Zero);
                 
-                position.Exposure.Should()
-                    .Be("None");
-                
-                position.IsClosed.Should()
+                position.IsClosed().Should()
                     .BeTrue();
             }
         }
@@ -66,9 +65,9 @@ namespace TradeTracker.Domain.UnitTests.Entities
             Position position)
         {
             // Arrange
-            decimal originalPositionQuantity = position.Quantity;
-            string originalPositionExposure = position.Exposure;
-            bool originalPositionIsClosed = position.IsClosed;
+            decimal originalPositionQuantity = Math.Abs(position.Quantity);
+            ExposureType originalPositionExposure = position.Exposure;
+            bool originalPositionIsClosed = position.IsClosed();
 
             // Act
             position.Attach(attachedTransactionType, Decimal.Zero);
@@ -76,13 +75,13 @@ namespace TradeTracker.Domain.UnitTests.Entities
             // Assert
             using (new AssertionScope())
             {
-                position.Quantity.Should()
-                    .Be(originalPositionQuantity);
-                
                 position.Exposure.Should()
                     .Be(originalPositionExposure);
                 
-                position.IsClosed.Should()
+                Math.Abs(position.Quantity).Should()
+                    .Be(originalPositionQuantity);
+                
+                position.IsClosed().Should()
                     .Be(originalPositionIsClosed);
             }
         }
@@ -101,7 +100,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
             position.Attach(transactionType, (decimal)transactionQuantity);
 
             // Assert
-            position.IsClosed.Should()
+            position.IsClosed().Should()
                 .BeFalse();
         }
 
@@ -113,7 +112,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
             decimal attachedTransactionQuantity,
             Position position,
             decimal expectedPositionQuantity,
-            string expectedPositionExposure)
+            ExposureType expectedPositionExposure)
         {
             // Act
             position.Attach(
@@ -126,7 +125,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                 position.Exposure.Should()
                     .Be(expectedPositionExposure);
                 
-                position.Quantity.Should()
+                Math.Abs(position.Quantity).Should()
                     .Be(expectedPositionQuantity);
             }
         }
@@ -139,7 +138,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
             decimal attachedTransactionQuantity,
             Position position,
             decimal expectedPositionQuantity,
-            string expectedPositionExposure)
+            ExposureType expectedPositionExposure)
         {
             // Act
             position.Attach(
@@ -152,7 +151,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                 position.Exposure.Should()
                     .Be(expectedPositionExposure);
 
-                position.Quantity.Should()
+                Math.Abs(position.Quantity).Should()
                     .Be(expectedPositionQuantity);
             }
         }
@@ -165,7 +164,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
             decimal attachedTransactionQuantity,
             Position position,
             decimal expectedPositionQuantity,
-            string expectedPositionExposure)
+            ExposureType expectedPositionExposure)
         {
             // Act
             position.Detach(
@@ -178,7 +177,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                 position.Exposure.Should()
                     .Be(expectedPositionExposure);
 
-                position.Quantity.Should()
+                Math.Abs(position.Quantity).Should()
                     .Be(expectedPositionQuantity);
             }
         }

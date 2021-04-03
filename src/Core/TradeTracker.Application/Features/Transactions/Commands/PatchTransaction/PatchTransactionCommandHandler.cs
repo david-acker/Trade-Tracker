@@ -3,10 +3,10 @@ using MediatR;
 using Microsoft.AspNetCore.JsonPatch;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Exceptions;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Exceptions;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
-using TradeTracker.Application.Interfaces.Persistence.Transactions;
-using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 using TradeTracker.Domain.Events;
@@ -14,17 +14,17 @@ using TradeTracker.Domain.Events;
 namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransaction
 {
     public class PatchTransactionCommandHandler :
-        ValidatableRequestHandler<UpdateTransactionCommand>,
+        ValidatableRequestBehavior<UpdateTransactionCommand>,
         IRequestHandler<PatchTransactionCommand>
     {
-        private readonly IMapper _mapper;
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
+         private readonly IMapper _mapper;
         public PatchTransactionCommandHandler(
-            IMapper mapper, 
-            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
+            IMapper mapper)
         {
-            _mapper = mapper;
             _authenticatedTransactionRepository = authenticatedTransactionRepository;
+            _mapper = mapper;
         }
 
         public async Task<Unit> Handle(PatchTransactionCommand request, CancellationToken cancellationToken)

@@ -3,38 +3,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using TradeTracker.Api.Models.Querying;
-using TradeTracker.Application.Enums;
+using TradeTracker.Application.Common.Enums;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces.Persistence.Positions;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
+using TradeTracker.Application.Common.Models.Resources.Parameters.Transactions;
+using TradeTracker.Application.Common.Models.Resources.Requests;
 using TradeTracker.Application.Features.Positions;
-using TradeTracker.Application.Interfaces.Infrastructure;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Interfaces.Persistence.Positions;
-using TradeTracker.Application.Interfaces.Persistence.Transactions;
-using TradeTracker.Application.ResourceParameters.Unpaged;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
+using TradeTracker.Domain.Extensions;
 
 namespace TradeTracker.Infrastructure.Services
 {
     public class PositionService : IPositionService
     {
-        private readonly ILogger<PositionService> _logger;
         private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
-        private readonly IPositionRepository _positionRepository;
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
+        private readonly ILogger<PositionService> _logger;
+        private readonly IPositionRepository _positionRepository;
         private readonly ITransactionRepository _transactionRepository;
 
         public PositionService(
-            ILogger<PositionService> logger, 
             IAuthenticatedPositionRepository authenticatedPositionRepository,
-            IPositionRepository positionRepository,
             IAuthenticatedTransactionRepository authenticatedTransactionRepository,
+            ILogger<PositionService> logger, 
+            IPositionRepository positionRepository,
             ITransactionRepository transactionRepository)
         {
-            _logger = logger;
             _authenticatedPositionRepository = authenticatedPositionRepository;
-            _positionRepository = positionRepository;
             _authenticatedTransactionRepository = authenticatedTransactionRepository;
+            _logger = logger;
+            _positionRepository = positionRepository;   
             _transactionRepository = transactionRepository;
         }
 
@@ -103,7 +103,7 @@ namespace TradeTracker.Infrastructure.Services
 
         public async Task HandleNewPosition(Position position)
         {
-            if (!position.IsClosed)
+            if (position.IsClosed())
             {
                 await AddPosition(position);
             }
@@ -111,7 +111,7 @@ namespace TradeTracker.Infrastructure.Services
 
         public async Task HandleExistingPosition(Position position)
         {
-            if (!position.IsClosed)
+            if (position.IsClosed())
             {
                 await UpdatePosition(position);
             }
@@ -202,11 +202,11 @@ namespace TradeTracker.Infrastructure.Services
 
             var parametersForSymbol = new UnpagedTransactionsResourceParameters();
 
-            var selectionForSymbol = new Selection(
+            var symbolSelection = new SymbolSelection(
                 new List<string>() { symbol },
                 SelectionType.Include);
 
-            parametersForSymbol.Selection = selectionForSymbol;
+            parametersForSymbol.SymbolSelection = symbolSelection;
 
             var transactionHistory = await _transactionRepository
                 .GetUnpagedResponseAsync(parametersForSymbol, accessKey);
@@ -248,13 +248,13 @@ namespace TradeTracker.Infrastructure.Services
 
             var parametersForSymbol = new UnpagedTransactionsResourceParameters();
 
-            var selectionForSymbol = new Selection(
+            var symbolSelection = new SymbolSelection(
                 new List<string>() { symbol },
                 SelectionType.Include);
 
-            parametersForSymbol.Selection = selectionForSymbol;
+            parametersForSymbol.SymbolSelection = symbolSelection;
 
-            parametersForSymbol.Type = "buy";
+            parametersForSymbol.TransactionType = TransactionType.Buy;
 
             var transactionsForSymbol = await _authenticatedTransactionRepository
                 .GetUnpagedResponseAsync(parametersForSymbol);

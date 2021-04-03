@@ -8,8 +8,8 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System;
 using System.Text;
-using TradeTracker.Application.Interfaces.Identity;
-using TradeTracker.Application.Models.Authentication;
+using TradeTracker.Application.Common.Interfaces.Identity;
+using TradeTracker.Application.Models.Common.Authentication;
 using TradeTracker.Identity.Models;
 using TradeTracker.Identity.Services;
 

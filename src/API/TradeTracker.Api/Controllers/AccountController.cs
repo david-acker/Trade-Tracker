@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using TradeTracker.Application.Models.Authentication;
-using TradeTracker.Application.Interfaces.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using TradeTracker.Api.ActionConstraints;
+using TradeTracker.Application.Common.Interfaces.Identity;
+using TradeTracker.Application.Models.Common.Authentication;
 
 namespace TradeTracker.Api.Controllers
 {

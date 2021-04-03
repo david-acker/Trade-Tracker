@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FluentAssertions;
 using Moq;
-using TradeTracker.Application.Exceptions;
+using TradeTracker.Application.Common.Exceptions;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
+using TradeTracker.Application.Common.Profiles;
 using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransaction;
-using TradeTracker.Application.Interfaces.Persistence.Transactions;
-using TradeTracker.Application.Profiles;
 using TradeTracker.Application.UnitTests.Mocks;
 using Xunit;
 
@@ -32,31 +32,12 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
         }
 
         [Fact]
-        public async Task Handle_ValidRequest_ReturnsTransactionForReturnDto()
-        {
-            // Arrange
-            var handler = new GetTransactionQueryHandler(
-                _mapper, _mockAuthenticatedTransactionRepository.Object);
-
-            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
-            var transactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49");
-
-            var query = new GetTransactionQuery() { TransactionId = transactionId };
-
-            // Act
-            var transaction = await handler.Handle(query, CancellationToken.None);
-
-            // Assert
-            transaction.Should()
-                .BeOfType<TransactionForReturnDto>();
-        }
-
-        [Fact]
         public async Task Handle_ValidRequest_TransactionMatchesQueryParameters()
         {
             // Arrange
             var handler = new GetTransactionQueryHandler(
-                _mapper, _mockAuthenticatedTransactionRepository.Object);
+                _mockAuthenticatedTransactionRepository.Object,
+                _mapper);
 
             var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
             var transactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49");
@@ -76,7 +57,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
         {
             // Arrange
             var handler = new GetTransactionQueryHandler(
-                _mapper, _mockAuthenticatedTransactionRepository.Object);
+                _mockAuthenticatedTransactionRepository.Object,
+                _mapper);
 
             var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
             
@@ -96,7 +78,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
         {
             // Arrange
             var handler = new GetTransactionQueryHandler(
-                _mapper, _mockAuthenticatedTransactionRepository.Object);
+                _mockAuthenticatedTransactionRepository.Object,
+                _mapper);
 
             var transactionId = Guid.NewGuid();
             var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
@@ -110,27 +93,6 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
             await act.Should()
                 .ThrowAsync<NotFoundException>()
                 .WithMessage($"Transaction ({transactionId}) is not found.");
-        }
-
-        [Fact]
-        public async Task Handle_TransactionNotAssociatedWithAccessKey_ThrowsNotFoundException()
-        {
-            // Arrange
-            var handler = new GetTransactionQueryHandler(
-                _mapper, _mockAuthenticatedTransactionRepository.Object);
-
-            var transactionId = Guid.Parse("2eb3de2f-7869-41b5-9bfc-3867c844f6e7");
-            var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
-
-            var query = new GetTransactionQuery() { TransactionId = transactionId };
-
-            // Act
-            Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);
-            
-            // Assert
-            await act.Should()
-                .ThrowAsync<NotFoundException>()
-                .WithMessage($"Transaction ({transactionId}) is not found.");            
         }
     }
 }

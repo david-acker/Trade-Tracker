@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
 using TradeTracker.Api.Helpers;
@@ -15,7 +14,7 @@ using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
-using TradeTracker.Application.Models.Navigation;
+using TradeTracker.Application.Models.Common.Resources.Responses;
 
 namespace TradeTracker.Api.Controllers
 {

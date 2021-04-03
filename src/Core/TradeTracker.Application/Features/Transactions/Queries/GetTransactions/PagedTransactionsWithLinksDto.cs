@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using TradeTracker.Api.Models.Pagination;
-using TradeTracker.Application.Models.Navigation;
+using TradeTracker.Application.Common.Models.Resources.Responses;
+using TradeTracker.Application.Models.Common.Resources.Responses;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {

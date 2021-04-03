@@ -1,8 +1,8 @@
 using System;
 using FluentValidation;
+using TradeTracker.Application.Common.Validation.Pagination;
+using TradeTracker.Application.Common.Validation.Selection;
 using TradeTracker.Application.Features.Transactions.Validators.Querying;
-using TradeTracker.Application.Validators.Pagination;
-using TradeTracker.Application.Validators.Selection;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
@@ -10,11 +10,14 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
     {
         public GetTransactionsQueryValidator()
         {
-            RuleFor(q => q.Type)
+            RuleFor(q => q.TransactionType)
                 .SetValidator(new TransactionTypeFilterValidator());
 
-            RuleFor(q => q.Order)
-                .SetValidator(new TransactionOrderValidator());
+            When(q => !String.IsNullOrWhiteSpace(q.OrderBy), () =>
+            {
+                RuleFor(q => q.OrderBy)
+                    .SetValidator(new TransactionOrderByValidator());
+            });
 
             RuleFor(q => q.PageNumber)
                 .SetValidator(new PageNumberValidator());
@@ -38,10 +41,10 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
                             .WithMessage("RangeStart must occur before RangeEnd.");
                 });
 
-            When(q => !String.IsNullOrWhiteSpace(q.Selection), () => 
+            When(q => !String.IsNullOrWhiteSpace(q.SymbolSelection), () => 
             {
-                RuleFor(q => q.Selection)
-                    .SetValidator(new SelectionValidator());
+                RuleFor(q => q.SymbolSelection)
+                    .SetValidator(new SymbolSelectionValidator());
             });
         }
 

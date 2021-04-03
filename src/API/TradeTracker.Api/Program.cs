@@ -9,9 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TradeTracker.Application.Interfaces.Infrastructure;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Interfaces.Persistence.Transactions;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Identity;
 using TradeTracker.Identity.Models;
 using TradeTracker.Persistence;
@@ -105,7 +104,7 @@ namespace TradeTracker.Api
 
                 var positionService = scope.ServiceProvider.GetRequiredService<IPositionService>();
 
-                IEnumerable<string> symbolsForUser;
+                HashSet<string> symbolsForUser;
 
                 foreach (var key in accessKeys)
                 {

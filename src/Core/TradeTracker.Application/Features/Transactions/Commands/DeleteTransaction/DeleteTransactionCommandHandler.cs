@@ -2,26 +2,24 @@ using AutoMapper;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Exceptions;
-using TradeTracker.Application.Interfaces.Persistence.Transactions;
+using TradeTracker.Application.Common.Exceptions;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Domain.Entities;
-using TradeTracker.Domain.Enums;
-using TradeTracker.Domain.Events;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.DeleteTransaction
 {
     public class DeleteTransactionCommandHandler :
         IRequestHandler<DeleteTransactionCommand>
     {
-        private readonly IMapper _mapper;
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
+        private readonly IMapper _mapper;
         
-        public DeleteTransactionCommandHandler(
-            IMapper mapper, 
-            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
+        public DeleteTransactionCommandHandler( 
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
+            IMapper mapper)
         {
-            _mapper = mapper;
             _authenticatedTransactionRepository = authenticatedTransactionRepository;
+            _mapper = mapper;
         }
 
         public async Task<Unit> Handle(DeleteTransactionCommand request, CancellationToken cancellationToken)

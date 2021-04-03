@@ -20,18 +20,17 @@ namespace TradeTracker.Application.Features.Transactions.Validators.Transactions
         
         private bool IsTransactionTypeSpecified(string input)
         {   
-            var isValid = false;
+            var isSpecified = false;
 
-            TransactionType transactionType;
-            if (Enum.TryParse(input, true, out transactionType))
+            if (Enum.TryParse(input, true, out TransactionType transactionType))
             {
                 if (transactionType != TransactionType.NotSpecified)
                 {
-                    isValid = true;
+                    isSpecified = true;
                 }
             }
 
-            return isValid;
+            return isSpecified;
         }
     }
 }

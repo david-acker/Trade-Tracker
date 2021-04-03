@@ -5,31 +5,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Interfaces;
-using TradeTracker.Application.Interfaces.Infrastructure;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Interfaces.Persistence.Transactions;
-using TradeTracker.Application.Requests;
-using TradeTracker.Application.ResourceParameters.Unpaged;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
+using TradeTracker.Application.Common.Models.Resources.Parameters.Transactions;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransactions
 {
     public class ExportTransactionsQueryHandler : 
-        ValidatableRequestHandler<ExportTransactionsQuery>,
+        ValidatableRequestBehavior<ExportTransactionsQuery>,
         IRequestHandler<ExportTransactionsQuery, TransactionsExportFileVm>
     {
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly ICsvExporter _csvExporter;
         private readonly IMapper _mapper;
-        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
 
         public ExportTransactionsQueryHandler(
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
             ICsvExporter csvExporter,
-            IMapper mapper, 
-            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
+            IMapper mapper)
         {
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
             _csvExporter = csvExporter;
             _mapper = mapper;
-            _authenticatedTransactionRepository = authenticatedTransactionRepository;
         }
 
         public async Task<TransactionsExportFileVm> Handle(ExportTransactionsQuery request, CancellationToken cancellationToken)

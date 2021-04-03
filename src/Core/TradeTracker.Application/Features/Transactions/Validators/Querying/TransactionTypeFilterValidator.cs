@@ -24,15 +24,8 @@ namespace TradeTracker.Application.Features.Transactions.Validators.Querying
             var cleanedInput = input
                 .Trim()
                 .ToLower();
-
-            bool isValid = true;
-
-            if (!String.IsNullOrWhiteSpace(cleanedInput))
-            {
-                isValid = validTransactionTypes.Contains(cleanedInput);
-            }
-
-            return isValid;
+            
+            return validTransactionTypes.Contains(cleanedInput);
         }
     }
 }

@@ -4,12 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces.Persistence;
 using TradeTracker.Application.Interfaces;
-using TradeTracker.Application.Interfaces.Infrastructure;
-using TradeTracker.Application.Interfaces.Persistence;
 using TradeTracker.Domain.Common;
 using TradeTracker.Domain.Entities;
-using TradeTracker.Domain.Enums;
 using TradeTracker.Domain.Interfaces;
 using TradeTracker.Persistence.Seed.Transactions;
 
@@ -17,8 +16,11 @@ namespace TradeTracker.Persistence
 {
     public class TradeTrackerDbContext : DbContext, ITradeTrackerDbContext
     {
-        private readonly ILoggedInUserService _loggedInUserService;
         private readonly IDomainEventService _domainEventService;
+        private readonly ILoggedInUserService _loggedInUserService;
+
+        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Position> Positions { get; set; }
 
         public TradeTrackerDbContext(DbContextOptions<TradeTrackerDbContext> options)
            : base(options)
@@ -26,17 +28,14 @@ namespace TradeTracker.Persistence
         }
 
         public TradeTrackerDbContext(
-            DbContextOptions<TradeTrackerDbContext> options, 
-            ILoggedInUserService loggedInUserService,
-            IDomainEventService domainEventService)
+            DbContextOptions<TradeTrackerDbContext> options,
+            IDomainEventService domainEventService,
+            ILoggedInUserService loggedInUserService)
             : base(options)
         {
-            _loggedInUserService = loggedInUserService;
             _domainEventService = domainEventService;
+            _loggedInUserService = loggedInUserService;
         }
-
-        public DbSet<Transaction> Transactions { get; set; }
-        public DbSet<Position> Positions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -47,8 +46,6 @@ namespace TradeTracker.Persistence
                 transactionCount: 100);
 
             modelBuilder.Entity<Transaction>().HasData(equityTransactions);
-
-            modelBuilder.Entity<Position>().Property(p => p.Quantity).HasField("_quantity");
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())

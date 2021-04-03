@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FluentAssertions;
 using Moq;
-using TradeTracker.Application.Exceptions;
+using TradeTracker.Application.Common.Exceptions;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
+using TradeTracker.Application.Common.Profiles;
 using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection;
-using TradeTracker.Application.Interfaces.Persistence.Transactions;
-using TradeTracker.Application.Profiles;
 using TradeTracker.Application.UnitTests.Mocks;
 using Xunit;
 
@@ -34,35 +34,12 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
         }
 
         [Fact]
-        public async Task Handle_ValidRequest_ReturnsIEnumerableOfTransactionForReturnDto()
-        {
-            // Arrange
-            var handler = new GetTransactionCollectionQueryHandler(
-                _mapper, _mockAuthenticatedTransactionRepository.Object);
-
-            var transactionIds = new List<Guid>()
-            {
-                Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49"),
-                Guid.Parse("f29b3b88-4ba3-4f4c-b3d4-e5ba823b7bfd"),
-                Guid.Parse("7aafd62c-7192-4a08-a258-0a95be5bd1a1"),
-            };
-
-            var query = new GetTransactionCollectionQuery() { TransactionIds = transactionIds };
-
-            // Act
-            var transactionCollection = await handler.Handle(query, CancellationToken.None);
-
-            // Assert
-            transactionCollection.Should()
-                .BeOfType<List<TransactionForReturnDto>>();
-        }
-
-        [Fact]
         public async Task Handle_ValidRequest_TransactionMatchesQueryParameters()
         {
             // Arrange
             var handler = new GetTransactionCollectionQueryHandler(
-                _mapper, _mockAuthenticatedTransactionRepository.Object);
+                _mockAuthenticatedTransactionRepository.Object,
+                _mapper);
 
             var transactionIds = new List<Guid>()
             {
@@ -84,7 +61,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
         {
             // Arrange
             var handler = new GetTransactionCollectionQueryHandler(
-                _mapper, _mockAuthenticatedTransactionRepository.Object);
+                _mockAuthenticatedTransactionRepository.Object,
+                _mapper);
 
             var query = new GetTransactionCollectionQuery();
 
@@ -102,7 +80,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
         {
             // Arrange
             var handler = new GetTransactionCollectionQueryHandler(
-                _mapper, _mockAuthenticatedTransactionRepository.Object);
+                _mockAuthenticatedTransactionRepository.Object,
+                _mapper);
 
             var transactionIds = new List<Guid>();
             for (var i = 0; i < 101; i++)
@@ -126,7 +105,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
         {
             // Arrange
             var handler = new GetTransactionCollectionQueryHandler(
-                _mapper, _mockAuthenticatedTransactionRepository.Object);
+                _mockAuthenticatedTransactionRepository.Object,
+                _mapper);
 
             var transactionIds = new List<Guid>() { Guid.NewGuid() };
 
@@ -146,7 +126,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
         {
             // Arrange
             var handler = new GetTransactionCollectionQueryHandler(
-                _mapper, _mockAuthenticatedTransactionRepository.Object);
+                _mockAuthenticatedTransactionRepository.Object,
+                _mapper);
 
             var firstNonExistentTransactionId = Guid.NewGuid();
             var secondNonExistentTranasctionId = Guid.NewGuid();
@@ -175,29 +156,6 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
             await act.Should()
                 .ThrowAsync<NotFoundException>()
                 .WithMessage(expectedMessage);
-        }
-
-        [Fact]
-        public async Task Handle_TransactionNotAssociatedWithAccessKey_ThrowsNotFoundException()
-        {
-            // Arrange
-            var handler = new GetTransactionCollectionQueryHandler(
-                _mapper, _mockAuthenticatedTransactionRepository.Object);
-
-            var transactionIds = new List<Guid>()
-            {
-                Guid.Parse("2eb3de2f-7869-41b5-9bfc-3867c844f6e7")
-            };
-
-            var query = new GetTransactionCollectionQuery() { TransactionIds = transactionIds };
-
-            // Act
-            Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);
-            
-            // Assert
-            await act.Should()
-                .ThrowAsync<NotFoundException>()
-                .WithMessage($"Transaction ({transactionIds.Single()}) is not found.");            
         }
     }
 }

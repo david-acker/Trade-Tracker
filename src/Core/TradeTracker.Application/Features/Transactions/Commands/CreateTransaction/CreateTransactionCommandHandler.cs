@@ -2,27 +2,25 @@ using AutoMapper;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Interfaces;
-using TradeTracker.Application.Interfaces.Persistence.Transactions;
-using TradeTracker.Application.Requests;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Domain.Entities;
-using TradeTracker.Domain.Events;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransaction
 {
     public class CreateTransactionCommandHandler : 
-        ValidatableRequestHandler<CreateTransactionCommand>,
+        ValidatableRequestBehavior<CreateTransactionCommand>,
         IRequestHandler<CreateTransactionCommand, TransactionForReturnDto>
     {
-        private readonly IMapper _mapper;
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
+        private readonly IMapper _mapper;
 
         public CreateTransactionCommandHandler(
-            IMapper mapper, 
-            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
+            IMapper mapper)
         {
-            _mapper = mapper;
             _authenticatedTransactionRepository = authenticatedTransactionRepository;
+            _mapper = mapper;
         }
 
         public async Task<TransactionForReturnDto> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)

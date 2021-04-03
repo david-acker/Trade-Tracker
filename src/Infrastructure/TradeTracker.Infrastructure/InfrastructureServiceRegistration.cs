@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TradeTracker.Application.Interfaces;
-using TradeTracker.Application.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
 using TradeTracker.Infrastructure.Services;
 
 namespace TradeTracker.Infrastructure

@@ -9,5 +9,17 @@ namespace TradeTracker.Application.Features.Positions
         public decimal LinkedQuantity { get; set; }
         public decimal TradePrice { get; set; }
         public TransactionForReturnWithLinksDto Transaction { get; set; }
+
+        public FullSourceTransactionLink() { }
+
+        public FullSourceTransactionLink(
+            SourceTransactionLink sourceLink, 
+            TransactionForReturnWithLinksDto transactionWithLinks)
+        {
+            DateTime = sourceLink.DateTime;
+            LinkedQuantity = sourceLink.LinkedQuantity;
+            TradePrice = sourceLink.TradePrice;
+            Transaction = transactionWithLinks;
+        }
     }
 }

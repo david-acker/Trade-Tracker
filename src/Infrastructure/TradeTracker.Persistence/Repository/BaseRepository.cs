@@ -1,12 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Models.Pagination;
-using TradeTracker.Application.ResourceParameters.Paged;
-using TradeTracker.Application.ResourceParameters.Unpaged;
+using TradeTracker.Application.Common.Interfaces.Persistence;
+using TradeTracker.Application.Common.Models.Resources.Responses;
+using TradeTracker.Application.ResourceParameters;
 using TradeTracker.Domain.Interfaces;
 using TradeTracker.Persistence.Extensions;
 

@@ -1,44 +1,37 @@
 using AutoMapper;
 using MediatR;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Exceptions;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Exceptions;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces.Persistence.Positions;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
-using TradeTracker.Application.Interfaces;
-using TradeTracker.Application.Interfaces.Infrastructure;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Interfaces.Persistence.Positions;
-using TradeTracker.Application.Interfaces.Persistence.Transactions;
-using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
 {
     public class GetDetailedPositionQueryHandler : 
-        ValidatableRequestHandler<GetDetailedPositionQuery>,
+        ValidatableRequestBehavior<GetDetailedPositionQuery>,
         IRequestHandler<GetDetailedPositionQuery, DetailedPositionForReturnDto>
-    {
-        private readonly ILoggedInUserService _loggedInUserService;        
-        private readonly IMapper _mapper;
+    {     
         private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
-        private readonly IPositionService _positionService;
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
+        private readonly IMapper _mapper;
+        private readonly IPositionService _positionService;
 
         public GetDetailedPositionQueryHandler(
-            ILoggedInUserService loggedInUserService,
-            IMapper mapper,
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
             IAuthenticatedPositionRepository authenticatedPositionRepository,
-            IPositionService positionService,
-            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
+            IMapper mapper,
+            IPositionService positionService)
         {
-            _loggedInUserService = loggedInUserService;
-            _mapper = mapper;
-            _authenticatedPositionRepository = authenticatedPositionRepository;
-            _positionService = positionService;
             _authenticatedTransactionRepository = authenticatedTransactionRepository;
+            _authenticatedPositionRepository = authenticatedPositionRepository;
+            _mapper = mapper;
+            _positionService = positionService;
         }
 
         public async Task<DetailedPositionForReturnDto> Handle(GetDetailedPositionQuery request, CancellationToken cancellationToken)
@@ -63,11 +56,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
                     request.Symbol);
 
             var tasks = sourceTransactionMap
-                .Select(async (sourceLink) => 
-                    {
-                        return await CreateFullLink(
-                            sourceLink);
-                    })
+                .Select(async (sourceLink) => await CreateFullLink(sourceLink))
                 .ToList();
 
             var fullSourceTransactionMap = await Task.WhenAll(tasks);
@@ -86,13 +75,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
             var transactionWithLinks = 
                 _mapper.Map<TransactionForReturnWithLinksDto>(transaction);
 
-            return new FullSourceTransactionLink()
-            {
-                DateTime = sourceLink.DateTime,
-                LinkedQuantity = sourceLink.LinkedQuantity,
-                TradePrice = sourceLink.TradePrice,
-                Transaction = transactionWithLinks
-            };
+            return new FullSourceTransactionLink(sourceLink, transactionWithLinks);
         } 
     }
 }

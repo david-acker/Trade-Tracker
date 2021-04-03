@@ -1,9 +1,9 @@
-using TradeTracker.Application.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using TradeTracker.Application.Common.Exceptions;
 
 namespace TradeTracker.Api.Middleware
 {

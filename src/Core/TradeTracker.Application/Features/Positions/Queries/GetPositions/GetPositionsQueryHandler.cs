@@ -1,40 +1,34 @@
 using AutoMapper;
 using MediatR;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Interfaces;
-using TradeTracker.Application.Interfaces.Infrastructure;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Interfaces.Persistence.Positions;
-using TradeTracker.Application.Models.Pagination;
-using TradeTracker.Application.Requests;
-using TradeTracker.Application.ResourceParameters;
-using TradeTracker.Application.ResourceParameters.Paged;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces.Persistence.Positions;
+using TradeTracker.Application.Common.Models.Resources.Parameters.Positions;
+using TradeTracker.Application.Common.Models.Resources.Responses;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
     public class GetPositionsQueryHandler : 
-        ValidatableRequestHandler<GetPositionsQuery>,
+        ValidatableRequestBehavior<GetPositionsQuery>,
         IRequestHandler<GetPositionsQuery, PagedPositionsBaseDto>
     {
-        private readonly ILoggedInUserService _loggedInUserService;
-        private readonly IMapper _mapper;
+        
         private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
+        private readonly IMapper _mapper;
         private readonly IPositionService _positionService;
 
         public GetPositionsQueryHandler(
-            ILoggedInUserService loggedInUserService,
-            IMapper mapper,
             IAuthenticatedPositionRepository authenticatedPositionRepository,
+            IMapper mapper,
             IPositionService positionService)
         {
-            _loggedInUserService = loggedInUserService;
-            _mapper = mapper;
             _authenticatedPositionRepository = authenticatedPositionRepository;
+            _mapper = mapper;
             _positionService = positionService;
         }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
+using TradeTracker.Domain.Extensions;
 
 namespace TradeTracker.Domain.UnitTests.Entities
 {
@@ -78,7 +79,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                     (decimal)100,
                     CreateEmptyPosition(),
                     (decimal)100,
-                    "Long"
+                    ExposureType.Long
                 };
                 yield return new object[]
                 {
@@ -86,7 +87,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                     (decimal)100,
                     CreateEmptyPosition(),
                     (decimal)100,
-                    "Short"
+                    ExposureType.Short
                 };
             }
         }
@@ -103,7 +104,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                         TransactionType.Buy, 
                         (decimal)100),
                     (decimal)150,
-                    "Long",
+                    ExposureType.Long
                 };
                 yield return new object[]
                 {
@@ -113,7 +114,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                         TransactionType.Buy, 
                         (decimal)100),
                     (decimal)50,
-                    "Long"
+                    ExposureType.Long
                 };
                 yield return new object[]
                 {
@@ -123,7 +124,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                         TransactionType.Buy, 
                         (decimal)100),
                     (decimal)50,
-                    "Short"
+                    ExposureType.Short
                 };
                 yield return new object[]
                 {
@@ -133,7 +134,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                         TransactionType.Sell, 
                         (decimal)100),
                     (decimal)150,
-                    "Short"
+                    ExposureType.Short
                 };
                 yield return new object[]
                 {
@@ -143,7 +144,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                         TransactionType.Sell, 
                         (decimal)100),
                     (decimal)50,
-                    "Short"
+                    ExposureType.Short
                 };
                 yield return new object[]
                 {
@@ -153,7 +154,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                         TransactionType.Sell, 
                         (decimal)100),
                     (decimal)50,
-                    "Long"
+                    ExposureType.Long
                 };
             }
         }
@@ -170,7 +171,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                         TransactionType.Buy, 
                         (decimal)100),
                     (decimal)50,
-                    "Long"
+                    ExposureType.Long
                 };
                 yield return new object[]
                 {
@@ -180,7 +181,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                         TransactionType.Buy, 
                         (decimal)100),
                     (decimal)150,
-                    "Long"
+                    ExposureType.Long
                 };
                 yield return new object[]
                 {
@@ -190,7 +191,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                         TransactionType.Buy, 
                         (decimal)50),
                     (decimal)50,
-                    "Short"
+                    ExposureType.Short
                 };
                 yield return new object[]
                 {
@@ -200,7 +201,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                         TransactionType.Sell, 
                         (decimal)100),
                     (decimal)50,
-                    "Short"
+                    ExposureType.Short
                 };
                 yield return new object[]
                 {
@@ -210,7 +211,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                         TransactionType.Sell, 
                         (decimal)100),
                     (decimal)150,
-                    "Short"
+                    ExposureType.Short
                 };
                 yield return new object[]
                 {
@@ -220,7 +221,7 @@ namespace TradeTracker.Domain.UnitTests.Entities
                         TransactionType.Sell, 
                         (decimal)50),
                     (decimal)50,
-                    "Long"
+                    ExposureType.Long
                 };
             }
         }

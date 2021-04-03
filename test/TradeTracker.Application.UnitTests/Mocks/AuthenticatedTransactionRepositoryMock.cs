@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Moq;
-using TradeTracker.Application.Interfaces.Persistence.Transactions;
-using TradeTracker.Application.ResourceParameters.Unpaged;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
+using TradeTracker.Application.Common.Models.Resources.Parameters.Transactions;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 
@@ -18,6 +18,8 @@ namespace TradeTracker.Application.UnitTests.Mocks
                 { 0, Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547") },
                 { 1, Guid.Parse("36a3afa2-7edf-413a-925e-832fb2f3c529") }
             };
+
+            var currentUserAccessKey = userAccessKeys[0];
 
             var transactions = new List<Transaction>()
             {
@@ -85,6 +87,7 @@ namespace TradeTracker.Application.UnitTests.Mocks
                 .ReturnsAsync((Guid transactionId) => 
                 {
                     return transactions
+                        .Where(t => t.AccessKey == currentUserAccessKey)
                         .FirstOrDefault(t => t.TransactionId == transactionId);
                 });
             
@@ -93,6 +96,7 @@ namespace TradeTracker.Application.UnitTests.Mocks
                 .ReturnsAsync((IEnumerable<Guid> ids) =>
                 {
                     return transactions
+                        .Where(t => t.AccessKey == currentUserAccessKey)
                         .Where(t => ids.Contains(t.TransactionId))
                         .ToList();
                 });
@@ -101,13 +105,17 @@ namespace TradeTracker.Application.UnitTests.Mocks
                 .Setup(repo => repo.GetUnpagedResponseAsync(It.IsAny<UnpagedTransactionsResourceParameters>()))
                 .ReturnsAsync((UnpagedTransactionsResourceParameters parameters) =>
                 {
-                    return transactions.ToList();
+                    return transactions
+                        .Where(t => t.AccessKey == currentUserAccessKey)
+                        .ToList();
                 });
             
             mockTransactionRepository
                 .Setup(repo => repo.AddAsync(It.IsAny<Transaction>()))
                 .ReturnsAsync((Transaction transaction) =>
                 {
+                    transaction.AccessKey = currentUserAccessKey;
+
                     transactions.Add(transaction);
                     return transaction;
                 });
@@ -116,6 +124,14 @@ namespace TradeTracker.Application.UnitTests.Mocks
                 .Setup(repo => repo.AddRangeAsync(It.IsAny<IEnumerable<Transaction>>()))
                 .ReturnsAsync((IEnumerable<Transaction> newTransactions) =>
                 {
+                    transactions = transactions
+                        .Select(transaction => 
+                        {
+                            transaction.AccessKey = currentUserAccessKey;
+                            return transaction;
+                        })
+                        .ToList();
+
                     transactions.AddRange(newTransactions);
                     return newTransactions;
                 });

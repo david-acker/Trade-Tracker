@@ -3,28 +3,26 @@ using MediatR;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Interfaces.Persistence.Transactions;
-using TradeTracker.Application.Models.Pagination;
-using TradeTracker.Application.Requests;
-using TradeTracker.Application.ResourceParameters;
-using TradeTracker.Application.ResourceParameters.Paged;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
+using TradeTracker.Application.Common.Models.Resources.Parameters.Transactions;
+using TradeTracker.Application.Common.Models.Resources.Responses;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
     public class GetTransactionsQueryHandler : 
-        ValidatableRequestHandler<GetTransactionsQuery>,
+        ValidatableRequestBehavior<GetTransactionsQuery>,
         IRequestHandler<GetTransactionsQuery, PagedTransactionsBaseDto>
     {
-        private readonly IMapper _mapper;
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
+        private readonly IMapper _mapper;
         public GetTransactionsQueryHandler(
-            IMapper mapper, 
-            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
+            IMapper mapper)
         {
-            _mapper = mapper;
             _authenticatedTransactionRepository = authenticatedTransactionRepository;
+            _mapper = mapper;
         }
 
         public async Task<PagedTransactionsBaseDto> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)

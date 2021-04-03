@@ -2,27 +2,26 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using TradeTracker.Application.Interfaces.Infrastructure;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Interfaces.Persistence.Transactions;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Domain.Enums;
 
 namespace TradeTracker.Infrastructure.Services
 {
     public class PositionTrackingService : IPositionTrackingService
     {
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly ILogger<PositionTrackingService> _logger;
         private readonly IPositionService _positionService;
-        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
 
         public PositionTrackingService(
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
             ILogger<PositionTrackingService> logger, 
-            IPositionService positionService, 
-            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
+            IPositionService positionService)
         {
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
             _logger = logger;
             _positionService = positionService;
-            _authenticatedTransactionRepository = authenticatedTransactionRepository;
         }
 
         public async Task RefreshAfterCreation(Guid accessKey, Guid transactionId)

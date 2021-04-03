@@ -2,34 +2,29 @@ using AutoMapper;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Exceptions;
-using TradeTracker.Application.Interfaces;
-using TradeTracker.Application.Interfaces.Infrastructure;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Interfaces.Persistence.Positions;
-using TradeTracker.Application.Requests;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Exceptions;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces.Persistence.Positions;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
 {
     public class GetPositionQueryHandler : 
-        ValidatableRequestHandler<GetPositionQuery>,
+        ValidatableRequestBehavior<GetPositionQuery>,
         IRequestHandler<GetPositionQuery, PositionForReturnDto>
     {
-        private readonly ILoggedInUserService _loggedInUserService;   
-        private readonly IMapper _mapper;
         private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
+        private readonly IMapper _mapper;
         private readonly IPositionService _positionService;
 
         public GetPositionQueryHandler(
-            ILoggedInUserService loggedInUserService,
-            IMapper mapper,
             IAuthenticatedPositionRepository authenticatedPositionRepository,
+            IMapper mapper,
             IPositionService positionService)
         {
-            _loggedInUserService = loggedInUserService;
-            _mapper = mapper;
             _authenticatedPositionRepository = authenticatedPositionRepository;
+            _mapper = mapper;
             _positionService = positionService;
         }
 

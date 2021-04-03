@@ -2,9 +2,9 @@ using AutoMapper;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Exceptions;
-using TradeTracker.Application.Interfaces.Persistence.Transactions;
-using TradeTracker.Application.Requests;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Exceptions;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 using TradeTracker.Domain.Events;
@@ -12,17 +12,18 @@ using TradeTracker.Domain.Events;
 namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction
 {
     public class UpdateTransactionCommandHandler : 
-        ValidatableRequestHandler<UpdateTransactionCommand>,
+        ValidatableRequestBehavior<UpdateTransactionCommand>,
         IRequestHandler<UpdateTransactionCommand>
     {
-        private readonly IMapper _mapper;
+       
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
+         private readonly IMapper _mapper;
         public UpdateTransactionCommandHandler(
-            IMapper mapper, 
-            IAuthenticatedTransactionRepository authenticatedTransactionRepository)
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
+            IMapper mapper)
         {
-            _mapper = mapper;
             _authenticatedTransactionRepository = authenticatedTransactionRepository;
+            _mapper = mapper;
         }
 
         public async Task<Unit> Handle(UpdateTransactionCommand request, CancellationToken cancellationToken)

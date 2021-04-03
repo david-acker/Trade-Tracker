@@ -7,15 +7,14 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
 using TradeTracker.Api.Helpers;
-using TradeTracker.Api.Models.Pagination;
+using TradeTracker.Application.Common.Models.Resources.Responses;
 using TradeTracker.Application.Features.Positions;
 using TradeTracker.Application.Features.Positions.Queries.GetPosition;
 using TradeTracker.Application.Features.Positions.Queries.GetPositions;
-using TradeTracker.Application.Models.Navigation;
+using TradeTracker.Application.Models.Common.Resources.Responses;
 
 namespace TradeTracker.Api.Controllers
 {
@@ -374,11 +373,11 @@ namespace TradeTracker.Api.Controllers
                         "GetPositions",
                         new
                         {
-                            order = query.Order,
+                            orderBy = query.OrderBy,
                             pageNumber = query.PageNumber - 1,
                             pageSize = query.PageSize,
-                            selection = query.Selection,
-                            exposure = query.Exposure
+                            symbolSelection = query.SymbolSelection,
+                            exposureType = query.ExposureType
                         });
 
                 case ResourceUriType.NextPage:
@@ -386,11 +385,11 @@ namespace TradeTracker.Api.Controllers
                         "GetPositions",
                         new
                         {
-                            order = query.Order,
+                            orderBy = query.OrderBy,
                             pageNumber = query.PageNumber + 1,
                             pageSize = query.PageSize,
-                            selection = query.Selection,
-                            exposure = query.Exposure
+                            symbolSelection = query.SymbolSelection,
+                            exposureType = query.ExposureType
                         });
 
                 case ResourceUriType.CurrentPage:
@@ -399,11 +398,11 @@ namespace TradeTracker.Api.Controllers
                         "GetPositions",
                         new
                         {
-                            order = query.Order,
+                            orderBy = query.OrderBy,
                             pageNumber = query.PageNumber,
                             pageSize = query.PageSize,
-                            selection = query.Selection,
-                            exposure = query.Exposure
+                            symbolSelection = query.SymbolSelection,
+                            exposureType = query.ExposureType
                         });
             }
         }

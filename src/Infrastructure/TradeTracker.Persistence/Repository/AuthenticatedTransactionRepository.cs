@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
+using TradeTracker.Application.Common.Models.Resources.Parameters.Transactions;
+using TradeTracker.Application.Common.Models.Resources.Responses;
 using TradeTracker.Application.Interfaces;
-using TradeTracker.Application.Interfaces.Persistence.Transactions;
-using TradeTracker.Application.Models.Pagination;
-using TradeTracker.Application.ResourceParameters.Paged;
-using TradeTracker.Application.ResourceParameters.Unpaged;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Events;
 

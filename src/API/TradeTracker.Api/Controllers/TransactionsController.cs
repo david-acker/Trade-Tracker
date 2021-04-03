@@ -8,12 +8,11 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
 using TradeTracker.Api.Helpers;
-using TradeTracker.Api.Models.Pagination;
 using TradeTracker.Api.Utilities;
+using TradeTracker.Application.Common.Models.Resources.Responses;
 using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
@@ -23,7 +22,7 @@ using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using TradeTracker.Application.Features.Transactions.Queries.ExportTransactions;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransaction;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
-using TradeTracker.Application.Models.Navigation;
+using TradeTracker.Application.Models.Common.Resources.Responses;
 
 namespace TradeTracker.Api.Controllers
 {
@@ -594,11 +593,11 @@ namespace TradeTracker.Api.Controllers
                         "GetTransactions",
                         new
                         {
-                            order = query.Order,
-                            type = query.Type,
+                            orderBy = query.OrderBy,
+                            transactionType = query.TransactionType,
                             pageNumber = query.PageNumber - 1,
                             pageSize = query.PageSize,
-                            selection = query.Selection,
+                            symbolSelection = query.SymbolSelection,
                             rangeStart = query.RangeStart,
                             rangeEnd = query.RangeEnd
                         });
@@ -608,11 +607,11 @@ namespace TradeTracker.Api.Controllers
                         "GetTransactions",
                         new
                         {
-                            order = query.Order,
-                            type = query.Type,
+                            orderBy = query.OrderBy,
+                            transactionType = query.TransactionType,
                             pageNumber = query.PageNumber + 1,
                             pageSize = query.PageSize,
-                            selection = query.Selection,
+                            symbolSelection = query.SymbolSelection,
                             rangeStart = query.RangeStart,
                             rangeEnd = query.RangeEnd
                         });
@@ -623,11 +622,11 @@ namespace TradeTracker.Api.Controllers
                         "GetTransactions",
                         new
                         {
-                            order = query.Order,
-                            type = query.Type,
+                            orderBy = query.OrderBy,
+                            transactionType = query.TransactionType,
                             pageNumber = query.PageNumber,
                             pageSize = query.PageSize,
-                            selection = query.Selection,
+                            symbolSelection = query.SymbolSelection,
                             rangeStart = query.RangeStart,
                             rangeEnd = query.RangeEnd
                         });
