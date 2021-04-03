@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentValidation;
+using TradeTracker.Application.Common.Helpers;
 using TradeTracker.Application.Common.Validation.Pagination;
 using TradeTracker.Application.Common.Validation.Selection;
-using TradeTracker.Application.Features.Transactions.Helpers;
 using TradeTracker.Application.Features.Transactions.Validators.Querying;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
@@ -13,8 +13,11 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
     {
         public GetTransactionsQueryValidator()
         {
-            RuleFor(q => q.TransactionType)
-                .SetValidator(new TransactionTypeFilterValidator());
+            When(q => !String.IsNullOrWhiteSpace(q.TransactionType), () =>
+            {
+                RuleFor(q => q.TransactionType)
+                    .SetValidator(new TransactionTypeFilterValidator());
+            });
 
             When(q => !String.IsNullOrWhiteSpace(q.OrderBy), () =>
             {
@@ -28,21 +31,21 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
             RuleFor(q => q.PageSize)
                 .SetValidator(new PageSizeValidator());
 
-            RuleFor(q => q.RangeStart)
-                .Must(q => DateTimeRangeHelper.IsValidDateTime(q))
-                    .WithMessage("RangeStart must be a valid DateTime.");
-            
-            RuleFor(q => q.RangeEnd)
-                .Must(q => DateTimeRangeHelper.IsValidDateTime(q))
-                    .WithMessage("RangeEnd must be a valid DateTime.");
-
-            When(q => 
+            When(q => !String.IsNullOrWhiteSpace(q.RangeStart), () =>
             {
-                var rangeValues = new List<string>() { q.RangeStart, q.RangeEnd };
+                RuleFor(q => q.RangeStart)
+                    .Must(q => DateTimeRangeHelper.IsValidDateTime(q))
+                        .WithMessage("RangeStart must be a valid DateTime.");
+            });
 
-                return rangeValues.All(r => DateTimeRangeHelper.IsValidDateTime(r))
-                    && rangeValues.All(r => DateTimeRangeHelper.IsNotDefault(r));
-            }, () =>
+            When(q => !String.IsNullOrWhiteSpace(q.RangeEnd), () =>
+            {
+                RuleFor(q => q.RangeEnd)
+                    .Must(q => DateTimeRangeHelper.IsValidDateTime(q))
+                        .WithMessage("RangeEnd must be a valid DateTime.");
+            });
+
+            When(q => BothRangeValuesProvided(q), () =>
                 {
                     RuleFor(q => q)
                         .Must(q => DateTimeRangeHelper.IsStartBeforeEnd(q.RangeStart, q.RangeEnd))
@@ -54,6 +57,14 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
                 RuleFor(q => q.SymbolSelection)
                     .SetValidator(new SymbolSelectionValidator());
             });
+        }
+
+        private bool BothRangeValuesProvided(GetTransactionsQuery query)
+        {
+            var rangeValues = new List<string>() { query.RangeStart, query.RangeEnd };
+
+            return rangeValues.All(r => DateTimeRangeHelper.IsValidDateTime(r))
+                && rangeValues.All(r => DateTimeRangeHelper.IsNotDefault(r));
         }
     }
 }

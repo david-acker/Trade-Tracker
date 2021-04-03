@@ -10,7 +10,7 @@ namespace TradeTracker.Application.Features.Positions.Querying.Validators
         {
             RuleFor(t => t)
                 .Must(t => EnumHelper.IsNotDefault<ExposureType>(t))
-                    .WithMessage("Cannot filter with an invalid Exposuretype.");
+                    .WithMessage($"ExposureType requires a valid type: {EnumHelper.Display<ExposureType>(1)}");
         }
     }
 }

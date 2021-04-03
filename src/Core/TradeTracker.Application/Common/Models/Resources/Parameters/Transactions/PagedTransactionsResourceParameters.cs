@@ -14,6 +14,6 @@ namespace TradeTracker.Application.Common.Models.Resources.Parameters.Transactio
         public TransactionType TransactionType { get; set; } = TransactionType.NotSpecified;
         public ISymbolSelection SymbolSelection { get; set; } = new NullSymbolSelection();
         public DateTime RangeStart { get; set; } = DateTime.MinValue.Date;
-        public DateTime RangeEnd { get; set; } = DateTime.MaxValue.Date;
+        public DateTime RangeEnd { get; set; } = DateTime.MinValue.Date;
     }
 }

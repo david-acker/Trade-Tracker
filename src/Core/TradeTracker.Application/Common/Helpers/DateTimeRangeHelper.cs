@@ -1,6 +1,6 @@
 using System;
 
-namespace TradeTracker.Application.Features.Transactions.Helpers
+namespace TradeTracker.Application.Common.Helpers
 {
     public static class DateTimeRangeHelper
     {
@@ -15,13 +15,9 @@ namespace TradeTracker.Application.Features.Transactions.Helpers
             var isValidEnd = DateTime.TryParse(endInput, out DateTime end);
 
             if (isValidStart && isValidEnd)
-            {
                 return (start < end);
-            }
             else
-            {
                 return false;
-            }
         }
 
         public static bool IsNotDefault(string input)
@@ -29,14 +25,9 @@ namespace TradeTracker.Application.Features.Transactions.Helpers
             var isValid = DateTime.TryParse(input, out DateTime dateTime);
 
             if (isValid)
-            {
-                return !dateTime.Equals(DateTime.MinValue)
-                    && !dateTime.Equals(DateTime.MaxValue);
-            }
+                return !dateTime.Equals(DateTime.MinValue);
             else
-            {
                 return false;
-            }
         }
     }
 }

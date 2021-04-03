@@ -10,7 +10,7 @@ namespace TradeTracker.Application.Features.Transactions.Validators.Querying
         {
             RuleFor(t => t)
                 .Must(t => EnumHelper.IsNotDefault<TransactionType>(t))
-                    .WithMessage("Cannot filter with an invalid TransactionType.");
+                    .WithMessage($"TransactionType requires a valid type: {EnumHelper.Display<TransactionType>(1)}");
         }
     }
 }

@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using FluentValidation;
 using TradeTracker.Application.Common.Enums;
 using TradeTracker.Application.Common.Helpers;
@@ -8,18 +6,12 @@ namespace TradeTracker.Application.Features.Positions.Querying.Validators
 {
     public class PositionOrderByComponentsValidator : AbstractValidator<string>
     {
-        readonly string[] PositionOrderByFields = new string[]
-        {
-            "symbol",
-            "quantity"
-        };
-
         public PositionOrderByComponentsValidator()
         {
             RuleFor(s => OrderByParser.ExtractField(s, ' '))
                 .Cascade(CascadeMode.Stop)
-                .Must(q => PositionOrderByFields.Contains(q.ToLower()))
-                    .WithMessage($"OrderBy requires a valid field name: {String.Join(", ", PositionOrderByFields)}.");
+                .Must(q => EnumHelper.ToList<PositionOrderByField>(1).Contains(q.ToLower()))
+                    .WithMessage($"OrderBy requires a valid field: {EnumHelper.Display<PositionOrderByField>(1)}.");
         
             RuleFor(s => OrderByParser.ExtractSortTypeString(s, ' '))
                 .Cascade(CascadeMode.Stop)

@@ -5,7 +5,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
     public class GetTransactionsQuery : IRequest<PagedTransactionsBaseDto>
     {
-        public string OrderBy { get; set; } = "DateTime Descending";
+        public string OrderBy { get; set; }
         
         public string TransactionType { get; set; }
 
@@ -14,7 +14,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 
         public string SymbolSelection { get; set; }
         
-        public string RangeStart { get; set; } = DateTime.MinValue.ToString(); 
-        public string RangeEnd { get; set; } = DateTime.MaxValue.ToString();
+        public string RangeStart { get; set; }
+        public string RangeEnd { get; set; }
     }
 }

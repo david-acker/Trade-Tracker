@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TradeTracker.Application.Common.Helpers
 {
@@ -18,6 +20,31 @@ namespace TradeTracker.Application.Common.Helpers
             }
 
             return isSpecified;
+        }
+
+        public static List<string> ToList<TEnum>(
+            int startIndex = 0)
+            where TEnum : struct, Enum
+        {
+            var names = Enum.GetNames(typeof(TEnum)).ToList();
+
+            if (startIndex < 0 || startIndex > names.Count()) { startIndex = 0; }
+
+            var count = names.Count() - startIndex;
+
+            return names.GetRange(startIndex, count);
+        }
+
+        public static string Display<TEnum>(
+            int startIndex = 0,
+            string separator = ", ")
+            where TEnum : struct, Enum
+        {
+            var names = EnumHelper.ToList<TEnum>(startIndex);
+            
+            if (String.IsNullOrEmpty(separator)) { separator = String.Empty; }
+
+            return String.Join(separator, names);
         }
     }
 }
