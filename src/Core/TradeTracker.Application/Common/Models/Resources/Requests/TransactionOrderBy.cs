@@ -12,8 +12,8 @@ namespace TradeTracker.Application.Common.Models.Resources.Requests
         public TransactionOrderBy() { }
         public TransactionOrderBy(string orderByString)
         {
-            Field = OrderByParser.extractField(orderByString);
-            Type = OrderByParser.extractSortType(orderByString);
+            Field = OrderByParser.ExtractField(orderByString);
+            Type = OrderByParser.ExtractSortType(orderByString);
         }    
     }
 }

@@ -18,16 +18,16 @@ namespace TradeTracker.Application.Features.Transactions.Validators.Querying
 
         public TransactionOrderByComponentsValidator()
         {
-            RuleFor(s => OrderByParser.extractField(s, ' '))
+            RuleFor(s => OrderByParser.ExtractField(s, ' '))
                 .Cascade(CascadeMode.Stop)
                 .Must(q => TransactionOrderByFields.Contains(q.ToLower()))
                     .WithMessage($"OrderBy requires a valid Field: {String.Join(", ", TransactionOrderByFields)}.");
         
-            RuleFor(s => OrderByParser.extractSortTypeString(s, ' '))
+            RuleFor(s => OrderByParser.ExtractSortTypeString(s, ' '))
                 .Cascade(CascadeMode.Stop)
                 .IsEnumName(typeof(SortType), caseSensitive: false)
                     .WithMessage("A valid SortOrder is required: ascending, descending.")
-                .Must(t => OrderByHelper.isSortTypeSpecified(t))
+                .Must(t => EnumHelper.IsNotDefault<SortType>(t))
                     .WithMessage("SortOrder cannot be left unspecified.");
         }
     }

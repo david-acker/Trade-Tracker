@@ -34,9 +34,8 @@ namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransacti
         {
             await ValidateRequest(request);
 
-            var transactions = (await _authenticatedTransactionRepository
-                .GetUnpagedResponseAsync(new UnpagedTransactionsResourceParameters()))
-                .OrderBy(x => x.DateTime);
+            var transactions = await _authenticatedTransactionRepository
+                .GetUnpagedResponseAsync(new UnpagedTransactionsResourceParameters());
 
             var transactionsForReturn= _mapper.Map<List<TransactionsForExportDto>>(transactions);
 

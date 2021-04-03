@@ -19,7 +19,6 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
                         .WithMessage("The TransactionIds parameter can not be blank.")
                     .Must(t => t.Count() <= 100)
                         .WithMessage("The number of TransactionIds in a single request may not exceed 100.");
-        
             });
         }
     }

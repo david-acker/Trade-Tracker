@@ -8,7 +8,7 @@ namespace TradeTracker.Application.Common.Validation.Selection
     {
         public SymbolSelectionComponentsValidator()
         {
-            RuleForEach(s => SymbolSelectionParser.extractSymbols(s, ' ', ','))
+            RuleForEach(s => SymbolSelectionParser.ExtractSymbols(s, ' ', ','))
                 .Cascade(CascadeMode.Stop)
                 .NotNull()
                 .NotEmpty()
@@ -22,14 +22,14 @@ namespace TradeTracker.Application.Common.Validation.Selection
                 .Matches(@"^[a-zA-Z0-9.]*$")
                     .WithMessage("SymbolSelection symbols may only include letters, numbers, and periods.");
         
-            RuleFor(s => SymbolSelectionParser.extractSelectionTypeString(s, ' '))
+            RuleFor(s => SymbolSelectionParser.ExtractSelectionTypeString(s, ' '))
                 .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .NotNull()
                     .WithMessage("SymbolSelection requires a SelectionType.")
                 .IsEnumName(typeof(SelectionType), caseSensitive: false)
                     .WithMessage("SymbolSelection requires a valid SelectionType is required: include, exclude.")
-                .Must(t => SymbolSelectionHelper.isSelectionTypeSpecified(t))
+                .Must(t => EnumHelper.IsNotDefault<SelectionType>(t))
                     .WithMessage("SymbolSelection must specify a SelectionType.");
         }
     }

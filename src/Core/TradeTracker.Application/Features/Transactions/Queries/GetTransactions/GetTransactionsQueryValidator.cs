@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using FluentValidation;
 using TradeTracker.Application.Common.Validation.Pagination;
 using TradeTracker.Application.Common.Validation.Selection;
+using TradeTracker.Application.Features.Transactions.Helpers;
 using TradeTracker.Application.Features.Transactions.Validators.Querying;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
@@ -26,18 +29,23 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
                 .SetValidator(new PageSizeValidator());
 
             RuleFor(q => q.RangeStart)
-                .Must(q => isValidDateTime(q))
+                .Must(q => DateTimeRangeHelper.IsValidDateTime(q))
                     .WithMessage("RangeStart must be a valid DateTime.");
             
             RuleFor(q => q.RangeEnd)
-                .Must(q => isValidDateTime(q))
+                .Must(q => DateTimeRangeHelper.IsValidDateTime(q))
                     .WithMessage("RangeEnd must be a valid DateTime.");
 
-            When(q => bothValidRangeValues(q.RangeStart, q.RangeEnd) 
-                && !isDefaultRangeValues(q.RangeStart, q.RangeEnd), () =>
+            When(q => 
+            {
+                var rangeValues = new List<string>() { q.RangeStart, q.RangeEnd };
+
+                return rangeValues.All(r => DateTimeRangeHelper.IsValidDateTime(r))
+                    && rangeValues.All(r => DateTimeRangeHelper.IsNotDefault(r));
+            }, () =>
                 {
                     RuleFor(q => q)
-                        .Must(q => startIsBeforeEnd(q.RangeStart, q.RangeEnd))
+                        .Must(q => DateTimeRangeHelper.IsStartBeforeEnd(q.RangeStart, q.RangeEnd))
                             .WithMessage("RangeStart must occur before RangeEnd.");
                 });
 
@@ -46,44 +54,6 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
                 RuleFor(q => q.SymbolSelection)
                     .SetValidator(new SymbolSelectionValidator());
             });
-        }
-
-        private bool isDefaultRangeValues(string rangeStart, string rangeEnd)
-        {
-            var start = DateTime.Parse(rangeStart);
-            var end = DateTime.Parse(rangeEnd);
-
-            bool isStartDefault = start.Date.Equals(DateTime.MinValue.Date);
-            bool isEndDefault = end.Date.Equals(DateTime.MaxValue.Date);
-
-            bool bothDefault = isStartDefault && isEndDefault;
-
-            return bothDefault;
-        }
-
-        private bool startIsBeforeEnd(string rangeStart, string rangeEnd)
-        {
-            var start = DateTime.Parse(rangeStart);
-            var end = DateTime.Parse(rangeEnd);
-
-            return (start < end);
-        }
-
-        private bool bothValidRangeValues(string rangeStart, string rangeEnd)
-        {
-            bool isStartValid = isValidDateTime(rangeStart);
-            bool isEndValid = isValidDateTime(rangeEnd);
-
-            bool bothValid = isStartValid && isEndValid;
-
-            return bothValid;
-        }
-
-        private bool isValidDateTime(string input)
-        {
-            bool isValid = DateTime.TryParse(input, out _);
-
-            return isValid;
         }
     }
 }

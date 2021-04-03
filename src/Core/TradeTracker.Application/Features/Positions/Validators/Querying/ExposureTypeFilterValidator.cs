@@ -1,6 +1,6 @@
-using System;
-using System.Linq;
 using FluentValidation;
+using TradeTracker.Application.Common.Helpers;
+using TradeTracker.Domain.Enums;
 
 namespace TradeTracker.Application.Features.Positions.Querying.Validators
 {
@@ -9,23 +9,8 @@ namespace TradeTracker.Application.Features.Positions.Querying.Validators
         public ExposureTypeFilterValidator()
         {
             RuleFor(t => t)
-                .Must(t => IsValidExposureTypeForFiltering(t))
+                .Must(t => EnumHelper.IsNotDefault<ExposureType>(t))
                     .WithMessage("Cannot filter with an invalid Exposuretype.");
-        }
-        
-        private bool IsValidExposureTypeForFiltering(string input)
-        {   
-            var validExposureTypes = new string[]
-            { 
-                "long", 
-                "short" 
-            };
-
-            var cleanedInput = input
-                .Trim()
-                .ToLower();
-
-            return validExposureTypes.Contains(cleanedInput);
         }
     }
 }

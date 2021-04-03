@@ -7,7 +7,7 @@ namespace TradeTracker.Application.Common.Helpers
 {
     public static class SymbolSelectionParser
     {
-        public static List<string> extractSymbols(
+        public static List<string> ExtractSymbols(
             string input,
             char selectionSeparator = ' ',
             char symbolSeparator = ',')
@@ -21,7 +21,7 @@ namespace TradeTracker.Application.Common.Helpers
                 .ToList();
         }
 
-        public static string extractSelectionTypeString(
+        public static string ExtractSelectionTypeString(
             string input,
             char selectionSeparator = ' ')
         {
@@ -31,11 +31,11 @@ namespace TradeTracker.Application.Common.Helpers
                 .Trim();
         }
 
-        public static SelectionType extractSelectionType(
+        public static SelectionType ExtractSelectionType(
             string input,
             char selectionSeparator = ' ')
         {
-            var selectionTypeString = extractSelectionTypeString(input, selectionSeparator);
+            var selectionTypeString = ExtractSelectionTypeString(input, selectionSeparator);
         
             SelectionType selectionType = SelectionType.NotSpecified;
             Enum.TryParse(selectionTypeString, true, out selectionType);

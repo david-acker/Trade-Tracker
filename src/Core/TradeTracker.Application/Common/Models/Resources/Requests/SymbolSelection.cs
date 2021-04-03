@@ -19,11 +19,11 @@ namespace TradeTracker.Application.Common.Models.Resources.Requests
         
         public SymbolSelection(string symbolSelectionString)
         {
-            Symbols = SymbolSelectionParser.extractSymbols(symbolSelectionString)
+            Symbols = SymbolSelectionParser.ExtractSymbols(symbolSelectionString)
                 .Select(s => s.ToUpper())
                 .ToList();
                 
-            Type = SymbolSelectionParser.extractSelectionType(symbolSelectionString);
+            Type = SymbolSelectionParser.ExtractSelectionType(symbolSelectionString);
         }    
     }
 }

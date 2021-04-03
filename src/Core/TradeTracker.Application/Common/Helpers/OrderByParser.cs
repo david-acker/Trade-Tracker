@@ -5,7 +5,7 @@ namespace TradeTracker.Application.Common.Helpers
 {
     public static class OrderByParser
     {
-        public static string extractField(
+        public static string ExtractField(
             string input,
             char separator = ' ')
         {
@@ -15,7 +15,7 @@ namespace TradeTracker.Application.Common.Helpers
                 .Trim();
         }
 
-        public static string extractSortTypeString(
+        public static string ExtractSortTypeString(
             string input,
             char separator = ' ')
         {
@@ -25,11 +25,11 @@ namespace TradeTracker.Application.Common.Helpers
                 .Trim();
         }
 
-        public static SortType extractSortType(
+        public static SortType ExtractSortType(
             string input,
             char separator = ' ')
         {
-            var sortTypeString = extractSortTypeString(input, separator);
+            var sortTypeString = ExtractSortTypeString(input, separator);
 
             SortType sortType = SortType.NotSpecified;
             Enum.TryParse(sortTypeString, true, out sortType);

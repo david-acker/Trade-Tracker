@@ -1,6 +1,6 @@
-using System;
-using System.Linq;
 using FluentValidation;
+using TradeTracker.Application.Common.Helpers;
+using TradeTracker.Domain.Enums;
 
 namespace TradeTracker.Application.Features.Transactions.Validators.Querying
 {
@@ -9,23 +9,8 @@ namespace TradeTracker.Application.Features.Transactions.Validators.Querying
         public TransactionTypeFilterValidator()
         {
             RuleFor(t => t)
-                .Must(t => IsValidTransactionTypeForFiltering(t))
+                .Must(t => EnumHelper.IsNotDefault<TransactionType>(t))
                     .WithMessage("Cannot filter with an invalid TransactionType.");
-        }
-        
-        private bool IsValidTransactionTypeForFiltering(string input)
-        {   
-            var validTransactionTypes = new string[]
-            { 
-                "buy", 
-                "sell" 
-            };
-
-            var cleanedInput = input
-                .Trim()
-                .ToLower();
-            
-            return validTransactionTypes.Contains(cleanedInput);
         }
     }
 }

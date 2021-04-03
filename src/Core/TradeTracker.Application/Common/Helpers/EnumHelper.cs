@@ -1,17 +1,17 @@
 using System;
-using TradeTracker.Application.Common.Enums;
 
 namespace TradeTracker.Application.Common.Helpers
 {
-    public static class OrderByHelper
+    public static class EnumHelper
     {
-        public static bool isSortTypeSpecified(string input)
+        public static bool IsNotDefault<TEnum>(string input)
+            where TEnum : struct, Enum
         {
             var isSpecified = false;
 
-            if (Enum.TryParse(input, true, out SortType sortType))
+            if (Enum.TryParse(input.Trim(), true, out TEnum enumType))
             {
-                if (sortType != SortType.NotSpecified)
+                if (!enumType.Equals(default(TEnum)))
                 {
                     isSpecified = true;
                 }

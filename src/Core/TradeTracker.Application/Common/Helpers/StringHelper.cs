@@ -5,7 +5,7 @@ namespace TradeTracker.Application.Common.Helpers
 {
     public static class StringHelper
     {
-        public static bool containsNumberOfElementsAfterSplit(
+        public static bool ContainsNumberOfElementsAfterSplit(
             string input,
             int expectedCount,
             char separator = ' ')
