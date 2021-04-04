@@ -43,7 +43,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
             }
 
             var ifMatchHeader = _eTagService.GetETagFromHeader();
-
+            
             if (!String.IsNullOrWhiteSpace(ifMatchHeader))
             {
                 var transactionForReturn = _mapper.Map<TransactionForReturnDto>(transaction);
