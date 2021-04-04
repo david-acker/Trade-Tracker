@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
-using TradeTracker.Api.Helpers;
+using TradeTracker.Application.Common.Helpers;
 
 namespace TradeTracker.Api.Utilities
 {

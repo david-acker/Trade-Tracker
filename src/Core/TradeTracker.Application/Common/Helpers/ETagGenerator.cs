@@ -3,7 +3,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace TradeTracker.Api.Helpers
+namespace TradeTracker.Application.Common.Helpers
 {
     public static class ETagGenerator
     {
