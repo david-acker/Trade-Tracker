@@ -37,13 +37,11 @@ namespace TradeTracker.Api.Utilities
                             (int)HttpStatusCode.NotModified);
                     }
                 }
-                else
-                {
-                    response.Headers.Add(HeaderNames.ETag, new [] { generatedETag });
-                }
 
-                base.OnActionExecuted(context);
+                response.Headers.Add(HeaderNames.ETag, new [] { generatedETag });
             }
+
+            base.OnActionExecuted(context);
         }
     }
 }
