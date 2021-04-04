@@ -11,7 +11,7 @@ namespace TradeTracker.Api.Utilities
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class,
         AllowMultiple = false)]
-    public class ETagFilter : ActionFilterAttribute
+    public class EntityTagFilter : ActionFilterAttribute
     {
         public override void OnActionExecuted(ActionExecutedContext context)
         {
@@ -23,22 +23,22 @@ namespace TradeTracker.Api.Utilities
             {
                 var result = JsonConvert.SerializeObject(context.Result);
 
-                string generatedETag = ETagGenerator.Generate(result);
+                string generatedEntityTag = EntityTagHelper.Generate(result);
 
                 if (request.Headers.Keys.Contains(HeaderNames.IfNoneMatch))
                 {
-                    var incomingETag = request
+                    var incomingEntityTag = request
                         .Headers[HeaderNames.IfNoneMatch]
                         .ToString();
 
-                    if (incomingETag.Equals(generatedETag))
+                    if (incomingEntityTag.Equals(generatedEntityTag))
                     {
                         context.Result = new StatusCodeResult(
                             (int)HttpStatusCode.NotModified);
                     }
                 }
 
-                response.Headers.Add(HeaderNames.ETag, new [] { generatedETag });
+                response.Headers.Add(HeaderNames.ETag, new [] { generatedEntityTag });
             }
 
             base.OnActionExecuted(context);

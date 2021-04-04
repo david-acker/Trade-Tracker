@@ -6,7 +6,7 @@ namespace TradeTracker.Application.Common.Behaviors
     {
         public static bool IsConflict(object resource, string providedETag)
         {
-            string resourceETag = ETagGenerator.Generate(resource);
+            string resourceETag = EntityTagHelper.Generate(resource);
 
             return !resourceETag.Equals(providedETag);
         }

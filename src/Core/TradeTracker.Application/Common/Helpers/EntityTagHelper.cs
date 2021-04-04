@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace TradeTracker.Application.Common.Helpers
 {
-    public static class ETagGenerator
+    public static class EntityTagHelper
     {
         public static string Generate(object content)
         {
@@ -24,7 +24,7 @@ namespace TradeTracker.Application.Common.Helpers
         {
             byte[] hash = ComputeHash(contentBytes);
 
-            return FormatAsETag(hash);
+            return FormatAsEntityTag(hash);
         }
 
         public static string Generate(string key, object content)
@@ -46,7 +46,7 @@ namespace TradeTracker.Application.Common.Helpers
 
             byte[] hash = ComputeHash(combinedBytes);
             
-            return FormatAsETag(hash);
+            return FormatAsEntityTag(hash);
         }
 
         private static byte[] Combine(params byte[][] input)
@@ -71,7 +71,7 @@ namespace TradeTracker.Application.Common.Helpers
             }
         }
 
-        private static string FormatAsETag(byte[] data)
+        private static string FormatAsEntityTag(byte[] data)
         {
             return BitConverter
                 .ToString(data)
