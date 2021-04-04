@@ -38,7 +38,7 @@ namespace TradeTracker.Api
             services.AddIdentityServices(Configuration);
 
             services.AddScoped<ILoggedInUserService, LoggedInUserService>();
-            services.AddTransient<IETagService, ETagService>();
+            services.AddTransient<IEntityTagService, EntityTagService>();
         
             services.AddControllers(setupAction => setupAction.ConfigureStatusCodes())
                 .AddNewtonsoftJsonSerializationSettings();
