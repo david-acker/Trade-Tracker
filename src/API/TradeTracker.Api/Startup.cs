@@ -11,6 +11,7 @@ using TradeTracker.Api.Extensions.Startup;
 using TradeTracker.Api.Middleware;
 using TradeTracker.Api.Services;
 using TradeTracker.Application;
+using TradeTracker.Application.Common.Interfaces;
 using TradeTracker.Application.Interfaces;
 using TradeTracker.Identity;
 using TradeTracker.Infrastructure;
@@ -29,12 +30,15 @@ namespace TradeTracker.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpContextAccessor();
+
             services.AddApplicationServices();
             services.AddInfrastructureServices(Configuration);
             services.AddPersistenceServices(Configuration);
             services.AddIdentityServices(Configuration);
 
             services.AddScoped<ILoggedInUserService, LoggedInUserService>();
+            services.AddTransient<IEntityTagService, EntityTagService>();
         
             services.AddControllers(setupAction => setupAction.ConfigureStatusCodes())
                 .AddNewtonsoftJsonSerializationSettings();

@@ -6,6 +6,7 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using Moq;
 using TradeTracker.Application.Common.Exceptions;
+using TradeTracker.Application.Common.Interfaces;
 using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Common.Profiles;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
@@ -20,10 +21,16 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
     {
         private readonly IMapper _mapper;
         private readonly Mock<IAuthenticatedTransactionRepository> _mockAuthenticatedTransactionRepository;
+        private readonly Mock<IEntityTagService> _mockEntityTagServiceWithMatchingTag;
+        private readonly Mock<IEntityTagService> _mockEntityTagServiceWithMismatchingTag;
+        private readonly Mock<IEntityTagService> _mockNullEntityTagService;
 
         public UpdateTransactionTests()
         {
             _mockAuthenticatedTransactionRepository = AuthenticatedTransactionRepositoryMock.GetRepository();
+            _mockEntityTagServiceWithMatchingTag = EntityTagServiceMock.GetEntityTagServiceWithMatchingTag();
+            _mockEntityTagServiceWithMismatchingTag = EntityTagServiceMock.GetEntityTagServiceWithMismatchingTag();
+            _mockNullEntityTagService = EntityTagServiceMock.GetNullEntityTagService();
 
             var configurationProvider = new MapperConfiguration(cfg =>
             {
@@ -39,6 +46,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             // Arrange
             var handler = new UpdateTransactionCommandHandler(
                 _mockAuthenticatedTransactionRepository.Object,
+                _mockNullEntityTagService.Object,
                 _mapper);
 
             var transactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49");
@@ -91,7 +99,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
         {
             // Arrange
             var handler = new UpdateTransactionCommandHandler(
-                _mockAuthenticatedTransactionRepository.Object, 
+                _mockAuthenticatedTransactionRepository.Object,
+                _mockNullEntityTagService.Object,
                 _mapper);
 
             var command = new UpdateTransactionCommand();
@@ -110,7 +119,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
         {
             // Arrange
             var handler = new UpdateTransactionCommandHandler(
-                _mockAuthenticatedTransactionRepository.Object, 
+                _mockAuthenticatedTransactionRepository.Object,
+                _mockNullEntityTagService.Object, 
                 _mapper);
 
             var transactionId = Guid.NewGuid();
@@ -140,7 +150,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
         {
             // Arrange
             var handler = new UpdateTransactionCommandHandler(
-                _mockAuthenticatedTransactionRepository.Object, 
+                _mockAuthenticatedTransactionRepository.Object,
+                _mockNullEntityTagService.Object,
                 _mapper);
 
             var transactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49");
@@ -165,6 +176,65 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             // Assert
             _mockAuthenticatedTransactionRepository
                 .Verify(mock => mock.UpdateAsync(It.IsAny<Transaction>()), Times.Once);
-        }        
+        }
+
+        [Fact]
+        public async Task Handle_ExistingTransactionWithMatchingEntityTag_UpdatedInRepo()
+        {
+            // Arrange
+            var handler = new UpdateTransactionCommandHandler(
+                _mockAuthenticatedTransactionRepository.Object,
+                _mockEntityTagServiceWithMatchingTag.Object,
+                _mapper);
+
+            var command = new UpdateTransactionCommand()
+            {
+                TransactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49"),
+                DateTime = new DateTime(2015, 1, 1),
+                Symbol = "XYZ",
+                Type = TransactionType.Buy.ToString(),
+                Quantity = (decimal)10,
+                Notional = (decimal)10,
+                TradePrice = (decimal)1
+            };
+
+            // Act
+            await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            _mockAuthenticatedTransactionRepository
+                .Verify(mock => mock.UpdateAsync(It.IsAny<Transaction>()), Times.Once);
+        }      
+
+        [Fact]
+        public async Task Handle_ExistingTransactionWithMismatchingEntityTag_ThrowsResourceStateConflictException()
+        {
+            // Arrange
+            var handler = new UpdateTransactionCommandHandler(
+                _mockAuthenticatedTransactionRepository.Object,
+                _mockEntityTagServiceWithMismatchingTag.Object,
+                _mapper);
+
+            var transactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49");
+
+            var command = new UpdateTransactionCommand()
+            {
+                TransactionId = transactionId,
+                DateTime = new DateTime(2015, 1, 1),
+                Symbol = "XYZ",
+                Type = TransactionType.Buy.ToString(),
+                Quantity = (decimal)10,
+                Notional = (decimal)10,
+                TradePrice = (decimal)1
+            };
+
+            // Act
+            Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            await act.Should()
+                .ThrowAsync<ResourceStateConflictException>()
+                .WithMessage($"The representation of the {nameof(Transaction)} ({transactionId}) was changed.");
+        }
     }
 }
