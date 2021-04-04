@@ -50,7 +50,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             // Assert
             await act.Should()
                 .ThrowAsync<NotFoundException>()
-                .WithMessage($"Transaction ({transactionId}) is not found.");
+                .WithMessage($"Transaction ({transactionId}) was not found.");
         }
 
         [Fact]

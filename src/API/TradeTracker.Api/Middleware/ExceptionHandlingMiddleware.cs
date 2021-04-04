@@ -44,9 +44,9 @@ namespace TradeTracker.Api.Middleware
                     result = JsonConvert.SerializeObject(validationException.ValidationErrors);
                     break;
 
-                case UnauthorizedException unauthorizedException:
+                case UnauthorizedRequestException unauthorizedRequestException:
                     httpStatusCode = HttpStatusCode.Unauthorized;
-                    result = unauthorizedException.Message;
+                    result = unauthorizedRequestException.Message;
                     break;
 
                 case BadRequestException badRequestException:

@@ -28,7 +28,7 @@ namespace TradeTracker.Application.Common.Helpers
         {
             var names = Enum.GetNames(typeof(TEnum)).ToList();
 
-            if (startIndex < 0 || startIndex > names.Count()) { startIndex = 0; }
+            if (startIndex < 0 || startIndex >= names.Count()) { startIndex = 0; }
 
             var count = names.Count() - startIndex;
 
@@ -42,7 +42,7 @@ namespace TradeTracker.Application.Common.Helpers
         {
             var names = EnumHelper.ToList<TEnum>(startIndex);
             
-            if (String.IsNullOrEmpty(separator)) { separator = String.Empty; }
+            if (separator == null) { separator = ", "; }
 
             return String.Join(separator, names);
         }

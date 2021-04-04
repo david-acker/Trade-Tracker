@@ -16,16 +16,16 @@ namespace TradeTracker.Application.Common.Exceptions
         {
         }
 
-        public static string CreateMessageForSingle(string name, object key)
+        private static string CreateMessageForSingle(string name, object key)
         {
-            return $"{name} ({key}) is not found.";
+            return $"{name} ({key}) was not found.";
         }
 
-        public static string CreateMessageForMultiple(string name, IEnumerable<object> keys)
+        private static string CreateMessageForMultiple(string name, IEnumerable<object> keys)
         {
             if (keys.Count() == 1)
             {
-                return $"{name} ({keys.Single()}) is not found.";
+                return CreateMessageForSingle(name, keys.Single());
             }
             else
             {

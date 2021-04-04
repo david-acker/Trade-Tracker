@@ -10,10 +10,9 @@ namespace TradeTracker.Application.Common.Behaviors
         {
             Type requestType = typeof(TRequest);
 
-            var validator = 
-                (AbstractValidator<TRequest>)Activator.CreateInstance(
-                    Type.GetType($"{requestType.ToString()}Validator")
-                );
+            var validator = (AbstractValidator<TRequest>)Activator
+                .CreateInstance(
+                    Type.GetType($"{requestType.ToString()}Validator"));
 
             var validationResult = await validator.ValidateAsync(request);
             

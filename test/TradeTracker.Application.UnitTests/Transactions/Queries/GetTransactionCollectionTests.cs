@@ -118,7 +118,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
             // Assert
             await act.Should()
                 .ThrowAsync<NotFoundException>()
-                .WithMessage($"Transaction ({transactionIds.Single()}) is not found.");
+                .WithMessage($"Transaction ({transactionIds.Single()}) was not found.");
         }
 
         [Fact]
