@@ -16,8 +16,6 @@ namespace TradeTracker.Api.Extensions.Startup
             services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
             services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
             services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
-            
-            services.AddHttpContextAccessor();
 
             return services;
         }
