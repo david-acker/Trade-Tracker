@@ -49,6 +49,11 @@ namespace TradeTracker.Api.Middleware
                     result = unauthorizedRequestException.Message;
                     break;
 
+                case ResourceStateConflictException resourceStateConflictException:
+                    httpStatusCode = HttpStatusCode.Conflict;
+                    result = resourceStateConflictException.Message;
+                    break;
+
                 case BadRequestException badRequestException:
                     httpStatusCode = HttpStatusCode.BadRequest;
                     result = badRequestException.Message;
