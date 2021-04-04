@@ -1,5 +1,4 @@
 using FluentValidation;
-using TradeTracker.Application.Features.Transactions.Shared.Validators;
 using TradeTracker.Application.Features.Transactions.Validators.Transactions;
 
 namespace TradeTracker.Application.Features.Transactions.Commands
@@ -8,9 +7,6 @@ namespace TradeTracker.Application.Features.Transactions.Commands
     {
         public CreateTransactionCommandBaseValidator ()
         {
-            RuleFor(t => t.AccessKey)
-                .SetValidator(new AccessKeyValidator());
-
             RuleFor(t => t.DateTime)
                 .SetValidator(new DateTimeValidator());
             

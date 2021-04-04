@@ -1,9 +1,8 @@
 using System;
-using TradeTracker.Application.Requests;
 
 namespace TradeTracker.Application.Features.Transactions.Commands
 {
-    public class UpdateTransactionCommandBase : AuthenticatedRequest
+    public class UpdateTransactionCommandBase
     {
         public DateTime DateTime { get; set; }
         public string Symbol { get; set; }

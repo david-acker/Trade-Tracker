@@ -2,38 +2,34 @@ using AutoMapper;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Requests;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Domain.Entities;
-using TradeTracker.Domain.Events;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransaction
 {
     public class CreateTransactionCommandHandler : 
-        ValidatableRequestHandler<CreateTransactionCommand>,
+        ValidatableRequestBehavior<CreateTransactionCommand>,
         IRequestHandler<CreateTransactionCommand, TransactionForReturnDto>
     {
-        private readonly ITransactionRepository _transactionRepository;
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly IMapper _mapper;
 
-        public CreateTransactionCommandHandler(IMapper mapper, ITransactionRepository transactionRepository)
+        public CreateTransactionCommandHandler(
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
+            IMapper mapper)
         {
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
             _mapper = mapper;
-            _transactionRepository = transactionRepository;
         }
 
         public async Task<TransactionForReturnDto> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
-
+            
             var transaction = _mapper.Map<Transaction>(request);
 
-            transaction.DomainEvents.Add(
-                new TransactionCreatedEvent(
-                    accessKey: transaction.AccessKey, 
-                    transactionId: transaction.TransactionId));
-
-            transaction = await _transactionRepository.AddAsync(transaction);
+            transaction = await _authenticatedTransactionRepository.AddAsync(transaction);
 
             return _mapper.Map<TransactionForReturnDto>(transaction);
         }

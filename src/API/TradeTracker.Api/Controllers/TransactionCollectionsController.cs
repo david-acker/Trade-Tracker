@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
 using TradeTracker.Api.Helpers;
@@ -15,7 +14,7 @@ using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
-using TradeTracker.Application.Models.Navigation;
+using TradeTracker.Application.Models.Common.Resources.Responses;
 
 namespace TradeTracker.Api.Controllers
 {
@@ -84,15 +83,6 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(CreateTransactionCollection)} was called.");
 
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            command.Transactions = command.Transactions
-                .Select(transaction => 
-                {
-                    transaction.Authenticate(accessKey);
-
-                    return transaction;
-                });
-
             var transactionCollectionCreated = await _mediator.Send(command);
 
             var idsAsString = String.Join(
@@ -144,15 +134,6 @@ namespace TradeTracker.Api.Controllers
             [FromBody] CreateTransactionCollectionCommand command)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(CreateTransactionCollectionWithLinks)} was called.");
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            command.Transactions = command.Transactions
-                .Select(transaction => 
-                {
-                    transaction.Authenticate(accessKey);
-
-                    return transaction;
-                });
 
             var transactionCollectionCreated = await _mediator.Send(command);
 
@@ -230,13 +211,7 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(GetTransactionCollection)} was called.");
 
-            var query = new GetTransactionCollectionQuery()
-            {
-                TransactionIds = transactionIds
-            };
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
+            var query = new GetTransactionCollectionQuery() { TransactionIds = transactionIds };
 
             var transactionCollection = await _mediator.Send(query);
 
@@ -264,13 +239,7 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(GetTransactionCollectionWithLinks)} was called.");
 
-            var query = new GetTransactionCollectionQuery()
-            {
-                TransactionIds = transactionIds
-            };
-            
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
+            var query = new GetTransactionCollectionQuery() { TransactionIds = transactionIds };
 
             var transactionCollection = await _mediator.Send(query);
 

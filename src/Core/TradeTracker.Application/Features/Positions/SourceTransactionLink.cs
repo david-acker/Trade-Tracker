@@ -8,5 +8,7 @@ namespace TradeTracker.Application.Features.Positions
         public decimal LinkedQuantity { get; set; }
         public decimal TradePrice { get; set; }
         public Guid TransactionId { get; set; }
+
+        public SourceTransactionLink() { }
     }
 }

@@ -1,5 +1,4 @@
 using FluentValidation;
-using TradeTracker.Application.Features.Transactions.Shared.Validators;
 using TradeTracker.Application.Features.Transactions.Validators.Transactions;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
@@ -8,8 +7,6 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
     {
         public GetDetailedPositionQueryValidator()
         {
-            RuleFor(t => t.AccessKey)
-                .SetValidator(new AccessKeyValidator());
 
             RuleFor(t => t.Symbol)
                 .SetValidator(new SymbolValidator());

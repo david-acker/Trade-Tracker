@@ -1,9 +1,8 @@
-using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using TradeTracker.Application.Interfaces.Persistence;
+using TradeTracker.Application.Common.Interfaces.Persistence.Positions;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Persistence.Repositories;
 
 namespace TradeTracker.Persistence
@@ -12,15 +11,21 @@ namespace TradeTracker.Persistence
     {
         public static IServiceCollection AddPersistenceServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<TradeTrackerDbContext>(options =>
+            // services.AddDbContext<TradeTrackerDbContext>(options =>
+            // {
+            //     options.UseSqlite(configuration.GetConnectionString("TradeTrackerSqliteConnectionString"));
+            // });
+
+            services.AddDbContext<TradeTrackerDbContext>(options => 
             {
-                options.UseSqlite(configuration.GetConnectionString("TradeTrackerConnectionString"));
+                options.UseNpgsql(configuration.GetConnectionString("TradeTrackerPostgresConnectionString"));
             });
                 
-            services.AddScoped(typeof(IAsyncRepository<>), typeof(BaseRepository<>));
-
             services.AddScoped<ITransactionRepository, TransactionRepository>();
+            services.AddScoped<IAuthenticatedTransactionRepository, AuthenticatedTransactionRepository>();
+
             services.AddScoped<IPositionRepository, PositionRepository>();
+            services.AddScoped<IAuthenticatedPositionRepository, AuthenticatedPositionRepository>();
 
             return services;    
         }

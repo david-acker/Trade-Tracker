@@ -1,45 +1,44 @@
 using AutoMapper;
 using MediatR;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Exceptions;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Exceptions;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces.Persistence.Positions;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
-using TradeTracker.Application.Interfaces.Infrastructure;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
 {
     public class GetDetailedPositionQueryHandler : 
-        ValidatableRequestHandler<GetDetailedPositionQuery>,
+        ValidatableRequestBehavior<GetDetailedPositionQuery>,
         IRequestHandler<GetDetailedPositionQuery, DetailedPositionForReturnDto>
-    {
+    {     
+        private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly IMapper _mapper;
-        private readonly IPositionRepository _positionRepository;
         private readonly IPositionService _positionService;
-        private readonly ITransactionRepository _transactionRepository;
 
         public GetDetailedPositionQueryHandler(
-            IMapper mapper, 
-            IPositionRepository positionRepository,
-            IPositionService positionService,
-            ITransactionRepository transactionRepository)
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
+            IAuthenticatedPositionRepository authenticatedPositionRepository,
+            IMapper mapper,
+            IPositionService positionService)
         {
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
+            _authenticatedPositionRepository = authenticatedPositionRepository;
             _mapper = mapper;
-            _positionRepository = positionRepository;
             _positionService = positionService;
-            _transactionRepository = transactionRepository;
         }
 
         public async Task<DetailedPositionForReturnDto> Handle(GetDetailedPositionQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
-            var position = await _positionRepository.GetBySymbolAsync(request.AccessKey, request.Symbol);
+            var position = await _authenticatedPositionRepository.GetBySymbolAsync(request.Symbol);
 
             if (position == null)
             {
@@ -50,21 +49,14 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
 
             positionForReturn.AverageCostBasis = await _positionService
                 .CalculateAverageCostBasis(
-                    request.AccessKey, 
                     request.Symbol);
 
             var sourceTransactionMap = await _positionService
                 .CreateSourceTransactionMap(
-                    request.AccessKey,
                     request.Symbol);
 
             var tasks = sourceTransactionMap
-                .Select(async (sourceLink) => 
-                    {
-                        return await CreateFullLink(
-                            request.AccessKey, 
-                            sourceLink);
-                    })
+                .Select(async (sourceLink) => await CreateFullLink(sourceLink))
                 .ToList();
 
             var fullSourceTransactionMap = await Task.WhenAll(tasks);
@@ -75,22 +67,15 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
         }
 
         private async Task<FullSourceTransactionLink> CreateFullLink(
-            Guid accessKey,
             SourceTransactionLink sourceLink)
         {
-            var transaction = await _transactionRepository
-                .GetByIdAsync(accessKey, sourceLink.TransactionId);
+            var transaction = await _authenticatedTransactionRepository
+                .GetByIdAsync(sourceLink.TransactionId);
 
             var transactionWithLinks = 
                 _mapper.Map<TransactionForReturnWithLinksDto>(transaction);
 
-            return new FullSourceTransactionLink()
-            {
-                DateTime = sourceLink.DateTime,
-                LinkedQuantity = sourceLink.LinkedQuantity,
-                TradePrice = sourceLink.TradePrice,
-                Transaction = transactionWithLinks
-            };
+            return new FullSourceTransactionLink(sourceLink, transactionWithLinks);
         } 
     }
 }

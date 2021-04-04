@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using TradeTracker.Application.Models.Navigation;
+using TradeTracker.Application.Models.Common.Resources.Responses;
 
 namespace TradeTracker.Application.Features.Positions
 {

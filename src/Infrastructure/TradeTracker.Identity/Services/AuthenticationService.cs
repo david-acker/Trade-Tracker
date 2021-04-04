@@ -8,25 +8,25 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using TradeTracker.Application.Interfaces.Identity;
-using TradeTracker.Application.Models.Authentication;
+using TradeTracker.Application.Common.Interfaces.Identity;
+using TradeTracker.Application.Models.Common.Authentication;
 using TradeTracker.Identity.Models;
 
 namespace TradeTracker.Identity.Services
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly JwtSettings _jwtSettings;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public AuthenticationService(
-            UserManager<ApplicationUser> userManager,
             IOptions<JwtSettings> jwtSettings,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager)
         {
-            _userManager = userManager;
             _jwtSettings = jwtSettings.Value;
+            _userManager = userManager;
             _signInManager = signInManager;
         }
 

@@ -1,5 +1,5 @@
-using System;
 using FluentValidation;
+using TradeTracker.Application.Common.Helpers;
 using TradeTracker.Domain.Enums;
 
 namespace TradeTracker.Application.Features.Transactions.Validators.Transactions
@@ -14,24 +14,8 @@ namespace TradeTracker.Application.Features.Transactions.Validators.Transactions
                     .WithMessage("TransactionType is required.")
                 .IsEnumName(typeof(TransactionType), caseSensitive: false)
                     .WithMessage("A valid TransactionType is required.")
-                .Must(t => IsTransactionTypeSpecified(t))
+                .Must(t => EnumHelper.IsNotDefault<TransactionType>(t))
                     .WithMessage("TransactionType cannot be left unspecified.");
-        }
-        
-        private bool IsTransactionTypeSpecified(string input)
-        {   
-            var isValid = false;
-
-            TransactionType transactionType;
-            if (Enum.TryParse(input, true, out transactionType))
-            {
-                if (transactionType != TransactionType.NotSpecified)
-                {
-                    isValid = true;
-                }
-            }
-
-            return isValid;
         }
     }
 }

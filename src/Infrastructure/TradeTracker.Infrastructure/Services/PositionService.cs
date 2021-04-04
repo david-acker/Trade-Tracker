@@ -2,42 +2,53 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.Extensions.Logging;
+using TradeTracker.Application.Common.Enums;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces.Persistence.Positions;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
+using TradeTracker.Application.Common.Models.Resources.Parameters.Transactions;
+using TradeTracker.Application.Common.Models.Resources.Requests;
 using TradeTracker.Application.Features.Positions;
-using TradeTracker.Application.Interfaces;
-using TradeTracker.Application.Interfaces.Infrastructure;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Models;
-using TradeTracker.Domain.Common;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
+using TradeTracker.Domain.Extensions;
 
 namespace TradeTracker.Infrastructure.Services
 {
     public class PositionService : IPositionService
     {
+        private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly ILogger<PositionService> _logger;
         private readonly IPositionRepository _positionRepository;
         private readonly ITransactionRepository _transactionRepository;
 
         public PositionService(
+            IAuthenticatedPositionRepository authenticatedPositionRepository,
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
             ILogger<PositionService> logger, 
             IPositionRepository positionRepository,
             ITransactionRepository transactionRepository)
         {
+            _authenticatedPositionRepository = authenticatedPositionRepository;
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
             _logger = logger;
-            _positionRepository = positionRepository;
+            _positionRepository = positionRepository;   
             _transactionRepository = transactionRepository;
         }
 
-        public async Task RefreshForTransaction(Guid accessKey, Guid transactionId)
+        public async Task RefreshForTransaction(
+            Guid accessKey, 
+            Guid transactionId)
         {
             _logger.LogInformation($"PositionService: {nameof(RefreshForTransaction)} was called for {transactionId}.");
 
-            var transaction = await _transactionRepository.GetByIdAsync(accessKey, transactionId);
+            var transaction = await _authenticatedTransactionRepository.GetByIdAsync(transactionId);
 
-            var position = await _positionRepository.GetBySymbolAsync(transaction.AccessKey, transaction.Symbol);
+            var position = await _positionRepository.GetBySymbolAsync(
+                transaction.Symbol, accessKey);
+
             if (position != null)
             {
                 position.Attach(transaction.Type, transaction.Quantity);
@@ -52,14 +63,19 @@ namespace TradeTracker.Infrastructure.Services
             }
         }
 
-        public async Task RefreshForTransactionCollection(Guid accessKey, string symbol, List<Guid> transactionIds)
+        public async Task RefreshForTransactionCollection(
+            string symbol, 
+            List<Guid> transactionIds,
+            Guid accessKey)
         {
             _logger.LogInformation($"PositionService: {nameof(RefreshForTransactionCollection)} was called for {symbol}.");
 
             var transactionCollectionForSymbol = await _transactionRepository
-                .GetTransactionCollectionByIdsAsync(accessKey, transactionIds);
+                .GetTransactionCollectionByIdsAsync(transactionIds, accessKey);
 
-            var position = await _positionRepository.GetBySymbolAsync(accessKey, symbol);
+            var userAccessKey = transactionCollectionForSymbol.FirstOrDefault().AccessKey;
+
+            var position = await _positionRepository.GetBySymbolAsync(symbol, accessKey);
             if (position != null)
             {
                 AttachBatch(position, transactionCollectionForSymbol);
@@ -67,7 +83,7 @@ namespace TradeTracker.Infrastructure.Services
             }
             else
             {
-                position = new Position(accessKey, symbol);
+                position = new Position(userAccessKey, symbol);
 
                 AttachBatch(position, transactionCollectionForSymbol);
                 await HandleNewPosition(position);
@@ -87,7 +103,7 @@ namespace TradeTracker.Infrastructure.Services
 
         public async Task HandleNewPosition(Position position)
         {
-            if (!position.IsClosed)
+            if (position.IsClosed())
             {
                 await AddPosition(position);
             }
@@ -95,7 +111,7 @@ namespace TradeTracker.Infrastructure.Services
 
         public async Task HandleExistingPosition(Position position)
         {
-            if (!position.IsClosed)
+            if (position.IsClosed())
             {
                 await UpdatePosition(position);
             }
@@ -126,11 +142,15 @@ namespace TradeTracker.Infrastructure.Services
             _logger.LogInformation($"PositionService: {nameof(UpdatePosition)} - Updating position for {position.Symbol}.");
         }
 
-        public async Task AttachToPosition(Guid accessKey, string symbol, TransactionType transactionType, decimal quantity)
+        public async Task AttachToPosition(
+            string symbol, 
+            TransactionType transactionType, 
+            decimal quantity,
+            Guid accessKey)
         {
             _logger.LogInformation($"PositionService: {nameof(AttachToPosition)} was called for {symbol}.");
 
-            var position = await _positionRepository.GetBySymbolAsync(accessKey, symbol);
+            var position = await _positionRepository.GetBySymbolAsync(symbol, accessKey);
             if (position != null)
             {
                 position.Attach(transactionType, quantity);
@@ -145,11 +165,15 @@ namespace TradeTracker.Infrastructure.Services
             }
         }
 
-        public async Task DetachFromPosition(Guid accessKey, string symbol, TransactionType transactionType, decimal quantity)
+        public async Task DetachFromPosition(
+            string symbol, 
+            TransactionType transactionType, 
+            decimal quantity, 
+            Guid accessKey)
         {
             _logger.LogInformation($"PositionService: {nameof(DetachFromPosition)} was called for {symbol}.");
 
-            var position = await _positionRepository.GetBySymbolAsync(accessKey, symbol);
+            var position = await _positionRepository.GetBySymbolAsync(symbol, accessKey);
             if (position != null)
             {
                 position.Detach(transactionType, quantity);
@@ -164,19 +188,33 @@ namespace TradeTracker.Infrastructure.Services
             }
         }
 
-        public async Task RecalculateForSymbol(Guid accessKey, string symbol)
+        public async Task RecalculateForSymbol(
+            string symbol, 
+            Guid accessKey)
         {
             _logger.LogInformation($"PositionService: {nameof(RecalculateForSymbol)} was called for {symbol}.");
 
-            var position = await _positionRepository.GetBySymbolAsync(accessKey, symbol);
+            var position = await _positionRepository.GetBySymbolAsync(symbol, accessKey);
             if (position != null)
             {
                 await _positionRepository.DeleteAsync(position);
             }
 
-            var transactionHistory = await _transactionRepository.GetAllTransactionsForSymbolAsync(accessKey, symbol);
+            var parametersForSymbol = new UnpagedTransactionsResourceParameters();
 
-            position = new Position(accessKey, symbol);
+            var symbolSelection = new SymbolSelection(
+                new List<string>() { symbol },
+                SelectionType.Include);
+
+            parametersForSymbol.SymbolSelection = symbolSelection;
+
+            var transactionHistory = await _transactionRepository
+                .GetUnpagedResponseAsync(parametersForSymbol, accessKey);
+
+            position = new Position(
+                accessKey, 
+                symbol);
+
             foreach (var transaction in transactionHistory)
             {
                 position.Attach(transaction.Type, transaction.Quantity);
@@ -185,11 +223,12 @@ namespace TradeTracker.Infrastructure.Services
             await HandleNewPosition(position);
         }
 
-        public async Task<decimal> CalculateAverageCostBasis(Guid accessKey, string symbol)
+        public async Task<decimal> CalculateAverageCostBasis(
+            string symbol)
         {
             _logger.LogInformation($"PositionTrackingService: {nameof(CalculateAverageCostBasis)} was called.");
 
-            var sourceTransactionMap = await CreateSourceTransactionMap(accessKey, symbol);
+            var sourceTransactionMap = await CreateSourceTransactionMap(symbol);
 
             decimal totalNotional = sourceTransactionMap
                 .Sum(p => p.LinkedQuantity * p.TradePrice);
@@ -201,16 +240,24 @@ namespace TradeTracker.Infrastructure.Services
         }
 
         public async Task<IEnumerable<SourceTransactionLink>> CreateSourceTransactionMap(
-            Guid accessKey, string symbol)
+            string symbol)
         {
             _logger.LogInformation($"PositionTrackingService: {nameof(CreateSourceTransactionMap)} was called.");
         
-            var position = await _positionRepository.GetBySymbolAsync(accessKey, symbol);
+            var position = await _authenticatedPositionRepository.GetBySymbolAsync(symbol);
 
-            var transactionsForSymbol = await _transactionRepository
-                .GetAllOpenTransactionsForSymbolAsync(
-                    accessKey,
-                    symbol);
+            var parametersForSymbol = new UnpagedTransactionsResourceParameters();
+
+            var symbolSelection = new SymbolSelection(
+                new List<string>() { symbol },
+                SelectionType.Include);
+
+            parametersForSymbol.SymbolSelection = symbolSelection;
+
+            parametersForSymbol.TransactionType = TransactionType.Buy;
+
+            var transactionsForSymbol = await _authenticatedTransactionRepository
+                .GetUnpagedResponseAsync(parametersForSymbol);
 
             var remainingOpenQuantity = position.Quantity;
 

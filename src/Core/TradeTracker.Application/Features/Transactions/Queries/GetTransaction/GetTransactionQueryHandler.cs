@@ -2,31 +2,33 @@ using AutoMapper;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Exceptions;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Requests;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Exceptions;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
 {
     public class GetTransactionQueryHandler : 
-        ValidatableRequestHandler<GetTransactionQuery>,
+        ValidatableRequestBehavior<GetTransactionQuery>,
         IRequestHandler<GetTransactionQuery, TransactionForReturnDto>
     {
-        private readonly ITransactionRepository _transactionRepository;
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly IMapper _mapper;
-
-        public GetTransactionQueryHandler(IMapper mapper, ITransactionRepository transactionRepository)
+        
+        public GetTransactionQueryHandler(
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
+            IMapper mapper)
         {
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
             _mapper = mapper;
-            _transactionRepository = transactionRepository;
         }
 
         public async Task<TransactionForReturnDto> Handle(GetTransactionQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
-            var transaction = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
+            var transaction = await _authenticatedTransactionRepository.GetByIdAsync(request.TransactionId);
             
             if (transaction == null)
             {

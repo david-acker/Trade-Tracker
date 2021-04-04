@@ -1,33 +1,34 @@
 using AutoMapper;
 using MediatR;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Interfaces.Infrastructure;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Models.Pagination;
-using TradeTracker.Application.Requests;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces.Persistence.Positions;
+using TradeTracker.Application.Common.Models.Resources.Parameters.Positions;
+using TradeTracker.Application.Common.Models.Resources.Responses;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
     public class GetPositionsQueryHandler : 
-        ValidatableRequestHandler<GetPositionsQuery>,
+        ValidatableRequestBehavior<GetPositionsQuery>,
         IRequestHandler<GetPositionsQuery, PagedPositionsBaseDto>
     {
+        
+        private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
         private readonly IMapper _mapper;
-        private readonly IPositionRepository _positionRepository;
         private readonly IPositionService _positionService;
 
         public GetPositionsQueryHandler(
-            IMapper mapper, 
-            IPositionRepository positionRepository,
+            IAuthenticatedPositionRepository authenticatedPositionRepository,
+            IMapper mapper,
             IPositionService positionService)
         {
+            _authenticatedPositionRepository = authenticatedPositionRepository;
             _mapper = mapper;
-            _positionRepository = positionRepository;
             _positionService = positionService;
         }
 
@@ -37,12 +38,12 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 
             var parameters = _mapper.Map<PagedPositionsResourceParameters>(request);
 
-            var pagedPositions = await _positionRepository.GetPagedPositionsAsync(parameters);
+            var pagedPositions = await _authenticatedPositionRepository.GetPagedResponseAsync(parameters);
             
             var positionsForReturn = _mapper.Map<PagedList<Position>, List<PositionForReturnDto>>(pagedPositions);
 
             var positionsForReturnWithSourceInformation = 
-                await AddSourceInformation(positionsForReturn, request.AccessKey);
+                await AddSourceInformation(positionsForReturn);
 
             return new PagedPositionsBaseDto()
             {
@@ -57,19 +58,16 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
         }
         
         private async Task<IEnumerable<PositionForReturnDto>> AddSourceInformation(
-            IEnumerable<PositionForReturnDto> positions, 
-            Guid accessKey)
+            IEnumerable<PositionForReturnDto> positions)
         {
             var tasks = positions.Select(async (position) =>
             {
                 position.AverageCostBasis = await _positionService
                     .CalculateAverageCostBasis(
-                        accessKey,
                         position.Symbol);
 
                 position.SourceTransactionMap = await _positionService
                     .CreateSourceTransactionMap(
-                        accessKey,
                         position.Symbol);
                 
                 return position;

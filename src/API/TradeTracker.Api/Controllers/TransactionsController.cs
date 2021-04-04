@@ -8,12 +8,11 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
 using TradeTracker.Api.Helpers;
-using TradeTracker.Api.Models.Pagination;
 using TradeTracker.Api.Utilities;
+using TradeTracker.Application.Common.Models.Resources.Responses;
 using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
@@ -23,7 +22,7 @@ using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using TradeTracker.Application.Features.Transactions.Queries.ExportTransactions;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransaction;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
-using TradeTracker.Application.Models.Navigation;
+using TradeTracker.Application.Models.Common.Resources.Responses;
 
 namespace TradeTracker.Api.Controllers
 {
@@ -87,9 +86,6 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetPagedTransactions)} was called.");
 
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
-
             var pagedTransactionsBase = await _mediator.Send(query);
 
             Response.Headers.Add("X-Paging-PageNumber", pagedTransactionsBase.CurrentPage.ToString());
@@ -137,9 +133,6 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetPagedTransactionsWithLinks)} was called.");
             
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey); 
-
             var pagedTransactionsBase = await _mediator.Send(query);
 
             var pagedTransactionsWithLinks = new PagedTransactionsWithLinksDto();
@@ -207,9 +200,6 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionsController: {nameof(CreateTransaction)} was called.");
 
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            command.Authenticate(accessKey);
-
             var transactionCreated = await _mediator.Send(command);
 
             return CreatedAtAction(
@@ -248,9 +238,6 @@ namespace TradeTracker.Api.Controllers
             [FromBody] CreateTransactionCommand command)
         {
             _logger.LogInformation($"TransactionsController: {nameof(CreateTransaction)} was called.");
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            command.Authenticate(accessKey);
 
             var transactionCreated = await _mediator.Send(command);
 
@@ -307,13 +294,7 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetTransaction)} was called.");
 
-            var query = new GetTransactionQuery()
-            {
-                TransactionId = transactionId
-            };
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
+            var query = new GetTransactionQuery() { TransactionId = transactionId };
             
             var transaction = await _mediator.Send(query);
 
@@ -341,13 +322,7 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetTransactionWithLinks)} was called.");
 
-            var query = new GetTransactionQuery()
-            {
-                TransactionId = transactionId
-            };
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
+            var query = new GetTransactionQuery() { TransactionId = transactionId };
             
             var transaction = await _mediator.Send(query);
 
@@ -390,9 +365,6 @@ namespace TradeTracker.Api.Controllers
             _logger.LogInformation($"TransactionsController: {nameof(UpdateTransaction)} was called.");
 
             command.TransactionId = transactionId;
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            command.Authenticate(accessKey);
             
             await _mediator.Send(command);
             return NoContent();
@@ -437,9 +409,6 @@ namespace TradeTracker.Api.Controllers
                 PatchDocument = patchDocument
             };
 
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            command.Authenticate(accessKey);
-
             await _mediator.Send(command);
             return NoContent();
         }
@@ -461,13 +430,7 @@ namespace TradeTracker.Api.Controllers
         {
             _logger.LogInformation($"TransactionsController: {nameof(DeleteTransaction)} was called.");
 
-            var command = new DeleteTransactionCommand() 
-            {
-                TransactionId = transactionId
-            };
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            command.Authenticate(accessKey);
+            var command = new DeleteTransactionCommand() { TransactionId = transactionId };
 
             await _mediator.Send(command);
             return NoContent();
@@ -509,9 +472,6 @@ namespace TradeTracker.Api.Controllers
             _logger.LogInformation($"TransactionsController: {nameof(ExportTransactions)} was called.");
 
             var query = new ExportTransactionsQuery();
-
-            var accessKey = Guid.Parse(User.FindFirstValue("AccessKey"));
-            query.Authenticate(accessKey);
 
             var fileExportDto = await _mediator.Send(query);
             return File(
@@ -633,11 +593,11 @@ namespace TradeTracker.Api.Controllers
                         "GetTransactions",
                         new
                         {
-                            order = query.Order,
-                            type = query.Type,
+                            orderBy = query.OrderBy,
+                            transactionType = query.TransactionType,
                             pageNumber = query.PageNumber - 1,
                             pageSize = query.PageSize,
-                            selection = query.Selection,
+                            symbolSelection = query.SymbolSelection,
                             rangeStart = query.RangeStart,
                             rangeEnd = query.RangeEnd
                         });
@@ -647,11 +607,11 @@ namespace TradeTracker.Api.Controllers
                         "GetTransactions",
                         new
                         {
-                            order = query.Order,
-                            type = query.Type,
+                            orderBy = query.OrderBy,
+                            transactionType = query.TransactionType,
                             pageNumber = query.PageNumber + 1,
                             pageSize = query.PageSize,
-                            selection = query.Selection,
+                            symbolSelection = query.SymbolSelection,
                             rangeStart = query.RangeStart,
                             rangeEnd = query.RangeEnd
                         });
@@ -662,11 +622,11 @@ namespace TradeTracker.Api.Controllers
                         "GetTransactions",
                         new
                         {
-                            order = query.Order,
-                            type = query.Type,
+                            orderBy = query.OrderBy,
+                            transactionType = query.TransactionType,
                             pageNumber = query.PageNumber,
                             pageSize = query.PageSize,
-                            selection = query.Selection,
+                            symbolSelection = query.SymbolSelection,
                             rangeStart = query.RangeStart,
                             rangeEnd = query.RangeEnd
                         });

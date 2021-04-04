@@ -3,10 +3,10 @@ using MediatR;
 using Microsoft.AspNetCore.JsonPatch;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Exceptions;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Exceptions;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Requests;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 using TradeTracker.Domain.Events;
@@ -14,21 +14,22 @@ using TradeTracker.Domain.Events;
 namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransaction
 {
     public class PatchTransactionCommandHandler :
-        ValidatableRequestHandler<UpdateTransactionCommand>,
+        ValidatableRequestBehavior<UpdateTransactionCommand>,
         IRequestHandler<PatchTransactionCommand>
     {
-        private readonly ITransactionRepository _transactionRepository;
-        private readonly IMapper _mapper;
-
-        public PatchTransactionCommandHandler(IMapper mapper, ITransactionRepository transactionRepository)
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
+         private readonly IMapper _mapper;
+        public PatchTransactionCommandHandler(
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
+            IMapper mapper)
         {
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
             _mapper = mapper;
-            _transactionRepository = transactionRepository;
         }
 
         public async Task<Unit> Handle(PatchTransactionCommand request, CancellationToken cancellationToken)
         {
-            var existingTransaction = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
+            var existingTransaction = await _authenticatedTransactionRepository.GetByIdAsync(request.TransactionId);
 
             if (existingTransaction == null)
             {
@@ -46,26 +47,25 @@ namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransacti
 
             transaction.DomainEvents.Add(
                 new TransactionModifiedEvent(
-                    accessKey: transaction.AccessKey,
-                    transactionId: transaction.TransactionId, 
-                    symbolBeforeModification: symbolBeforeModification,
-                    typeBeforeModification: typeBeforeModification,
-                    quantityBeforeModification: quantityBeforeModification));
+                    transaction.AccessKey,
+                    transaction.TransactionId, 
+                    symbolBeforeModification,
+                    typeBeforeModification,
+                    quantityBeforeModification));
         
-            await _transactionRepository.UpdateAsync(transaction);
+            await _authenticatedTransactionRepository.UpdateAsync(transaction);
 
             return Unit.Value;
         }
 
-        private UpdateTransactionCommand ApplyPatch(PatchTransactionCommand request, Transaction existingTransaction)
+        private UpdateTransactionCommand ApplyPatch(
+            PatchTransactionCommand request, 
+            Transaction existingTransaction)
         {
             var transactionForPatch = _mapper.Map<UpdateTransactionCommand>(existingTransaction);
 
             JsonPatchDocument<UpdateTransactionCommandBase> patchDocument = request.PatchDocument;
             patchDocument.ApplyTo(transactionForPatch);
-            
-            transactionForPatch.Authenticate(request.AccessKey);
-            transactionForPatch.TransactionId = request.TransactionId;
 
             return transactionForPatch;
         }

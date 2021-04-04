@@ -2,51 +2,36 @@ using AutoMapper;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Exceptions;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Requests;
+using TradeTracker.Application.Common.Exceptions;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Domain.Entities;
-using TradeTracker.Domain.Enums;
-using TradeTracker.Domain.Events;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.DeleteTransaction
 {
-    public class DeleteTransactionCommandHandler : 
-        ValidatableRequestHandler<DeleteTransactionCommand>,
+    public class DeleteTransactionCommandHandler :
         IRequestHandler<DeleteTransactionCommand>
     {
-        private readonly ITransactionRepository _transactionRepository;
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly IMapper _mapper;
         
-        public DeleteTransactionCommandHandler(IMapper mapper, ITransactionRepository transactionRepository)
+        public DeleteTransactionCommandHandler( 
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
+            IMapper mapper)
         {
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
             _mapper = mapper;
-            _transactionRepository = transactionRepository;
         }
 
         public async Task<Unit> Handle(DeleteTransactionCommand request, CancellationToken cancellationToken)
-        {
-            await ValidateRequest(request);
-
-            var transaction = await _transactionRepository.GetByIdAsync(request.AccessKey, request.TransactionId);
+        {   
+            var transaction = await _authenticatedTransactionRepository.GetByIdAsync(request.TransactionId);
 
             if (transaction == null)
             {
                 throw new NotFoundException(nameof(Transaction), request.TransactionId);
             }
 
-            string symbolBeforeDeletion = transaction.Symbol;
-            TransactionType typeBeforeDeletion = transaction.Type;
-            decimal quantityBeforeDeletion = transaction.Quantity;
-
-            transaction.DomainEvents.Add(
-                new TransactionDeletedEvent(
-                    accessKey: transaction.AccessKey, 
-                    symbolBeforeDeletion: symbolBeforeDeletion,
-                    typeBeforeDeletion: typeBeforeDeletion,
-                    quantityBeforeDeletion: quantityBeforeDeletion));
-
-            await _transactionRepository.DeleteAsync(transaction);
+            await _authenticatedTransactionRepository.DeleteAsync(transaction);
 
             return Unit.Value;
         }

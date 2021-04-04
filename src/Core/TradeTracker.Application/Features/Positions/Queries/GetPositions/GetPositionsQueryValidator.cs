@@ -1,9 +1,8 @@
 using System;
 using FluentValidation;
-using TradeTracker.Application.Features.Positions.Validators.Querying;
-using TradeTracker.Application.Features.Transactions.Shared.Validators;
-using TradeTracker.Application.Validators.Pagination;
-using TradeTracker.Application.Validators.Selection;
+using TradeTracker.Application.Common.Validation.Pagination;
+using TradeTracker.Application.Common.Validation.Selection;
+using TradeTracker.Application.Features.Positions.Querying.Validators;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
@@ -11,17 +10,17 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
     {
         public GetPositionsQueryValidator()
         {
-            RuleFor(t => t.AccessKey)
-                .SetValidator(new AccessKeyValidator());
-
-            When(q => !String.IsNullOrWhiteSpace(q.Exposure), () =>
+            When(q => !String.IsNullOrWhiteSpace(q.ExposureType), () =>
             {
-                RuleFor(q => q.Exposure)
+                RuleFor(q => q.ExposureType)
                     .SetValidator(new ExposureTypeFilterValidator());
             });
 
-            RuleFor(q => q.Order)
-                .SetValidator(new PositionOrderValidator());
+            When(q => !String.IsNullOrWhiteSpace(q.OrderBy), () =>
+            {
+                RuleFor(q => q.OrderBy)
+                    .SetValidator(new PositionOrderByValidator());
+            });
 
             RuleFor(q => q.PageNumber)
                 .SetValidator(new PageNumberValidator());
@@ -29,12 +28,11 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
             RuleFor(q => q.PageSize)
                 .SetValidator(new PageSizeValidator());
 
-            When(q => !String.IsNullOrWhiteSpace(q.Selection), () => 
+            When(q => !String.IsNullOrWhiteSpace(q.SymbolSelection), () => 
             {
-                RuleFor(q => q.Selection)
-                    .SetValidator(new SelectionValidator());
+                RuleFor(q => q.SymbolSelection)
+                    .SetValidator(new SymbolSelectionValidator());
             });
-
         }
     }
 }

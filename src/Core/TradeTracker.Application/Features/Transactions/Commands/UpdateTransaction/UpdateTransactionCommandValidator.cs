@@ -1,5 +1,4 @@
 using FluentValidation;
-using TradeTracker.Application.Features.Transactions.Shared.Validators;
 using TradeTracker.Application.Features.Transactions.Validators.Transactions;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction
@@ -8,9 +7,6 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
     {
         public UpdateTransactionCommandValidator()
         {
-            RuleFor(t => t.AccessKey)
-                .SetValidator(new AccessKeyValidator());
-
             RuleFor(t => t.TransactionId)
                 .SetValidator(new TransactionIdValidator());
 

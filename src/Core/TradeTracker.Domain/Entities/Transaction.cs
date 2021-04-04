@@ -8,7 +8,7 @@ using TradeTracker.Domain.Interfaces;
 
 namespace TradeTracker.Domain.Entities
 {
-    public class Transaction : AuditableEntity, IHasDomainEvent
+    public class Transaction : AuditableEntity, IAuthorizableEntity, IHasDomainEvent
     {
         [Key]
         public Guid TransactionId { get; set; } = Guid.NewGuid();

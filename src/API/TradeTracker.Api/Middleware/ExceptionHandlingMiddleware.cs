@@ -1,9 +1,9 @@
-using TradeTracker.Application.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using TradeTracker.Application.Common.Exceptions;
 
 namespace TradeTracker.Api.Middleware
 {
@@ -41,7 +41,12 @@ namespace TradeTracker.Api.Middleware
             {
                 case ValidationException validationException:
                     httpStatusCode = HttpStatusCode.BadRequest;
-                    result = JsonConvert.SerializeObject(validationException.ValdationErrors);
+                    result = JsonConvert.SerializeObject(validationException.ValidationErrors);
+                    break;
+
+                case UnauthorizedRequestException unauthorizedRequestException:
+                    httpStatusCode = HttpStatusCode.Unauthorized;
+                    result = unauthorizedRequestException.Message;
                     break;
 
                 case BadRequestException badRequestException:

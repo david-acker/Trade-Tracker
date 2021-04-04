@@ -5,35 +5,41 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Interfaces.Infrastructure;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Requests;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
+using TradeTracker.Application.Common.Models.Resources.Parameters.Transactions;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransactions
 {
     public class ExportTransactionsQueryHandler : 
-        ValidatableRequestHandler<ExportTransactionsQuery>,
+        ValidatableRequestBehavior<ExportTransactionsQuery>,
         IRequestHandler<ExportTransactionsQuery, TransactionsExportFileVm>
     {
-        private readonly ITransactionRepository _transactionRepository;
-        private readonly IMapper _mapper;
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly ICsvExporter _csvExporter;
+        private readonly IMapper _mapper;
 
-        public ExportTransactionsQueryHandler(IMapper mapper, ITransactionRepository transactionRepository, ICsvExporter csvExporter)
+        public ExportTransactionsQueryHandler(
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
+            ICsvExporter csvExporter,
+            IMapper mapper)
         {
-            _mapper = mapper;
-            _transactionRepository = transactionRepository;
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
             _csvExporter = csvExporter;
+            _mapper = mapper;
         }
 
         public async Task<TransactionsExportFileVm> Handle(ExportTransactionsQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
-            var allTransactions = _mapper.Map<List<TransactionsForExportDto>>(
-                (await _transactionRepository.ListAllAsync(request.AccessKey)).OrderBy(x => x.DateTime));
+            var transactions = await _authenticatedTransactionRepository
+                .GetUnpagedResponseAsync(new UnpagedTransactionsResourceParameters());
 
-            var fileData = _csvExporter.ExportTransactionsToCsv(allTransactions);
+            var transactionsForReturn= _mapper.Map<List<TransactionsForExportDto>>(transactions);
+
+            var fileData = _csvExporter.ExportTransactionsToCsv(transactionsForReturn);
 
             var transactionExportFileDto = new TransactionsExportFileVm() 
             { 

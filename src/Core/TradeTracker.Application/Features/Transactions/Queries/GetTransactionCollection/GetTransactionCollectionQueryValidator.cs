@@ -1,6 +1,5 @@
 using System.Linq;
 using FluentValidation;
-using TradeTracker.Application.Features.Transactions.Shared.Validators;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection
 {
@@ -8,9 +7,6 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
     {
         public GetTransactionCollectionQueryValidator()
         {
-            RuleFor(t => t.AccessKey)
-                .SetValidator(new AccessKeyValidator());
-
             RuleFor(t => t.TransactionIds)
                 .NotNull()
                 .NotEmpty()
@@ -23,7 +19,6 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
                         .WithMessage("The TransactionIds parameter can not be blank.")
                     .Must(t => t.Count() <= 100)
                         .WithMessage("The number of TransactionIds in a single request may not exceed 100.");
-        
             });
         }
     }

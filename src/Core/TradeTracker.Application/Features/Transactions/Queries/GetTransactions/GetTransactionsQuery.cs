@@ -1,21 +1,20 @@
 using System;
 using MediatR;
-using TradeTracker.Application.Requests;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionsQuery : AuthenticatedRequest, IRequest<PagedTransactionsBaseDto>
+    public class GetTransactionsQuery : IRequest<PagedTransactionsBaseDto>
     {
-        public string Order { get; set; } = "DateTime Descending";
+        public string OrderBy { get; set; }
         
-        public string Type { get; set; }
+        public string TransactionType { get; set; }
 
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 25;
 
-        public string Selection { get; set; }
+        public string SymbolSelection { get; set; }
         
-        public string RangeStart { get; set; } = DateTime.MinValue.ToString(); 
-        public string RangeEnd { get; set; } = DateTime.MaxValue.ToString();
+        public string RangeStart { get; set; }
+        public string RangeEnd { get; set; }
     }
 }

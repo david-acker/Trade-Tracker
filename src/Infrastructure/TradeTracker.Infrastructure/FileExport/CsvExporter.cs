@@ -2,8 +2,8 @@ using CsvHelper;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
 using TradeTracker.Application.Features.Transactions.Queries.ExportTransactions;
-using TradeTracker.Application.Interfaces.Infrastructure;
 
 namespace TradeTracker.Infrastructure
 {

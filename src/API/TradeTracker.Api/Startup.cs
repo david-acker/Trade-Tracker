@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using TradeTracker.Api.Extensions.Setup;
+using TradeTracker.Api.Extensions.Startup;
 using TradeTracker.Api.Middleware;
 using TradeTracker.Api.Services;
 using TradeTracker.Application;

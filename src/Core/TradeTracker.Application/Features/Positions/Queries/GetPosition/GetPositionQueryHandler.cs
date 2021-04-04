@@ -2,29 +2,29 @@ using AutoMapper;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Exceptions;
-using TradeTracker.Application.Interfaces.Infrastructure;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Requests;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Exceptions;
+using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces.Persistence.Positions;
 using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
 {
     public class GetPositionQueryHandler : 
-        ValidatableRequestHandler<GetPositionQuery>,
+        ValidatableRequestBehavior<GetPositionQuery>,
         IRequestHandler<GetPositionQuery, PositionForReturnDto>
     {
+        private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
         private readonly IMapper _mapper;
-        private readonly IPositionRepository _positionRepository;
         private readonly IPositionService _positionService;
 
         public GetPositionQueryHandler(
-            IMapper mapper, 
-            IPositionRepository positionRepository,
+            IAuthenticatedPositionRepository authenticatedPositionRepository,
+            IMapper mapper,
             IPositionService positionService)
         {
+            _authenticatedPositionRepository = authenticatedPositionRepository;
             _mapper = mapper;
-            _positionRepository = positionRepository;
             _positionService = positionService;
         }
 
@@ -32,7 +32,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
         {
             await ValidateRequest(request);
 
-            var position = await _positionRepository.GetBySymbolAsync(request.AccessKey, request.Symbol);
+            var position = await _authenticatedPositionRepository.GetBySymbolAsync(request.Symbol);
 
             if (position == null)
             {
@@ -42,13 +42,11 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
             var positionForReturn = _mapper.Map<PositionForReturnDto>(position);
 
             positionForReturn.AverageCostBasis = await _positionService
-                .CalculateAverageCostBasis(
-                    request.AccessKey, 
+                .CalculateAverageCostBasis( 
                     request.Symbol);
 
             positionForReturn.SourceTransactionMap = await _positionService
                 .CreateSourceTransactionMap(
-                    request.AccessKey,
                     request.Symbol);
 
             return positionForReturn;

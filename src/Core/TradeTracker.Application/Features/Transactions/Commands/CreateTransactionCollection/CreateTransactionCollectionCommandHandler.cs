@@ -1,27 +1,27 @@
 using AutoMapper;
 using MediatR;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TradeTracker.Application.Interfaces.Persistence;
-using TradeTracker.Application.Requests;
+using TradeTracker.Application.Common.Behaviors;
+using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Domain.Entities;
-using TradeTracker.Domain.Events;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection
 {
     public class CreateTransactionCollectionCommandHandler :
-        ValidatableRequestHandler<CreateTransactionCollectionCommand>,
+        ValidatableRequestBehavior<CreateTransactionCollectionCommand>,
         IRequestHandler<CreateTransactionCollectionCommand, IEnumerable<TransactionForReturnDto>>
     {
-        private readonly ITransactionRepository _transactionRepository;
+        private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly IMapper _mapper;
-
-        public CreateTransactionCollectionCommandHandler(IMapper mapper, ITransactionRepository transactionRepository)
+        
+        public CreateTransactionCollectionCommandHandler(
+            IAuthenticatedTransactionRepository authenticatedTransactionRepository,
+            IMapper mapper)
         {
+            _authenticatedTransactionRepository = authenticatedTransactionRepository;
             _mapper = mapper;
-            _transactionRepository = transactionRepository;
         }
 
         public async Task<IEnumerable<TransactionForReturnDto>> Handle(
@@ -32,11 +32,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
 
             var transactionCollection = _mapper.Map<IEnumerable<Transaction>>(request.Transactions);
 
-            var lastTransaction = transactionCollection.Last();
-            lastTransaction.DomainEvents.Add(
-                new TransactionCollectionCreatedEvent(transactionCollection));
-
-            transactionCollection = await _transactionRepository.AddRangeAsync(transactionCollection);
+            transactionCollection = await _authenticatedTransactionRepository.AddRangeAsync(transactionCollection);
 
             return _mapper.Map<IEnumerable<TransactionForReturnDto>>(transactionCollection);
         }
