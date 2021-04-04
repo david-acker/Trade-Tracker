@@ -2,11 +2,19 @@ using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace TradeTracker.Application.Common.Helpers
 {
     public static class ETagGenerator
     {
+        public static string Generate(object content)
+        {
+            var serializedContent = JsonConvert.SerializeObject(content);
+
+            return Generate(Encoding.UTF8.GetBytes(serializedContent));
+        }
+
         public static string Generate(string content)
         {
             return Generate(Encoding.UTF8.GetBytes(content));
@@ -17,6 +25,13 @@ namespace TradeTracker.Application.Common.Helpers
             byte[] hash = ComputeHash(contentBytes);
 
             return FormatAsETag(hash);
+        }
+
+        public static string Generate(string key, object content)
+        {
+            var serializedContent = JsonConvert.SerializeObject(content);
+            
+            return Generate(key, Encoding.UTF8.GetBytes(serializedContent));
         }
 
         public static string Generate(string key, string content)
