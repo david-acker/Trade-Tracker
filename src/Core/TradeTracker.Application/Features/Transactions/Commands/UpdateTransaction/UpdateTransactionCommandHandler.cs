@@ -50,7 +50,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
 
                 if (ETagComparer.IsConflict(transactionForReturn, ifMatchHeader))
                 {
-                    throw new ResourceStateConflictException($"The representation of the {typeof(Transaction)} ({request.TransactionId}) was changed.");
+                    throw new ResourceStateConflictException(nameof(Transaction), request.TransactionId);
                 }
             }
 
