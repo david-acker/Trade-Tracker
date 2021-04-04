@@ -19,15 +19,15 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
     {
        
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
-        private readonly IETagService _eTagService;
+        private readonly IEntityTagService _entityTagService;
         private readonly IMapper _mapper;
         public UpdateTransactionCommandHandler(
             IAuthenticatedTransactionRepository authenticatedTransactionRepository,
-            IETagService eTagService,
+            IEntityTagService entityTagService,
             IMapper mapper)
         {
             _authenticatedTransactionRepository = authenticatedTransactionRepository;
-            _eTagService = eTagService;
+            _entityTagService = entityTagService;
             _mapper = mapper;
         }
 
@@ -42,8 +42,8 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
                 throw new NotFoundException(nameof(Transaction), request.TransactionId);
             }
 
-            var ifMatchHeader = _eTagService.GetETagFromHeader();
-            
+            var ifMatchHeader = _entityTagService.GetEntityTagFromHeader();
+
             if (!String.IsNullOrWhiteSpace(ifMatchHeader))
             {
                 var transactionForReturn = _mapper.Map<TransactionForReturnDto>(transaction);

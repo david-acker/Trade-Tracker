@@ -5,20 +5,20 @@ using TradeTracker.Application.Common.Interfaces;
 
 namespace TradeTracker.Api.Services
 {
-    public class ETagService : IETagService
+    public class EntityTagService : IEntityTagService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ILogger<ETagService> _logger;
+        private readonly ILogger<EntityTagService> _logger;
 
-        public ETagService(
+        public EntityTagService(
             IHttpContextAccessor httpContextAccessor,
-            ILogger<ETagService> logger)
+            ILogger<EntityTagService> logger)
         {
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
         }
 
-        public string GetETagFromHeader()
+        public string GetEntityTagFromHeader()
         {
             return _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.IfMatch];
         }
