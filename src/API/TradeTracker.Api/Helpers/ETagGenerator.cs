@@ -7,6 +7,23 @@ namespace TradeTracker.Api.Helpers
 {
     public static class ETagGenerator
     {
+        public static string Generate(string content)
+        {
+            return Generate(Encoding.UTF8.GetBytes(content));
+        }
+
+        public static string Generate(byte[] contentBytes)
+        {
+            byte[] hash = ComputeHash(contentBytes);
+
+            return FormatAsETag(hash);
+        }
+
+        public static string Generate(string key, string content)
+        {
+            return Generate(key, Encoding.UTF8.GetBytes(content));
+        }
+
         public static string Generate(string key, byte[] contentBytes)
         {
             byte[] keyBytes = Encoding.UTF8.GetBytes(key);
@@ -16,7 +33,6 @@ namespace TradeTracker.Api.Helpers
             
             return FormatAsETag(hash);
         }
-
 
         private static byte[] Combine(params byte[][] input)
         {
