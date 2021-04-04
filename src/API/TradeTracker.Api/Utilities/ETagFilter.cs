@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
+using TradeTracker.Api.Helpers;
 
 namespace TradeTracker.Api.Utilities
 {
@@ -22,9 +23,7 @@ namespace TradeTracker.Api.Utilities
             {
                 var result = JsonConvert.SerializeObject(context.Result);
 
-                // Will be replaced with a static method containing 
-                // the ETag generation implementation
-                string generatedETag = String.Empty;
+                string generatedETag = ETagGenerator.Generate(result);
 
                 if (request.Headers.Keys.Contains(HeaderNames.IfNoneMatch))
                 {
