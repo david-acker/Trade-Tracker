@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
 using TradeTracker.Api.Helpers;
+using TradeTracker.Api.Utilities;
 using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection;
@@ -198,6 +199,7 @@ namespace TradeTracker.Api.Controllers
         /// GET /api/transactioncollections/{firstTransactionId},{secondTransactionId} 
         /// </remarks>
         /// <response code="200">Returns the requested transactions</response>
+        [EntityTagFilter]
         [HttpGet("{transactionIds}", Name = "GetTransactionCollection")]
         [Produces("application/json", 
             "application/vnd.trade.transactioncollection+json")]

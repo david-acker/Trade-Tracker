@@ -281,6 +281,7 @@ namespace TradeTracker.Api.Controllers
         /// GET /api/transactions/{transactionId} 
         /// </remarks>
         /// <response code="200">Returns the requested transaction</response>
+        [EntityTagFilter]
         [HttpGet("{transactionId}", Name = "GetTransaction")]
         [Produces("application/json",
             "application/vnd.trade.transaction+json")]
