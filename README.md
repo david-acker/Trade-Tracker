@@ -59,7 +59,7 @@ The API documentation using Swagger UI can be viewed here: [API Documentation](h
 * Provides an extension method for registering services with the ASP.NET Core Dependency Injection container.
 
 ### Persistence
-* Contains repositories, services, and EF Core types for the data access implementation&mdash;currently using SQLite.
+* Contains repositories, services, and EF Core types for the data access implementation&mdash;currently using PostgreSQL with [Npgsql](https://github.com/npgsql/npgsql).
 * Provides an extension method for registering services with the ASP.NET Core Dependency Injection container.
 
 ### Web UI
