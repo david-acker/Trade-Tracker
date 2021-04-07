@@ -3,7 +3,6 @@ using Moq;
 using TradeTracker.Application.Common.Helpers;
 using TradeTracker.Application.Common.Interfaces;
 using TradeTracker.Application.Features.Transactions;
-using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 
 namespace TradeTracker.Application.UnitTests.Mocks
@@ -28,9 +27,9 @@ namespace TradeTracker.Application.UnitTests.Mocks
         {
             var mockEntityTagServiceWithMatchingTag = new Mock<IEntityTagService>();
 
-            var transactionForReturn = new TransactionForReturnDto()
+            var transactionForReturn = new TransactionForReturn()
             {
-                TransactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49"),
+                Id = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49"),
                 DateTime = new DateTime(2016, 1, 1),
                 Symbol = "ABC",
                 Type = TransactionType.Buy.ToString(),
@@ -55,9 +54,9 @@ namespace TradeTracker.Application.UnitTests.Mocks
         {
             var mockEntityTagServiceWithMismatchingTag = new Mock<IEntityTagService>();
 
-            var transactionForReturn = new TransactionForReturnDto()
+            var transactionForReturn = new TransactionForReturn()
             {
-                TransactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49"),
+                Id = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49"),
                 DateTime = new DateTime(2016, 1, 1),
                 Symbol = "CBA",
                 Type = TransactionType.Buy.ToString(),
