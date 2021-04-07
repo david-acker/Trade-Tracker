@@ -10,7 +10,7 @@ namespace TradeTracker.Application.Features.Transactions.Validators.Transactions
             RuleFor(t => t)
                 .NotNull()
                 .NotEmpty()
-                    .WithMessage("A valid TransactionId is required.");
+                    .WithMessage("A valid Id is required.");
         }
     }
 }
