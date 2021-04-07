@@ -28,11 +28,11 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
         {
             await ValidateRequest(request);
 
-            var transaction = await _authenticatedTransactionRepository.GetByIdAsync(request.TransactionId);
+            var transaction = await _authenticatedTransactionRepository.GetByIdAsync(request.Id);
             
             if (transaction == null)
             {
-                throw new NotFoundException(nameof(Transaction), request.TransactionId);
+                throw new NotFoundException(nameof(Transaction), request.Id);
             }
             
             var transactionForReturnDto = _mapper.Map<TransactionForReturnDto>(transaction);

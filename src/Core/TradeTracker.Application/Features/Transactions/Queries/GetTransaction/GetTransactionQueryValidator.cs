@@ -7,7 +7,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
     {
         public GetTransactionQueryValidator()
         {
-            RuleFor(t => t.TransactionId)
+            RuleFor(t => t.Id)
                 .SetValidator(new TransactionIdValidator());
         }
     }

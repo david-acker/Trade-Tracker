@@ -32,11 +32,11 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
             await ValidateRequest(request);
 
             var transactionCollection = await _authenticatedTransactionRepository
-                .GetTransactionCollectionByIdsAsync(request.TransactionIds);
+                .GetTransactionCollectionByIdsAsync(request.Ids);
             
-            if (transactionCollection.Count() != request.TransactionIds.Count())
+            if (transactionCollection.Count() != request.Ids.Count())
             {
-                var transactionIdsNotFound = GetTransactionIdsNotFound(transactionCollection, request.TransactionIds);
+                var transactionIdsNotFound = GetTransactionIdsNotFound(transactionCollection, request.Ids);
 
                 throw new NotFoundException(nameof(Transaction), transactionIdsNotFound);
             }
@@ -51,7 +51,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
             IEnumerable<Guid> requestedTransactionIds)
         {
             var idsFound = transactionCollection
-                .Select(t => t.TransactionId)
+                .Select(t => t.Id)
                 .ToList();
             
             var idsNotFound = requestedTransactionIds
