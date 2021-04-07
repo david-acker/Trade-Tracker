@@ -81,7 +81,7 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Accept", 
             "application/json",
             "application/vnd.trade.pagedtransactions+json")]
-        public async Task<ActionResult<IEnumerable<TransactionForReturnDto>>> GetPagedTransactions(
+        public async Task<ActionResult<IEnumerable<TransactionForReturn>>> GetPagedTransactions(
             [FromQuery] GetTransactionsQuery query)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetPagedTransactions)} was called.");
@@ -128,17 +128,17 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Accept", 
             "application/vnd.trade.pagedtransactions.hateoas+json")]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<ActionResult<PagedTransactionsWithLinksDto>> GetPagedTransactionsWithLinks(
+        public async Task<ActionResult<PagedTransactionsWithLinks>> GetPagedTransactionsWithLinks(
             [FromQuery] GetTransactionsQuery query)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetPagedTransactionsWithLinks)} was called.");
             
             var pagedTransactionsBase = await _mediator.Send(query);
 
-            var pagedTransactionsWithLinks = new PagedTransactionsWithLinksDto();
+            var pagedTransactionsWithLinks = new PagedTransactionsWithLinks();
 
             pagedTransactionsWithLinks.Items = _mapper
-            .Map<IEnumerable<TransactionForReturnWithLinksDto>>(pagedTransactionsBase.Items);
+            .Map<IEnumerable<TransactionForReturnWithLinks>>(pagedTransactionsBase.Items);
 
             pagedTransactionsWithLinks.Items = pagedTransactionsWithLinks.Items
                 .Select(transaction =>
@@ -234,7 +234,7 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", 
             "application/vnd.trade.transaction.hateoas+json")]
-        public async Task<ActionResult<TransactionForReturnWithLinksDto>> CreateTransactionWithLinks(
+        public async Task<ActionResult<TransactionForReturnWithLinks>> CreateTransactionWithLinks(
             [FromBody] CreateTransactionCommand command)
         {
             _logger.LogInformation($"TransactionsController: {nameof(CreateTransaction)} was called.");
@@ -242,7 +242,7 @@ namespace TradeTracker.Api.Controllers
             var transactionCreated = await _mediator.Send(command);
 
             var transactionCreatedWithLinks =
-                _mapper.Map<TransactionForReturnWithLinksDto>(transactionCreated); 
+                _mapper.Map<TransactionForReturnWithLinks>(transactionCreated); 
 
             transactionCreatedWithLinks.Links = CreateLinksForTransaction(
                 transactionCreatedWithLinks.Id);
@@ -290,7 +290,7 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Accept", 
             "application/json",
             "application/vnd.trade.transaction+json")]
-        public async Task<ActionResult<TransactionForReturnDto>> GetTransaction(
+        public async Task<ActionResult<TransactionForReturn>> GetTransaction(
             [FromRoute] Guid id)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetTransaction)} was called.");
@@ -318,7 +318,7 @@ namespace TradeTracker.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [RequestHeaderMatchesMediaType("Accept", 
             "application/vnd.trade.transaction.hateoas+json")]
-        public async Task<ActionResult<TransactionForReturnWithLinksDto>> GetTransactionWithLinks(
+        public async Task<ActionResult<TransactionForReturnWithLinks>> GetTransactionWithLinks(
             [FromRoute] Guid id)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetTransactionWithLinks)} was called.");
@@ -327,7 +327,7 @@ namespace TradeTracker.Api.Controllers
             
             var transaction = await _mediator.Send(query);
 
-            var transactionWithLinks = _mapper.Map<TransactionForReturnWithLinksDto>(transaction);
+            var transactionWithLinks = _mapper.Map<TransactionForReturnWithLinks>(transaction);
 
             transactionWithLinks.Links = CreateLinksForTransaction(id);
 
@@ -501,13 +501,13 @@ namespace TradeTracker.Api.Controllers
         }
 
 
-        private IEnumerable<LinkDto> CreateLinksForTransaction(
+        private IEnumerable<Link> CreateLinksForTransaction(
             Guid id)
         {
-            var links = new List<LinkDto>();
+            var links = new List<Link>();
 
             links.Add(
-                new LinkDto(
+                new Link(
                     Url.Link(
                         "GetTransaction", 
                         new { id }),
@@ -515,7 +515,7 @@ namespace TradeTracker.Api.Controllers
                 "GET"));
 
             links.Add(
-                new LinkDto(
+                new Link(
                     Url.Link(
                         "UpdateTransaction",
                         new { id }),
@@ -523,7 +523,7 @@ namespace TradeTracker.Api.Controllers
                     "PUT"));
                 
             links.Add(
-                new LinkDto(
+                new Link(
                     Url.Link(
                         "PatchTransaction",
                         new { id }),
@@ -531,7 +531,7 @@ namespace TradeTracker.Api.Controllers
                     "PATCH"));
 
             links.Add(
-                new LinkDto(
+                new Link(
                     Url.Link(
                         "DeleteTransaction",
                         new { id }),
@@ -542,15 +542,15 @@ namespace TradeTracker.Api.Controllers
         }
 
 
-        private IEnumerable<LinkDto> CreateLinksForTransactions(
+        private IEnumerable<Link> CreateLinksForTransactions(
             GetTransactionsQuery query,
             bool hasNext,
             bool hasPrevious)
         {
-            var links = new List<LinkDto>();
+            var links = new List<Link>();
 
             links.Add(
-                new LinkDto(
+                new Link(
                     CreateTransactionsResourceUrl(
                         query, 
                         ResourceUriType.CurrentPage),
@@ -560,7 +560,7 @@ namespace TradeTracker.Api.Controllers
             if (hasNext)
             {
                 links.Add(
-                    new LinkDto(
+                    new Link(
                         CreateTransactionsResourceUrl(
                             query, 
                             ResourceUriType.NextPage),
@@ -571,7 +571,7 @@ namespace TradeTracker.Api.Controllers
             if (hasPrevious)
             {
                 links.Add(
-                    new LinkDto(
+                    new Link(
                         CreateTransactionsResourceUrl(
                             query, 
                             ResourceUriType.PreviousPage),

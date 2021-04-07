@@ -79,7 +79,7 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Accept", 
             "application/json",
             "application/vnd.trade.transactioncollection+json")]
-        public async Task<ActionResult<IEnumerable<TransactionForReturnDto>>> CreateTransactionCollection(
+        public async Task<ActionResult<IEnumerable<TransactionForReturn>>> CreateTransactionCollection(
             [FromBody] CreateTransactionCollectionCommand command)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(CreateTransactionCollection)} was called.");
@@ -131,7 +131,7 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", 
             "application/vnd.trade.transactioncollection.hateoas+json")]
-        public async Task<ActionResult<TransactionCollectionCreatedWithLinksDto>> CreateTransactionCollectionWithLinks(
+        public async Task<ActionResult<TransactionCollectionCreatedWithLinks>> CreateTransactionCollectionWithLinks(
             [FromBody] CreateTransactionCollectionCommand command)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(CreateTransactionCollectionWithLinks)} was called.");
@@ -139,10 +139,10 @@ namespace TradeTracker.Api.Controllers
             var transactionCollectionCreated = await _mediator.Send(command);
 
             var transactionCollectionCreatedWithLinks = 
-                new TransactionCollectionCreatedWithLinksDto();
+                new TransactionCollectionCreatedWithLinks();
 
             transactionCollectionCreatedWithLinks.Items = _mapper
-                .Map<IEnumerable<TransactionForReturnWithLinksDto>>(
+                .Map<IEnumerable<TransactionForReturnWithLinks>>(
                     transactionCollectionCreated);
 
             transactionCollectionCreatedWithLinks.Items = 
@@ -208,7 +208,7 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Accept", 
             "application/json",
             "application/vnd.trade.transactioncollection+json")]
-        public async Task<ActionResult<IEnumerable<TransactionForReturnDto>>> GetTransactionCollection(
+        public async Task<ActionResult<IEnumerable<TransactionForReturn>>> GetTransactionCollection(
             [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(GetTransactionCollection)} was called.");
@@ -236,7 +236,7 @@ namespace TradeTracker.Api.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Accept", 
             "application/vnd.trade.transactioncollection.hateoas+json")]
-        public async Task<ActionResult<TransactionCollectionWithLinksDto>> GetTransactionCollectionWithLinks(
+        public async Task<ActionResult<TransactionCollectionWithLinks>> GetTransactionCollectionWithLinks(
             [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(GetTransactionCollectionWithLinks)} was called.");
@@ -245,10 +245,10 @@ namespace TradeTracker.Api.Controllers
 
             var transactionCollection = await _mediator.Send(query);
 
-            var transactionCollectionWithLinks = new TransactionCollectionWithLinksDto();
+            var transactionCollectionWithLinks = new TransactionCollectionWithLinks();
 
             transactionCollectionWithLinks.Items = _mapper
-                .Map<IEnumerable<TransactionForReturnWithLinksDto>>(transactionCollection);
+                .Map<IEnumerable<TransactionForReturnWithLinks>>(transactionCollection);
 
             transactionCollectionWithLinks.Items = transactionCollectionWithLinks.Items
                 .Select(transaction => 
@@ -285,13 +285,13 @@ namespace TradeTracker.Api.Controllers
         }
 
 
-        private IEnumerable<LinkDto> CreateLinksForTransaction(
+        private IEnumerable<Link> CreateLinksForTransaction(
             Guid id)
         {
-            var links = new List<LinkDto>();
+            var links = new List<Link>();
 
             links.Add(
-                new LinkDto(
+                new Link(
                     Url.Link(
                         "GetTransaction", 
                         new { id }),
@@ -299,7 +299,7 @@ namespace TradeTracker.Api.Controllers
                 "GET"));
 
             links.Add(
-                new LinkDto(
+                new Link(
                     Url.Link(
                         "UpdateTransaction",
                         new { id }),
@@ -307,7 +307,7 @@ namespace TradeTracker.Api.Controllers
                     "PUT"));
                 
             links.Add(
-                new LinkDto(
+                new Link(
                     Url.Link(
                         "PatchTransaction",
                         new { id }),
@@ -315,7 +315,7 @@ namespace TradeTracker.Api.Controllers
                     "PATCH"));
 
             links.Add(
-                new LinkDto(
+                new Link(
                     Url.Link(
                         "DeleteTransaction",
                         new { id }),
@@ -326,13 +326,13 @@ namespace TradeTracker.Api.Controllers
         }
 
 
-        private IEnumerable<LinkDto> CreateLinksForTransactionCollection(
+        private IEnumerable<Link> CreateLinksForTransactionCollection(
             IEnumerable<Guid> ids)
         {
-            var links = new List<LinkDto>();
+            var links = new List<Link>();
 
             links.Add(
-                new LinkDto(
+                new Link(
                     Url.Link(
                         "GetTransactionCollection",
                         new { ids }),
