@@ -7,7 +7,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
     {
         public UpdateTransactionCommandValidator()
         {
-            RuleFor(t => t.TransactionId)
+            RuleFor(t => t.Id)
                 .SetValidator(new TransactionIdValidator());
 
             RuleFor(t => t.DateTime)
