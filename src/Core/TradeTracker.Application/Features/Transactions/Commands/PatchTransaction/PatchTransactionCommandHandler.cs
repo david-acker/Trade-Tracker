@@ -34,11 +34,11 @@ namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransacti
 
         public async Task<Unit> Handle(PatchTransactionCommand request, CancellationToken cancellationToken)
         {
-            var existingTransaction = await _authenticatedTransactionRepository.GetByIdAsync(request.TransactionId);
+            var existingTransaction = await _authenticatedTransactionRepository.GetByIdAsync(request.Id);
 
             if (existingTransaction == null)
             {
-                throw new NotFoundException(nameof(Transaction), request.TransactionId);
+                throw new NotFoundException(nameof(Transaction), request.Id);
             }
 
             var ifMatchHeader = _entityTagService.GetEntityTagFromHeader();
@@ -49,26 +49,14 @@ namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransacti
 
                 if (ETagComparer.IsConflict(transactionForReturn, ifMatchHeader))
                 {
-                    throw new ResourceStateConflictException($"The representation of the {typeof(Transaction)} ({request.TransactionId}) was changed.");
+                    throw new ResourceStateConflictException($"The representation of the {typeof(Transaction)} ({request.Id}) was changed.");
                 }
-            }
-
-            string symbolBeforeModification = existingTransaction.Symbol;
-            TransactionType typeBeforeModification = existingTransaction.Type;
-            decimal quantityBeforeModification = existingTransaction.Quantity;           
+            }       
 
             var updatedTransactionCommand = ApplyPatch(request, existingTransaction);
             await ValidateRequest(updatedTransactionCommand);
 
             var transaction = _mapper.Map<Transaction>(updatedTransactionCommand);
-
-            transaction.DomainEvents.Add(
-                new TransactionModifiedEvent(
-                    transaction.AccessKey,
-                    transaction.TransactionId, 
-                    symbolBeforeModification,
-                    typeBeforeModification,
-                    quantityBeforeModification));
         
             await _authenticatedTransactionRepository.UpdateAsync(transaction);
 
