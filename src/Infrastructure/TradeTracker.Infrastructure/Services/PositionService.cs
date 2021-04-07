@@ -228,21 +228,21 @@ namespace TradeTracker.Infrastructure.Services
         {
             _logger.LogInformation($"PositionTrackingService: {nameof(CalculateAverageCostBasis)} was called.");
 
-            var sourceTransactionMap = await CreateSourceTransactionMap(symbol);
+            var sourceRelations = await CreateSourceRelations(symbol);
 
-            decimal totalNotional = sourceTransactionMap
+            decimal totalNotional = sourceRelations
                 .Sum(p => p.Quantity * p.TradePrice);
 
-            decimal totalQuantity = sourceTransactionMap
+            decimal totalQuantity = sourceRelations
                 .Sum(p => p.Quantity);
 
             return Math.Round(totalNotional / totalQuantity, 2);
         }
 
-        public async Task<IEnumerable<SourceTransactionLink>> CreateSourceTransactionMap(
+        public async Task<IEnumerable<SourceRelation>> CreateSourceRelations(
             string symbol)
         {
-            _logger.LogInformation($"PositionTrackingService: {nameof(CreateSourceTransactionMap)} was called.");
+            _logger.LogInformation($"PositionTrackingService: {nameof(CreateSourceRelations)} was called.");
         
             var position = await _authenticatedPositionRepository.GetBySymbolAsync(symbol);
 
@@ -263,7 +263,7 @@ namespace TradeTracker.Infrastructure.Services
 
             var remainingOpenQuantity = position.Quantity;
 
-            var sourceTransactionMap = new List<SourceTransactionLink>();
+            var sourceRelations = new List<SourceRelation>();
             
             foreach (var transaction in transactionsForSymbol)
             {
@@ -272,21 +272,21 @@ namespace TradeTracker.Infrastructure.Services
 
                 if (remainingOpenQuantity > quantity)
                 {
-                    sourceTransactionMap.Add(
-                        new SourceTransactionLink(transaction, quantity));
+                    sourceRelations.Add(
+                        new SourceRelation(transaction, quantity));
 
                     remainingOpenQuantity -= quantity;
                 }
                 else
                 {
-                    sourceTransactionMap.Add(
-                        new SourceTransactionLink(transaction, remainingOpenQuantity));
+                    sourceRelations.Add(
+                        new SourceRelation(transaction, remainingOpenQuantity));
 
                     break;
                 }
             }
 
-            return sourceTransactionMap;
+            return sourceRelations;
         }
     }
 }
