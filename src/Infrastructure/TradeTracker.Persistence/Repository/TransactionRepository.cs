@@ -7,6 +7,7 @@ using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Common.Models.Resources.Parameters.Transactions;
 using TradeTracker.Application.Common.Models.Resources.Responses;
 using TradeTracker.Domain.Entities;
+using TradeTracker.Domain.Events;
 using TradeTracker.Persistence.Extensions;
 
 namespace TradeTracker.Persistence.Repositories
@@ -20,11 +21,59 @@ namespace TradeTracker.Persistence.Repositories
         {
         }
 
+        public override async Task<Transaction> AddAsync(Transaction transaction)
+        {
+            transaction.DomainEvents.Add(
+                new TransactionCreatedEvent(transaction));
+            
+            _context.Transactions.Add(transaction);
+            await _context.SaveChangesAsync();
+
+            return transaction;
+        }
+
+        public override async Task<IEnumerable<Transaction>> AddRangeAsync(
+            IEnumerable<Transaction> transactionCollection)
+        {
+            var lastTransaction = transactionCollection.Last();
+            lastTransaction.DomainEvents.Add(
+                new TransactionCollectionCreatedEvent(transactionCollection));
+
+            _context.Transactions.AddRange(transactionCollection);
+            await _context.SaveChangesAsync();
+
+            return transactionCollection;
+        }
+
+        public override async Task UpdateAsync(Transaction transaction)
+        {
+            var originalTransaction = await _context.Transactions
+                .ForAccessKey(transaction.AccessKey)
+                .Where(t => t.Id == transaction.Id)
+                .FirstOrDefaultAsync();
+            
+            transaction.DomainEvents.Add(
+                new TransactionModifiedEvent(originalTransaction));
+        
+            _context.Entry(transaction).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
+        public override async Task DeleteAsync(Transaction transaction)
+        {
+            transaction.DomainEvents.Add(
+                new TransactionDeletedEvent(transaction));
+
+            _context.Transactions.Remove(transaction);
+            await _context.SaveChangesAsync();
+        }
+
         public override async Task<PagedList<Transaction>> GetPagedResponseAsync(
             PagedTransactionsResourceParameters parameters,
             Guid accessKey)
         {
             var query = _context.Transactions
+                .ForAccessKey(accessKey)
                 .ForTransactionType(parameters.TransactionType)
                 .ForSymbolSelection(parameters.SymbolSelection)
                 .ForRangeStart(parameters.RangeStart)
@@ -55,7 +104,7 @@ namespace TradeTracker.Persistence.Repositories
         {
             return await _context.Transactions
                 .ForAccessKey(accessKey)
-                .Where(t => ids.Contains(t.TransactionId))
+                .Where(t => ids.Contains(t.Id))
                 .ToListAsync();
         }
         

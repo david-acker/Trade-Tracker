@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection
 {
-    public class GetTransactionCollectionQuery : IRequest<IEnumerable<TransactionForReturnDto>>
+    public class GetTransactionCollectionQuery : IRequest<IEnumerable<TransactionForReturn>>
     {
-        public IEnumerable<Guid> TransactionIds { get; set; }
+        public IEnumerable<Guid> Ids { get; set; }
     }
 }

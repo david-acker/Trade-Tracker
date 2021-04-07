@@ -31,7 +31,7 @@ namespace TradeTracker.Persistence.Seed.Transactions
 
                 transactions[i] = new Transaction()
                 {
-                    TransactionId = Guid.NewGuid(),
+                    Id = Guid.NewGuid(),
                     AccessKey = accessKey,
                     DateTime = dateTime,
                     Symbol = equitySymbol,

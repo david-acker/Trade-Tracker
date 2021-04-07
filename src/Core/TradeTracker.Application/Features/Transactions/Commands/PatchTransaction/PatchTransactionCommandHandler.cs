@@ -10,8 +10,6 @@ using TradeTracker.Application.Common.Interfaces;
 using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using TradeTracker.Domain.Entities;
-using TradeTracker.Domain.Enums;
-using TradeTracker.Domain.Events;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransaction
 {
@@ -34,41 +32,29 @@ namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransacti
 
         public async Task<Unit> Handle(PatchTransactionCommand request, CancellationToken cancellationToken)
         {
-            var existingTransaction = await _authenticatedTransactionRepository.GetByIdAsync(request.TransactionId);
+            var existingTransaction = await _authenticatedTransactionRepository.GetByIdAsync(request.Id);
 
             if (existingTransaction == null)
             {
-                throw new NotFoundException(nameof(Transaction), request.TransactionId);
+                throw new NotFoundException(nameof(Transaction), request.Id);
             }
 
             var ifMatchHeader = _entityTagService.GetEntityTagFromHeader();
             
             if (!String.IsNullOrWhiteSpace(ifMatchHeader))
             {
-                var transactionForReturn = _mapper.Map<TransactionForReturnDto>(existingTransaction);
+                var transactionForReturn = _mapper.Map<TransactionForReturn>(existingTransaction);
 
                 if (ETagComparer.IsConflict(transactionForReturn, ifMatchHeader))
                 {
-                    throw new ResourceStateConflictException($"The representation of the {typeof(Transaction)} ({request.TransactionId}) was changed.");
+                    throw new ResourceStateConflictException($"The representation of the {typeof(Transaction)} ({request.Id}) was changed.");
                 }
-            }
-
-            string symbolBeforeModification = existingTransaction.Symbol;
-            TransactionType typeBeforeModification = existingTransaction.Type;
-            decimal quantityBeforeModification = existingTransaction.Quantity;           
+            }       
 
             var updatedTransactionCommand = ApplyPatch(request, existingTransaction);
             await ValidateRequest(updatedTransactionCommand);
 
             var transaction = _mapper.Map<Transaction>(updatedTransactionCommand);
-
-            transaction.DomainEvents.Add(
-                new TransactionModifiedEvent(
-                    transaction.AccessKey,
-                    transaction.TransactionId, 
-                    symbolBeforeModification,
-                    typeBeforeModification,
-                    quantityBeforeModification));
         
             await _authenticatedTransactionRepository.UpdateAsync(transaction);
 

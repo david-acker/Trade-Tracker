@@ -11,7 +11,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
 {
     public class GetTransactionQueryHandler : 
         ValidatableRequestBehavior<GetTransactionQuery>,
-        IRequestHandler<GetTransactionQuery, TransactionForReturnDto>
+        IRequestHandler<GetTransactionQuery, TransactionForReturn>
     {
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly IMapper _mapper;
@@ -24,20 +24,20 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransaction
             _mapper = mapper;
         }
 
-        public async Task<TransactionForReturnDto> Handle(GetTransactionQuery request, CancellationToken cancellationToken)
+        public async Task<TransactionForReturn> Handle(GetTransactionQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
-            var transaction = await _authenticatedTransactionRepository.GetByIdAsync(request.TransactionId);
+            var transaction = await _authenticatedTransactionRepository.GetByIdAsync(request.Id);
             
             if (transaction == null)
             {
-                throw new NotFoundException(nameof(Transaction), request.TransactionId);
+                throw new NotFoundException(nameof(Transaction), request.Id);
             }
             
-            var transactionForReturnDto = _mapper.Map<TransactionForReturnDto>(transaction);
+            var transactionForReturn = _mapper.Map<TransactionForReturn>(transaction);
 
-            return transactionForReturnDto;
+            return transactionForReturn;
         }
     }
 }

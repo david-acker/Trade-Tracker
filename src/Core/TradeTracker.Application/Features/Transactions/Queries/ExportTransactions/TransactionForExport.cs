@@ -2,7 +2,7 @@ using System;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransactions
 {
-    public class TransactionsForExportDto
+    public class TransactionForExport
     {
         public Guid TransactionId { get; set; }
         public DateTime DateTime { get; set; }

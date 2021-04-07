@@ -1,10 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using FluentAssertions;
-using TradeTracker.Domain.Common;
 using TradeTracker.Domain.Entities;
-using TradeTracker.Domain.Enums;
 using TradeTracker.Domain.Events;
 using Xunit;
 

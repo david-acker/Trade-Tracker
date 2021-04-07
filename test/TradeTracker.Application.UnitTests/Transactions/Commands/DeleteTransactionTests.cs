@@ -42,7 +42,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
 
             var transactionId = Guid.NewGuid();
             
-            var command = new DeleteTransactionCommand() { TransactionId = transactionId };
+            var command = new DeleteTransactionCommand() { Id = transactionId };
 
             // Act
             Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
@@ -63,11 +63,11 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
 
             var transactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49");
             
-            var command = new DeleteTransactionCommand() { TransactionId = transactionId };
+            var command = new DeleteTransactionCommand() { Id = transactionId };
 
             var deletedTransaction = new Transaction()
             {
-                TransactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49"),
+                Id = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49"),
                 AccessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547"),
                 DateTime = new DateTime(2016, 1, 1),
                 Symbol = "ABC",

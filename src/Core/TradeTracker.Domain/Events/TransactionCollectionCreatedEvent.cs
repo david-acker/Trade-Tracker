@@ -23,7 +23,7 @@ namespace TradeTracker.Domain.Events
                 .GroupBy(t => t.Symbol)
                 .ToDictionary(
                     t => t.Key, 
-                    t => t.Select(i => i.TransactionId)
+                    t => t.Select(i => i.Id)
                           .Distinct()
                           .ToList());
         }

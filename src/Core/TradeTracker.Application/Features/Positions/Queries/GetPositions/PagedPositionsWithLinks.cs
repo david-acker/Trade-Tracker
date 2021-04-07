@@ -4,12 +4,12 @@ using TradeTracker.Application.Models.Common.Resources.Responses;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
-    public class PagedPositionsWithLinksDto
+    public class PagedPositionsWithLinks
     {
         public PaginationMetadata Metadata { get; set; }
 
-        public IEnumerable<PositionForReturnWithLinksDto> Items { get; set; }
+        public IEnumerable<PositionForReturnWithLinks> Items { get; set; }
 
-        public IEnumerable<LinkDto> Links { get; set; }
+        public IEnumerable<Link> Links { get; set; }
     }
 }

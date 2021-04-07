@@ -2,7 +2,7 @@ using System;
 
 namespace TradeTracker.Domain.Common
 {
-    public class AuditableEntity
+    public class AuditableEntity : BaseEntity
     {
         public string CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }

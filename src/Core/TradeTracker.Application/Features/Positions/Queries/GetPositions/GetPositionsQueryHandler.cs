@@ -15,7 +15,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
     public class GetPositionsQueryHandler : 
         ValidatableRequestBehavior<GetPositionsQuery>,
-        IRequestHandler<GetPositionsQuery, PagedPositionsBaseDto>
+        IRequestHandler<GetPositionsQuery, PagedPositionsBase>
     {
         
         private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
@@ -32,7 +32,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
             _positionService = positionService;
         }
 
-        public async Task<PagedPositionsBaseDto> Handle(GetPositionsQuery request, CancellationToken cancellationToken)
+        public async Task<PagedPositionsBase> Handle(GetPositionsQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
@@ -40,12 +40,12 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 
             var pagedPositions = await _authenticatedPositionRepository.GetPagedResponseAsync(parameters);
             
-            var positionsForReturn = _mapper.Map<PagedList<Position>, List<PositionForReturnDto>>(pagedPositions);
+            var positionsForReturn = _mapper.Map<PagedList<Position>, List<PositionForReturn>>(pagedPositions);
 
             var positionsForReturnWithSourceInformation = 
                 await AddSourceInformation(positionsForReturn);
 
-            return new PagedPositionsBaseDto()
+            return new PagedPositionsBase()
             {
                 CurrentPage = pagedPositions.CurrentPage,
                 TotalPages = pagedPositions.TotalPages,
@@ -57,8 +57,8 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
             };
         }
         
-        private async Task<IEnumerable<PositionForReturnDto>> AddSourceInformation(
-            IEnumerable<PositionForReturnDto> positions)
+        private async Task<IEnumerable<PositionForReturn>> AddSourceInformation(
+            IEnumerable<PositionForReturn> positions)
         {
             var tasks = positions.Select(async (position) =>
             {
@@ -66,8 +66,8 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
                     .CalculateAverageCostBasis(
                         position.Symbol);
 
-                position.SourceTransactionMap = await _positionService
-                    .CreateSourceTransactionMap(
+                position.SourceRelations = await _positionService
+                    .CreateSourceRelations(
                         position.Symbol);
                 
                 return position;

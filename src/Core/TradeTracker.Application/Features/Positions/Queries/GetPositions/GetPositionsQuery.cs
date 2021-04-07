@@ -2,7 +2,7 @@ using MediatR;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
-    public class GetPositionsQuery : IRequest<PagedPositionsBaseDto>
+    public class GetPositionsQuery : IRequest<PagedPositionsBase>
     {
         public string OrderBy { get; set; }
         public int PageNumber { get; set; } = 1;

@@ -25,7 +25,7 @@ namespace TradeTracker.Application.UnitTests.Mocks
             {
                 new Transaction()
                 {
-                    TransactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49"),
+                    Id = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49"),
                     AccessKey = userAccessKeys[0],
                     DateTime = new DateTime(2016, 1, 1),
                     Symbol = "ABC",
@@ -36,7 +36,7 @@ namespace TradeTracker.Application.UnitTests.Mocks
                 },
                 new Transaction()
                 {
-                    TransactionId = Guid.Parse("f29b3b88-4ba3-4f4c-b3d4-e5ba823b7bfd"),
+                    Id = Guid.Parse("f29b3b88-4ba3-4f4c-b3d4-e5ba823b7bfd"),
                     AccessKey = userAccessKeys[0],
                     DateTime = new DateTime(2017, 1, 1),
                     Symbol = "XYZ",
@@ -47,7 +47,7 @@ namespace TradeTracker.Application.UnitTests.Mocks
                 },
                 new Transaction()
                 {
-                    TransactionId = Guid.Parse("7aafd62c-7192-4a08-a258-0a95be5bd1a1"),
+                    Id = Guid.Parse("7aafd62c-7192-4a08-a258-0a95be5bd1a1"),
                     AccessKey = userAccessKeys[0],
                     DateTime = new DateTime(2018, 1, 1),
                     Symbol = "ABC",
@@ -58,7 +58,7 @@ namespace TradeTracker.Application.UnitTests.Mocks
                 },
                 new Transaction()
                 {
-                    TransactionId = Guid.Parse("2eb3de2f-7869-41b5-9bfc-3867c844f6e7"),
+                    Id = Guid.Parse("2eb3de2f-7869-41b5-9bfc-3867c844f6e7"),
                     AccessKey = userAccessKeys[1],
                     DateTime = new DateTime(2019, 1, 1),
                     Symbol = "ABC",
@@ -69,7 +69,7 @@ namespace TradeTracker.Application.UnitTests.Mocks
                 },
                 new Transaction()
                 {
-                    TransactionId = Guid.Parse("49f371e5-298c-4aa2-9644-496b8678810e"),
+                    Id = Guid.Parse("49f371e5-298c-4aa2-9644-496b8678810e"),
                     AccessKey = userAccessKeys[1],
                     DateTime = new DateTime(2020, 1, 1),
                     Symbol = "XYZ",
@@ -88,7 +88,7 @@ namespace TradeTracker.Application.UnitTests.Mocks
                 {
                     return transactions
                         .Where(t => t.AccessKey == currentUserAccessKey)
-                        .FirstOrDefault(t => t.TransactionId == transactionId);
+                        .FirstOrDefault(t => t.Id == transactionId);
                 });
             
             mockTransactionRepository
@@ -97,7 +97,7 @@ namespace TradeTracker.Application.UnitTests.Mocks
                 {
                     return transactions
                         .Where(t => t.AccessKey == currentUserAccessKey)
-                        .Where(t => ids.Contains(t.TransactionId))
+                        .Where(t => ids.Contains(t.Id))
                         .ToList();
                 });
             

@@ -13,7 +13,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
     public class GetTransactionsQueryHandler : 
         ValidatableRequestBehavior<GetTransactionsQuery>,
-        IRequestHandler<GetTransactionsQuery, PagedTransactionsBaseDto>
+        IRequestHandler<GetTransactionsQuery, PagedTransactionsBase>
     {
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly IMapper _mapper;
@@ -25,7 +25,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
             _mapper = mapper;
         }
 
-        public async Task<PagedTransactionsBaseDto> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
+        public async Task<PagedTransactionsBase> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
@@ -34,9 +34,9 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
             var pagedTransactions = await _authenticatedTransactionRepository
                 .GetPagedResponseAsync(parameters);
             
-            var transactionsForReturn = _mapper.Map<PagedList<Transaction>, List<TransactionForReturnDto>>(pagedTransactions);
+            var transactionsForReturn = _mapper.Map<PagedList<Transaction>, List<TransactionForReturn>>(pagedTransactions);
 
-            return new PagedTransactionsBaseDto()
+            return new PagedTransactionsBase()
             {
                 CurrentPage = pagedTransactions.CurrentPage,
                 TotalPages = pagedTransactions.TotalPages,

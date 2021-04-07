@@ -15,7 +15,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
 {
     public class GetDetailedPositionQueryHandler : 
         ValidatableRequestBehavior<GetDetailedPositionQuery>,
-        IRequestHandler<GetDetailedPositionQuery, DetailedPositionForReturnDto>
+        IRequestHandler<GetDetailedPositionQuery, DetailedPositionForReturn>
     {     
         private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
@@ -34,7 +34,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
             _positionService = positionService;
         }
 
-        public async Task<DetailedPositionForReturnDto> Handle(GetDetailedPositionQuery request, CancellationToken cancellationToken)
+        public async Task<DetailedPositionForReturn> Handle(GetDetailedPositionQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
@@ -45,37 +45,37 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
                 throw new NotFoundException(nameof(Position), request.Symbol);
             }
             
-            var positionForReturn = _mapper.Map<DetailedPositionForReturnDto>(position);
+            var positionForReturn = _mapper.Map<DetailedPositionForReturn>(position);
 
             positionForReturn.AverageCostBasis = await _positionService
                 .CalculateAverageCostBasis(
                     request.Symbol);
 
-            var sourceTransactionMap = await _positionService
-                .CreateSourceTransactionMap(
+            var sourceRelations = await _positionService
+                .CreateSourceRelations(
                     request.Symbol);
 
-            var tasks = sourceTransactionMap
+            var tasks = sourceRelations
                 .Select(async (sourceLink) => await CreateFullLink(sourceLink))
                 .ToList();
 
-            var fullSourceTransactionMap = await Task.WhenAll(tasks);
+            var fullSourceRelations = await Task.WhenAll(tasks);
 
-            positionForReturn.SourceTransactionMap = fullSourceTransactionMap;
+            positionForReturn.SourceRelations = fullSourceRelations;
 
             return positionForReturn;
         }
 
-        private async Task<FullSourceTransactionLink> CreateFullLink(
-            SourceTransactionLink sourceLink)
+        private async Task<FullSourceRelation> CreateFullLink(
+            SourceRelation sourceLink)
         {
             var transaction = await _authenticatedTransactionRepository
                 .GetByIdAsync(sourceLink.TransactionId);
 
             var transactionWithLinks = 
-                _mapper.Map<TransactionForReturnWithLinksDto>(transaction);
+                _mapper.Map<TransactionForReturnWithLinks>(transaction);
 
-            return new FullSourceTransactionLink(sourceLink, transactionWithLinks);
+            return new FullSourceRelation(sourceLink, transactionWithLinks);
         } 
     }
 }

@@ -2,7 +2,6 @@ using AutoMapper;
 using MediatR;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Common.Behaviors;
@@ -14,7 +13,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransacti
 {
     public class ExportTransactionsQueryHandler : 
         ValidatableRequestBehavior<ExportTransactionsQuery>,
-        IRequestHandler<ExportTransactionsQuery, TransactionsExportFileVm>
+        IRequestHandler<ExportTransactionsQuery, TransactionsForExportFileVm>
     {
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly ICsvExporter _csvExporter;
@@ -30,18 +29,18 @@ namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransacti
             _mapper = mapper;
         }
 
-        public async Task<TransactionsExportFileVm> Handle(ExportTransactionsQuery request, CancellationToken cancellationToken)
+        public async Task<TransactionsForExportFileVm> Handle(ExportTransactionsQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
             var transactions = await _authenticatedTransactionRepository
                 .GetUnpagedResponseAsync(new UnpagedTransactionsResourceParameters());
 
-            var transactionsForReturn= _mapper.Map<List<TransactionsForExportDto>>(transactions);
+            var transactionsForReturn= _mapper.Map<List<TransactionForExport>>(transactions);
 
             var fileData = _csvExporter.ExportTransactionsToCsv(transactionsForReturn);
 
-            var transactionExportFileDto = new TransactionsExportFileVm() 
+            var transactionExportFileDto = new TransactionsForExportFileVm() 
             { 
                 ContentType = "text/csv",
                 Data = fileData, 

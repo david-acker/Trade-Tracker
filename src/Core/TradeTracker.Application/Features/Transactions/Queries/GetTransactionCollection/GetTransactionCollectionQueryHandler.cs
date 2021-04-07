@@ -14,7 +14,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
 {
     public class GetTransactionCollectionQueryHandler :
         ValidatableRequestBehavior<GetTransactionCollectionQuery>,
-        IRequestHandler<GetTransactionCollectionQuery, IEnumerable<TransactionForReturnDto>>
+        IRequestHandler<GetTransactionCollectionQuery, IEnumerable<TransactionForReturn>>
     {
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly IMapper _mapper;
@@ -27,23 +27,23 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<TransactionForReturnDto>> Handle(GetTransactionCollectionQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<TransactionForReturn>> Handle(GetTransactionCollectionQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
             var transactionCollection = await _authenticatedTransactionRepository
-                .GetTransactionCollectionByIdsAsync(request.TransactionIds);
+                .GetTransactionCollectionByIdsAsync(request.Ids);
             
-            if (transactionCollection.Count() != request.TransactionIds.Count())
+            if (transactionCollection.Count() != request.Ids.Count())
             {
-                var transactionIdsNotFound = GetTransactionIdsNotFound(transactionCollection, request.TransactionIds);
+                var transactionIdsNotFound = GetTransactionIdsNotFound(transactionCollection, request.Ids);
 
                 throw new NotFoundException(nameof(Transaction), transactionIdsNotFound);
             }
 
-            var transactionCollectionDto = _mapper.Map<IEnumerable<TransactionForReturnDto>>(transactionCollection);
+            var transactionCollectionForReturn = _mapper.Map<IEnumerable<TransactionForReturn>>(transactionCollection);
 
-            return transactionCollectionDto;
+            return transactionCollectionForReturn;
         }
 
         private List<string> GetTransactionIdsNotFound(
@@ -51,7 +51,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
             IEnumerable<Guid> requestedTransactionIds)
         {
             var idsFound = transactionCollection
-                .Select(t => t.TransactionId)
+                .Select(t => t.Id)
                 .ToList();
             
             var idsNotFound = requestedTransactionIds

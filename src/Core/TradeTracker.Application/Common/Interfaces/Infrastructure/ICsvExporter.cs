@@ -5,6 +5,6 @@ namespace TradeTracker.Application.Common.Interfaces.Infrastructure
 {
     public interface ICsvExporter
     {
-        byte[] ExportTransactionsToCsv(List<TransactionsForExportDto> transactionExportDtos);
+        byte[] ExportTransactionsToCsv(List<TransactionForExport> transactionsForExport);
     }
 }

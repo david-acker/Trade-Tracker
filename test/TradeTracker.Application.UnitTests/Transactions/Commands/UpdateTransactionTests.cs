@@ -53,7 +53,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             
             var command = new UpdateTransactionCommand()
             {
-                TransactionId = transactionId, 
+                Id = transactionId, 
                 DateTime = new DateTime(2015, 1, 1),
                 Symbol = "XYZ",
                 Type = TransactionType.Buy.ToString(),
@@ -71,8 +71,8 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             // Assert
             using (new AssertionScope())
             {
-                actualTransaction.TransactionId.Should()
-                    .Be(command.TransactionId);
+                actualTransaction.Id.Should()
+                    .Be(command.Id);
 
                 actualTransaction.DateTime.Should()
                     .Be(command.DateTime);
@@ -95,7 +95,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
         }
 
         [Fact]
-        public async Task Handle_InvalidRequestMissingTransactionId_ThrowsValidationException()
+        public async Task Handle_InvalidRequestMissingId_ThrowsValidationException()
         {
             // Arrange
             var handler = new UpdateTransactionCommandHandler(
@@ -111,7 +111,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             // Assert
             await act.Should()
                 .ThrowAsync<ValidationException>()
-                .Where(e => e.ValidationErrors.Contains("A valid TransactionId is required."));
+                .Where(e => e.ValidationErrors.Contains("A valid Id is required."));
         }
 
         [Fact]
@@ -127,7 +127,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
 
             var command = new UpdateTransactionCommand()
             {
-                TransactionId = transactionId,
+                Id = transactionId,
                 DateTime = new DateTime(2015, 1, 1),
                 Symbol = "XYZ",
                 Type = TransactionType.Buy.ToString(),
@@ -158,7 +158,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
 
             var command = new UpdateTransactionCommand()
             {
-                TransactionId = transactionId,
+                Id = transactionId,
                 DateTime = new DateTime(2015, 1, 1),
                 Symbol = "XYZ",
                 Type = TransactionType.Buy.ToString(),
@@ -189,7 +189,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
 
             var command = new UpdateTransactionCommand()
             {
-                TransactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49"),
+                Id = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49"),
                 DateTime = new DateTime(2015, 1, 1),
                 Symbol = "XYZ",
                 Type = TransactionType.Buy.ToString(),
@@ -219,7 +219,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
 
             var command = new UpdateTransactionCommand()
             {
-                TransactionId = transactionId,
+                Id = transactionId,
                 DateTime = new DateTime(2015, 1, 1),
                 Symbol = "XYZ",
                 Type = TransactionType.Buy.ToString(),

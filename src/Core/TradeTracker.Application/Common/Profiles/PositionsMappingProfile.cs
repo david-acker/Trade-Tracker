@@ -21,11 +21,11 @@ namespace TradeTracker.Application.Common.Profiles
                             dest => dest.SymbolSelection,
                             opt => opt.MapFrom(src => AssignSymbolSelection(src.SymbolSelection)));
 
-            CreateMap<Position, PositionForReturnDto>();
-            CreateMap<Position, DetailedPositionForReturnDto>();
+            CreateMap<Position, PositionForReturn>();
+            CreateMap<Position, DetailedPositionForReturn>();
 
-            CreateMap<PositionForReturnDto, PositionForReturnWithLinksDto>();
-            CreateMap<DetailedPositionForReturnDto, DetailedPositionForReturnWithLinksDto>();
+            CreateMap<PositionForReturn, PositionForReturnWithLinks>();
+            CreateMap<DetailedPositionForReturn, DetailedPositionForReturnWithLinks>();
         }
 
         private static IPositionOrderBy AssignPositionOrderBy(string orderBy)

@@ -7,18 +7,18 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
     {
         public GetTransactionCollectionQueryValidator()
         {
-            RuleFor(t => t.TransactionIds)
+            RuleFor(t => t.Ids)
                 .NotNull()
                 .NotEmpty()
-                    .WithMessage("The TransactionIds parameter is required.");
+                    .WithMessage("The Ids parameter is required.");
 
-            When(t => (t.TransactionIds != null), () =>
+            When(t => (t.Ids != null), () =>
             {
-                RuleFor(t => t.TransactionIds)
+                RuleFor(t => t.Ids)
                     .Must(t => t.Count() > 0)
-                        .WithMessage("The TransactionIds parameter can not be blank.")
+                        .WithMessage("The Ids parameter can not be blank.")
                     .Must(t => t.Count() <= 100)
-                        .WithMessage("The number of TransactionIds in a single request may not exceed 100.");
+                        .WithMessage("The number of Ids in a single request may not exceed 100.");
             });
         }
     }

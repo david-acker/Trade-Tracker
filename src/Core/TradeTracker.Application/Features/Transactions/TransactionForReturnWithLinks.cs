@@ -3,8 +3,8 @@ using TradeTracker.Application.Models.Common.Resources.Responses;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class TransactionForReturnWithLinksDto : TransactionForReturnDto
+    public class TransactionForReturnWithLinks : TransactionForReturn
     {
-        public IEnumerable<LinkDto> Links { get; set; }
+        public IEnumerable<Link> Links { get; set; }
     }
 }

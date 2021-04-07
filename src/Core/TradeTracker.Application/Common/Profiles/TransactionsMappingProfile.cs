@@ -26,11 +26,11 @@ namespace TradeTracker.Application.Common.Profiles
             CreateMap<Transaction, UpdateTransactionCommand>()
                 .ReverseMap();
 
-            CreateMap<Transaction, TransactionForReturnDto>();
-            CreateMap<Transaction, TransactionForReturnWithLinksDto>();
-            CreateMap<TransactionForReturnDto, TransactionForReturnWithLinksDto>();
+            CreateMap<Transaction, TransactionForReturn>();
+            CreateMap<Transaction, TransactionForReturnWithLinks>();
+            CreateMap<TransactionForReturn, TransactionForReturnWithLinks>();
 
-            CreateMap<Transaction, TransactionsForExportDto>();
+            CreateMap<Transaction, TransactionForExport>();
 
             CreateMap<GetTransactionsQuery, PagedTransactionsResourceParameters>()
                 .ForMember(

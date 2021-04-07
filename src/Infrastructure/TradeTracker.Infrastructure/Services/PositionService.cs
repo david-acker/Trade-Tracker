@@ -228,40 +228,42 @@ namespace TradeTracker.Infrastructure.Services
         {
             _logger.LogInformation($"PositionTrackingService: {nameof(CalculateAverageCostBasis)} was called.");
 
-            var sourceTransactionMap = await CreateSourceTransactionMap(symbol);
+            var sourceRelations = await CreateSourceRelations(symbol);
 
-            decimal totalNotional = sourceTransactionMap
-                .Sum(p => p.LinkedQuantity * p.TradePrice);
+            decimal totalNotional = sourceRelations
+                .Sum(p => p.Quantity * p.TradePrice);
 
-            decimal totalQuantity = sourceTransactionMap
-                .Sum(p => p.LinkedQuantity);
+            decimal totalQuantity = sourceRelations
+                .Sum(p => p.Quantity);
 
             return Math.Round(totalNotional / totalQuantity, 2);
         }
 
-        public async Task<IEnumerable<SourceTransactionLink>> CreateSourceTransactionMap(
+        public async Task<IEnumerable<SourceRelation>> CreateSourceRelations(
             string symbol)
         {
-            _logger.LogInformation($"PositionTrackingService: {nameof(CreateSourceTransactionMap)} was called.");
+            _logger.LogInformation($"PositionTrackingService: {nameof(CreateSourceRelations)} was called.");
         
             var position = await _authenticatedPositionRepository.GetBySymbolAsync(symbol);
 
-            var parametersForSymbol = new UnpagedTransactionsResourceParameters();
+            var parametersForSymbol = new UnpagedTransactionsResourceParameters()
+            {
+                SymbolSelection = new SymbolSelection(
+                    new List<string>() { symbol },
+                    SelectionType.Include),
+                TransactionType = TransactionType.Buy
+            };
 
             var symbolSelection = new SymbolSelection(
                 new List<string>() { symbol },
                 SelectionType.Include);
-
-            parametersForSymbol.SymbolSelection = symbolSelection;
-
-            parametersForSymbol.TransactionType = TransactionType.Buy;
 
             var transactionsForSymbol = await _authenticatedTransactionRepository
                 .GetUnpagedResponseAsync(parametersForSymbol);
 
             var remainingOpenQuantity = position.Quantity;
 
-            var sourceTransactionMap = new List<SourceTransactionLink>();
+            var sourceRelations = new List<SourceRelation>();
             
             foreach (var transaction in transactionsForSymbol)
             {
@@ -270,33 +272,21 @@ namespace TradeTracker.Infrastructure.Services
 
                 if (remainingOpenQuantity > quantity)
                 {
-                    sourceTransactionMap.Add(
-                        new SourceTransactionLink()
-                        {
-                            DateTime = transaction.DateTime,
-                            LinkedQuantity = quantity,
-                            TradePrice = transaction.TradePrice,
-                            TransactionId = transaction.TransactionId
-                        });
+                    sourceRelations.Add(
+                        new SourceRelation(transaction, quantity));
 
                     remainingOpenQuantity -= quantity;
                 }
                 else
                 {
-                    sourceTransactionMap.Add(
-                        new SourceTransactionLink()
-                        {
-                            DateTime = transaction.DateTime,
-                            LinkedQuantity = remainingOpenQuantity,
-                            TradePrice = transaction.TradePrice,
-                            TransactionId = transaction.TransactionId
-                        });
+                    sourceRelations.Add(
+                        new SourceRelation(transaction, remainingOpenQuantity));
 
                     break;
                 }
             }
 
-            return sourceTransactionMap;
+            return sourceRelations;
         }
     }
 }

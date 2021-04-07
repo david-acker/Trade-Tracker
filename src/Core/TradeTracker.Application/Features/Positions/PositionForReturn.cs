@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace TradeTracker.Application.Features.Positions
 {
-    public class PositionForReturnDto
+    public class PositionForReturn
     {
         public string Symbol { get; set; }
 
@@ -12,7 +12,7 @@ namespace TradeTracker.Application.Features.Positions
 
         public decimal AverageCostBasis { get; set; }
 
-        public IEnumerable<SourceTransactionLink> SourceTransactionMap { get; set; }
+        public IEnumerable<SourceRelation> SourceRelations { get; set; }
     }
 }
 

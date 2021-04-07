@@ -11,7 +11,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
 {
     public class CreateTransactionCollectionCommandHandler :
         ValidatableRequestBehavior<CreateTransactionCollectionCommand>,
-        IRequestHandler<CreateTransactionCollectionCommand, IEnumerable<TransactionForReturnDto>>
+        IRequestHandler<CreateTransactionCollectionCommand, IEnumerable<TransactionForReturn>>
     {
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly IMapper _mapper;
@@ -24,7 +24,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<TransactionForReturnDto>> Handle(
+        public async Task<IEnumerable<TransactionForReturn>> Handle(
             CreateTransactionCollectionCommand request, 
             CancellationToken cancellationToken)
         {
@@ -34,7 +34,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransact
 
             transactionCollection = await _authenticatedTransactionRepository.AddRangeAsync(transactionCollection);
 
-            return _mapper.Map<IEnumerable<TransactionForReturnDto>>(transactionCollection);
+            return _mapper.Map<IEnumerable<TransactionForReturn>>(transactionCollection);
         }
     }
 }

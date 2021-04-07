@@ -53,7 +53,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Commands
             var createdTransaction = await handler.Handle(command, CancellationToken.None);
 
             var transactionFromRepo = await _mockAuthenticatedTransactionRepository.Object
-                .GetByIdAsync(createdTransaction.TransactionId);
+                .GetByIdAsync(createdTransaction.Id);
 
             // Assert
             using (new AssertionScope())

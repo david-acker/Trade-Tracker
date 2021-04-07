@@ -73,7 +73,7 @@ namespace TradeTracker.Api.Controllers
             "application/json",
             "application/vnd.trade.pagedpositions+json")]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<ActionResult<IEnumerable<PositionForReturnDto>>> GetPositions(
+        public async Task<ActionResult<IEnumerable<PositionForReturn>>> GetPositions(
             [FromQuery] GetPositionsQuery query)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositions)} was called.");
@@ -118,17 +118,17 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", 
             "application/vnd.trade.pagedpositions.hateoas+json")]
-        public async Task<ActionResult<PagedPositionsWithLinksDto>> GetPositionsWithLinks(
+        public async Task<ActionResult<PagedPositionsWithLinks>> GetPositionsWithLinks(
             [FromQuery] GetPositionsQuery query)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositionsWithLinks)} was called.");
 
             var pagedPositionsBase = await _mediator.Send(query);
 
-            var pagedPositionsWithLinks = new PagedPositionsWithLinksDto();
+            var pagedPositionsWithLinks = new PagedPositionsWithLinks();
 
             pagedPositionsWithLinks.Items = _mapper
-                .Map<IEnumerable<PositionForReturnWithLinksDto>>(pagedPositionsBase.Items);
+                .Map<IEnumerable<PositionForReturnWithLinks>>(pagedPositionsBase.Items);
 
             pagedPositionsWithLinks.Items = pagedPositionsWithLinks.Items
                 .Select(position => 
@@ -194,7 +194,7 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Accept", 
             "application/json",
             "application/vnd.trade.position+json")]
-        public async Task<ActionResult<PositionForReturnDto>> GetPosition(
+        public async Task<ActionResult<PositionForReturn>> GetPosition(
             [FromRoute] string symbol)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPosition)} was called.");
@@ -224,7 +224,7 @@ namespace TradeTracker.Api.Controllers
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Accept", 
             "application/vnd.trade.position.hateoas+json")]
-        public async Task<ActionResult<PositionForReturnWithLinksDto>> GetPositionWithLinks(
+        public async Task<ActionResult<PositionForReturnWithLinks>> GetPositionWithLinks(
             [FromRoute] string symbol)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositionWithLinks)} was called.");
@@ -233,7 +233,7 @@ namespace TradeTracker.Api.Controllers
 
             var position = await _mediator.Send(query);
 
-            var positionWithLinks = _mapper.Map<PositionForReturnWithLinksDto>(position);
+            var positionWithLinks = _mapper.Map<PositionForReturnWithLinks>(position);
 
             positionWithLinks.Links = CreateLinksForPosition(symbol);
 
@@ -257,7 +257,7 @@ namespace TradeTracker.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.detailedposition.hateoas+json")]
-        public async Task<ActionResult<PositionForReturnWithLinksDto>> GetDetailedPositionWithLinks(
+        public async Task<ActionResult<PositionForReturnWithLinks>> GetDetailedPositionWithLinks(
             [FromRoute] string symbol)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositionWithLinks)} was called.");
@@ -267,14 +267,14 @@ namespace TradeTracker.Api.Controllers
             var detailedPosition = await _mediator.Send(query);
 
             var detailedPositionWithLinks = 
-                _mapper.Map<DetailedPositionForReturnWithLinksDto>(detailedPosition);
+                _mapper.Map<DetailedPositionForReturnWithLinks>(detailedPosition);
 
-            detailedPositionWithLinks.SourceTransactionMap =
-                detailedPositionWithLinks.SourceTransactionMap
+            detailedPositionWithLinks.SourceRelations =
+                detailedPositionWithLinks.SourceRelations
                     .Select(fullSourceLink => 
                     {
                         fullSourceLink.Transaction.Links = 
-                            CreateLinksForTransaction(fullSourceLink.Transaction.TransactionId);
+                            CreateLinksForTransaction(fullSourceLink.Transaction.Id);
 
                         return fullSourceLink;
 
@@ -305,11 +305,11 @@ namespace TradeTracker.Api.Controllers
         }
 
 
-        private IEnumerable<LinkDto> CreateLinksForPosition(string symbol)
+        private IEnumerable<Link> CreateLinksForPosition(string symbol)
         {
-            var links = new List<LinkDto>()
+            var links = new List<Link>()
             {
-                new LinkDto(
+                new Link(
                     Url.Link(
                         "GetPosition", 
                         new { symbol }),
@@ -321,15 +321,15 @@ namespace TradeTracker.Api.Controllers
         }
 
 
-        private IEnumerable<LinkDto> CreateLinksForPositions(
+        private IEnumerable<Link> CreateLinksForPositions(
             GetPositionsQuery query,
             bool hasNext,
             bool hasPrevious)
         {
-            var links = new List<LinkDto>();
+            var links = new List<Link>();
 
             links.Add(
-                new LinkDto(
+                new Link(
                     CreatePositionsResourceUrl(
                         query, 
                         ResourceUriType.CurrentPage),
@@ -339,7 +339,7 @@ namespace TradeTracker.Api.Controllers
             if (hasNext)
             {
                 links.Add(
-                    new LinkDto(
+                    new Link(
                         CreatePositionsResourceUrl(
                             query, 
                             ResourceUriType.NextPage),
@@ -350,7 +350,7 @@ namespace TradeTracker.Api.Controllers
             if (hasPrevious)
             {
                 links.Add(
-                    new LinkDto(
+                    new Link(
                         CreatePositionsResourceUrl(
                             query, 
                             ResourceUriType.PreviousPage),
@@ -407,13 +407,13 @@ namespace TradeTracker.Api.Controllers
             }
         }
 
-        private IEnumerable<LinkDto> CreateLinksForTransaction(
+        private IEnumerable<Link> CreateLinksForTransaction(
             Guid transactionId)
         {
-            var links = new List<LinkDto>();
+            var links = new List<Link>();
 
             links.Add(
-                new LinkDto(
+                new Link(
                     Url.Link(
                         "GetTransaction", 
                         new { transactionId }),
@@ -421,7 +421,7 @@ namespace TradeTracker.Api.Controllers
                 "GET"));
 
             links.Add(
-                new LinkDto(
+                new Link(
                     Url.Link(
                         "UpdateTransaction",
                         new { transactionId }),
@@ -429,7 +429,7 @@ namespace TradeTracker.Api.Controllers
                     "PUT"));
                 
             links.Add(
-                new LinkDto(
+                new Link(
                     Url.Link(
                         "PatchTransaction",
                         new { transactionId }),
@@ -437,7 +437,7 @@ namespace TradeTracker.Api.Controllers
                     "PATCH"));
 
             links.Add(
-                new LinkDto(
+                new Link(
                     Url.Link(
                         "DeleteTransaction",
                         new { transactionId }),

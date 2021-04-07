@@ -46,18 +46,18 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
                 Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49")
             };
 
-            var query = new GetTransactionCollectionQuery() { TransactionIds = transactionIds };
+            var query = new GetTransactionCollectionQuery() { Ids = transactionIds };
 
             // Act
             var transactionCollection = await handler.Handle(query, CancellationToken.None);
 
             // Assert
             transactionCollection.First().Should()
-                .Match<TransactionForReturnDto>((t) => t.TransactionId == transactionIds.First());
+                .Match<TransactionForReturn>((t) => t.Id == transactionIds.First());
         }
 
         [Fact]
-        public async Task Handle_InvalidRequestWithNoTransactionIds_ThrowsValidationException()
+        public async Task Handle_InvalidRequestWithNoIds_ThrowsValidationException()
         {
             // Arrange
             var handler = new GetTransactionCollectionQueryHandler(
@@ -72,11 +72,11 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
             // Assert
             await act.Should()
                 .ThrowAsync<ValidationException>()
-                .Where(e => e.ValidationErrors.Contains("The TransactionIds parameter is required."));
+                .Where(e => e.ValidationErrors.Contains("The Ids parameter is required."));
         }
 
         [Fact]
-        public async Task Handle_InvalidRequestWithTooManyTransactionIds_ThrowsValidationException()
+        public async Task Handle_InvalidRequestWithTooManyIds_ThrowsValidationException()
         {
             // Arrange
             var handler = new GetTransactionCollectionQueryHandler(
@@ -89,7 +89,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
                 transactionIds.Add(Guid.NewGuid());
             }
 
-            var query = new GetTransactionCollectionQuery() { TransactionIds = transactionIds };
+            var query = new GetTransactionCollectionQuery() { Ids = transactionIds };
 
             // Act
             Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);
@@ -97,7 +97,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
             // Assert
             await act.Should()
                 .ThrowAsync<ValidationException>()
-                .Where(e => e.ValidationErrors.Contains("The number of TransactionIds in a single request may not exceed 100."));
+                .Where(e => e.ValidationErrors.Contains("The number of Ids in a single request may not exceed 100."));
         }
 
         [Fact]
@@ -110,7 +110,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
 
             var transactionIds = new List<Guid>() { Guid.NewGuid() };
 
-            var query = new GetTransactionCollectionQuery() { TransactionIds = transactionIds };
+            var query = new GetTransactionCollectionQuery() { Ids = transactionIds };
 
             // Act
             Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);
@@ -129,25 +129,25 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
                 _mockAuthenticatedTransactionRepository.Object,
                 _mapper);
 
-            var firstNonExistentTransactionId = Guid.NewGuid();
+            var firstNonExistentId = Guid.NewGuid();
             var secondNonExistentTranasctionId = Guid.NewGuid();
 
             var transactionIds = new List<Guid>()
             {
-                firstNonExistentTransactionId,
+                firstNonExistentId,
                 secondNonExistentTranasctionId 
             };
 
-            var orderedTransactionIds = transactionIds
+            var orderedIds = transactionIds
                 .OrderBy(t => t)
                 .Select(t => t.ToString())
                 .ToList();
 
-            var expectedIdsAsString = String.Join(", ", orderedTransactionIds);  
+            var expectedIdsAsString = String.Join(", ", orderedIds);  
 
             var expectedMessage = $"The following Transactions were not found: ({expectedIdsAsString}).";
             
-            var query = new GetTransactionCollectionQuery() { TransactionIds = transactionIds };
+            var query = new GetTransactionCollectionQuery() { Ids = transactionIds };
 
             // Act
             Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);

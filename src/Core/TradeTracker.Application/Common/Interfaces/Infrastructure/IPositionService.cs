@@ -36,7 +36,7 @@ namespace TradeTracker.Application.Common.Interfaces.Infrastructure
         Task<decimal> CalculateAverageCostBasis(
             string symbol);
 
-        Task<IEnumerable<SourceTransactionLink>> CreateSourceTransactionMap(
+        Task<IEnumerable<SourceRelation>> CreateSourceRelations(
             string symbol);
     }
 }
