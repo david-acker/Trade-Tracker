@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using TradeTracker.Domain.Common;
 using TradeTracker.Domain.Enums;
@@ -10,11 +9,6 @@ namespace TradeTracker.Domain.Entities
 {
     public class Transaction : AuditableEntity, IAuthorizableEntity, IHasDomainEvent
     {
-        [Key]
-        public Guid TransactionId { get; set; } = Guid.NewGuid();
-
-        public Guid AccessKey { get; set; }
-
         public DateTime DateTime { get; set; }
 
         public string Symbol { get; set; }
