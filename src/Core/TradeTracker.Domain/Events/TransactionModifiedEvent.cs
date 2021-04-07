@@ -1,5 +1,6 @@
 using System;
 using TradeTracker.Domain.Common;
+using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 
 namespace TradeTracker.Domain.Events
@@ -24,6 +25,15 @@ namespace TradeTracker.Domain.Events
             SymbolBeforeModification = symbolBeforeModification;
             TypeBeforeModification = typeBeforeModification;
             QuantityBeforeModification = quantityBeforeModification;
+        }
+
+        public TransactionModifiedEvent(Transaction originalTransaction)
+        {
+            AccessKey = originalTransaction.AccessKey;
+            TransactionId = originalTransaction.Id;
+            SymbolBeforeModification = originalTransaction.Symbol;
+            TypeBeforeModification = originalTransaction.Type;
+            QuantityBeforeModification = originalTransaction.Quantity;
         }
     }
 }

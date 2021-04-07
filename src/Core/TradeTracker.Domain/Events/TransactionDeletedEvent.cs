@@ -1,5 +1,6 @@
 using System;
 using TradeTracker.Domain.Common;
+using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 
 namespace TradeTracker.Domain.Events
@@ -21,6 +22,14 @@ namespace TradeTracker.Domain.Events
             SymbolBeforeDeletion = symbolBeforeDeletion;
             TypeBeforeDeletion = typeBeforeDeletion;
             QuantityBeforeDeletion = quantityBeforeDeletion;
+        }
+
+        public TransactionDeletedEvent(Transaction transaction)
+        {
+            AccessKey = transaction.AccessKey;
+            SymbolBeforeDeletion = transaction.Symbol;
+            TypeBeforeDeletion = transaction.Type;
+            QuantityBeforeDeletion = transaction.Quantity;
         }
     }
 }

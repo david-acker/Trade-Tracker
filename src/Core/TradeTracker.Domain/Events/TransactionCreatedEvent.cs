@@ -1,5 +1,6 @@
 using System;
 using TradeTracker.Domain.Common;
+using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Domain.Events
 {
@@ -12,6 +13,12 @@ namespace TradeTracker.Domain.Events
         {
             AccessKey = accessKey;
             TransactionId = transactionId;
+        }
+
+        public TransactionCreatedEvent(Transaction transaction)
+        {
+            AccessKey = transaction.AccessKey;
+            TransactionId = transaction.Id;
         }
     }
 }
