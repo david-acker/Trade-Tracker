@@ -274,7 +274,7 @@ namespace TradeTracker.Api.Controllers
                     .Select(fullSourceLink => 
                     {
                         fullSourceLink.Transaction.Links = 
-                            CreateLinksForTransaction(fullSourceLink.Transaction.TransactionId);
+                            CreateLinksForTransaction(fullSourceLink.Transaction.Id);
 
                         return fullSourceLink;
 

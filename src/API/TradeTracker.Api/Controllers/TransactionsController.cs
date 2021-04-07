@@ -144,7 +144,7 @@ namespace TradeTracker.Api.Controllers
                 .Select(transaction =>
                 {
                     transaction.Links = CreateLinksForTransaction(
-                        transaction.TransactionId);
+                        transaction.Id);
 
                     return transaction;
                 });
@@ -204,7 +204,7 @@ namespace TradeTracker.Api.Controllers
 
             return CreatedAtAction(
                 "GetTransaction",
-                new { transactionId = transactionCreated.TransactionId },
+                new { transactionId = transactionCreated.Id },
                 transactionCreated);
         }
 
@@ -245,11 +245,11 @@ namespace TradeTracker.Api.Controllers
                 _mapper.Map<TransactionForReturnWithLinksDto>(transactionCreated); 
 
             transactionCreatedWithLinks.Links = CreateLinksForTransaction(
-                transactionCreatedWithLinks.TransactionId);
+                transactionCreatedWithLinks.Id);
 
             return CreatedAtAction(
                 "GetTransaction",
-                new { transactionId = transactionCreatedWithLinks.TransactionId },
+                new { transactionId = transactionCreatedWithLinks.Id },
                 transactionCreatedWithLinks);
         }
 
@@ -275,14 +275,14 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Get a transaction by its id.
         /// </summary>
-        /// <param name="transactionId">The id of the transaction</param>
+        /// <param name="id">The id of the transaction</param>
         /// <remarks>
         /// Example: \
-        /// GET /api/transactions/{transactionId} 
+        /// GET /api/transactions/{id} 
         /// </remarks>
         /// <response code="200">Returns the requested transaction</response>
         [EntityTagFilter]
-        [HttpGet("{transactionId}", Name = "GetTransaction")]
+        [HttpGet("{id}", Name = "GetTransaction")]
         [Produces("application/json",
             "application/vnd.trade.transaction+json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -291,11 +291,11 @@ namespace TradeTracker.Api.Controllers
             "application/json",
             "application/vnd.trade.transaction+json")]
         public async Task<ActionResult<TransactionForReturnDto>> GetTransaction(
-            [FromRoute] Guid transactionId)
+            [FromRoute] Guid id)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetTransaction)} was called.");
 
-            var query = new GetTransactionQuery() { TransactionId = transactionId };
+            var query = new GetTransactionQuery() { Id = id };
             
             var transaction = await _mediator.Send(query);
 
@@ -306,30 +306,30 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Get a transaction by its id.
         /// </summary>
-        /// <param name="transactionId">The id of the transaction</param>
+        /// <param name="id">The id of the transaction</param>
         /// <remarks>
         /// Example: \
-        /// GET /api/transactions/{transactionId} 
+        /// GET /api/transactions/{id} 
         /// </remarks>
         /// <response code="200">Returns the requested transaction</response>
-        [HttpGet("{transactionId}", Name = "GetTransactionWithLinks")]
+        [HttpGet("{id}", Name = "GetTransactionWithLinks")]
         [Produces("application/vnd.trade.transaction.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [RequestHeaderMatchesMediaType("Accept", 
             "application/vnd.trade.transaction.hateoas+json")]
         public async Task<ActionResult<TransactionForReturnWithLinksDto>> GetTransactionWithLinks(
-            [FromRoute] Guid transactionId)
+            [FromRoute] Guid id)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetTransactionWithLinks)} was called.");
 
-            var query = new GetTransactionQuery() { TransactionId = transactionId };
+            var query = new GetTransactionQuery() { Id = id };
             
             var transaction = await _mediator.Send(query);
 
             var transactionWithLinks = _mapper.Map<TransactionForReturnWithLinksDto>(transaction);
 
-            transactionWithLinks.Links = CreateLinksForTransaction(transactionId);
+            transactionWithLinks.Links = CreateLinksForTransaction(id);
 
             return Ok(transactionWithLinks);
         }
@@ -338,12 +338,12 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Update a transaction.
         /// </summary>
-        /// <param name="transactionId">The id for the transaction to be updated</param>
+        /// <param name="id">The id for the transaction to be updated</param>
         /// <param name="command">The transaction with updated values</param>
         /// <response code="422">Validation Error</response>
         /// <remarks>
         /// Example: \
-        /// PUT /api/transactions/{transactionId} \
+        /// PUT /api/transactions/{id} \
         /// { \
         ///     "dateTime": "2020-01-15T15:00:00", \
         ///     "symbol": "CBA" \
@@ -353,19 +353,19 @@ namespace TradeTracker.Api.Controllers
         ///     "tradePrice": "12.50" \
         /// } 
         /// </remarks>
-        [HttpPut("{transactionId}", Name = "UpdateTransaction")]
+        [HttpPut("{id}", Name = "UpdateTransaction")]
         [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         public async Task<ActionResult> UpdateTransaction(
-            [FromRoute] Guid transactionId, 
+            [FromRoute] Guid id, 
             [FromBody] UpdateTransactionCommand command)
         {
             _logger.LogInformation($"TransactionsController: {nameof(UpdateTransaction)} was called.");
 
-            command.TransactionId = transactionId;
+            command.Id = id;
             
             await _mediator.Send(command);
             return NoContent();
@@ -375,10 +375,10 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Partially update a transaction.
         /// </summary>
-        /// <param name="transactionId">The id for the transaction to be updated</param>
+        /// <param name="id">The id for the transaction to be updated</param>
         /// <param name="patchDocument">The set of operations to be applied to the transaction</param>
         /// Example: \
-        /// PATCH /api/transactions/{transactionId} \
+        /// PATCH /api/transactions/{id} \
         /// [ \
         ///     { \
         ///         "op": "replace", \
@@ -392,21 +392,21 @@ namespace TradeTracker.Api.Controllers
         ///     } \
         /// ]
         /// <response code="422">Validation Error</response>
-        [HttpPatch("{transactionId}", Name = "PatchTransaction")]
+        [HttpPatch("{id}", Name = "PatchTransaction")]
         [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         public async Task<ActionResult> PatchTransaction(
-            [FromRoute] Guid transactionId, 
+            [FromRoute] Guid id, 
             JsonPatchDocument<UpdateTransactionCommandBase> patchDocument)
         {
             _logger.LogInformation($"TransactionsController: {nameof(PatchTransaction)} was called.");
 
             var command = new PatchTransactionCommand()
             {
-                TransactionId = transactionId,
+                Id = id,
                 PatchDocument = patchDocument
             };
 
@@ -418,20 +418,20 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Delete a transaction.
         /// </summary>
-        /// <param name="transactionId">The id for the transaction to be deleted</param>
+        /// <param name="id">The id for the transaction to be deleted</param>
         /// <remarks>
         /// Example: \
-        /// DELETE /api/transactions/{transactionId} 
+        /// DELETE /api/transactions/{id} 
         /// </remarks>
-        [HttpDelete("{transactionId}", Name = "DeleteTransaction")]
+        [HttpDelete("{id}", Name = "DeleteTransaction")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> DeleteTransaction(
-            [FromRoute] Guid transactionId)
+            [FromRoute] Guid id)
         {
             _logger.LogInformation($"TransactionsController: {nameof(DeleteTransaction)} was called.");
 
-            var command = new DeleteTransactionCommand() { TransactionId = transactionId };
+            var command = new DeleteTransactionCommand() { Id = id };
 
             await _mediator.Send(command);
             return NoContent();
@@ -439,13 +439,13 @@ namespace TradeTracker.Api.Controllers
 
 
         /// <summary>
-        /// Options for /api/transactions/{transactionId} URI.
+        /// Options for /api/transactions/{id} URI.
         /// </summary>
         /// <remarks>
         /// Example: \
-        /// OPTIONS /api/transactions/{transactionId} 
+        /// OPTIONS /api/transactions/{id} 
         /// </remarks>
-        [HttpOptions("{transactionId}", Name = "OptionsForTransactionById")]
+        [HttpOptions("{id}", Name = "OptionsForTransactionById")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactionById()
         {
@@ -502,7 +502,7 @@ namespace TradeTracker.Api.Controllers
 
 
         private IEnumerable<LinkDto> CreateLinksForTransaction(
-            Guid transactionId)
+            Guid id)
         {
             var links = new List<LinkDto>();
 
@@ -510,7 +510,7 @@ namespace TradeTracker.Api.Controllers
                 new LinkDto(
                     Url.Link(
                         "GetTransaction", 
-                        new { transactionId }),
+                        new { id }),
                 "self",
                 "GET"));
 
@@ -518,7 +518,7 @@ namespace TradeTracker.Api.Controllers
                 new LinkDto(
                     Url.Link(
                         "UpdateTransaction",
-                        new { transactionId }),
+                        new { id }),
                     "update transaction",
                     "PUT"));
                 
@@ -526,7 +526,7 @@ namespace TradeTracker.Api.Controllers
                 new LinkDto(
                     Url.Link(
                         "PatchTransaction",
-                        new { transactionId }),
+                        new { id }),
                     "patch transaction",
                     "PATCH"));
 
@@ -534,7 +534,7 @@ namespace TradeTracker.Api.Controllers
                 new LinkDto(
                     Url.Link(
                         "DeleteTransaction",
-                        new { transactionId }),
+                        new { id }),
                     "delete transaction",
                     "DELETE"));
 

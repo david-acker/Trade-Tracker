@@ -87,7 +87,7 @@ namespace TradeTracker.Api.Controllers
             var transactionCollectionCreated = await _mediator.Send(command);
 
             var idsAsString = String.Join(
-                ",", transactionCollectionCreated.Select(t => t.TransactionId));
+                ",", transactionCollectionCreated.Select(t => t.Id));
                 
             return CreatedAtAction(
                 "GetTransactionCollection",
@@ -150,14 +150,14 @@ namespace TradeTracker.Api.Controllers
                     .Select(transaction => 
                     {
                         transaction.Links = CreateLinksForTransaction(
-                            transaction.TransactionId);
+                            transaction.Id);
 
                         return transaction;
                     });
 
             IEnumerable<Guid> transactionIds = 
                 transactionCollectionCreatedWithLinks.Items
-                    .Select(t => t.TransactionId);
+                    .Select(t => t.Id);
             
             transactionCollectionCreatedWithLinks.Links = 
                 CreateLinksForTransactionCollection(transactionIds);
@@ -193,14 +193,14 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Get a collection of transactions.
         /// </summary>
-        /// <param name="transactionIds">The ids for the transactions</param>
+        /// <param name="ids">The ids for the transactions</param>
         /// <remarks>
         /// Example: \
-        /// GET /api/transactioncollections/{firstTransactionId},{secondTransactionId} 
+        /// GET /api/transactioncollections/{firstId},{secondId} 
         /// </remarks>
         /// <response code="200">Returns the requested transactions</response>
         [EntityTagFilter]
-        [HttpGet("{transactionIds}", Name = "GetTransactionCollection")]
+        [HttpGet("{ids}", Name = "GetTransactionCollection")]
         [Produces("application/json", 
             "application/vnd.trade.transactioncollection+json")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -209,11 +209,11 @@ namespace TradeTracker.Api.Controllers
             "application/json",
             "application/vnd.trade.transactioncollection+json")]
         public async Task<ActionResult<IEnumerable<TransactionForReturnDto>>> GetTransactionCollection(
-            [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> transactionIds)
+            [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(GetTransactionCollection)} was called.");
 
-            var query = new GetTransactionCollectionQuery() { TransactionIds = transactionIds };
+            var query = new GetTransactionCollectionQuery() { Ids = ids };
 
             var transactionCollection = await _mediator.Send(query);
 
@@ -224,24 +224,24 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Get a collection of transactions.
         /// </summary>
-        /// <param name="transactionIds">The ids for the transactions</param>
+        /// <param name="ids">The ids for the transactions</param>
         /// <remarks>
         /// Example: \
-        /// GET /api/transactioncollections/{firstTransactionId},{secondTransactionId} 
+        /// GET /api/transactioncollections/{firstId},{secondId} 
         /// </remarks>
         /// <response code="200">Returns the requested transactions</response>
-        [HttpGet("{transactionIds}", Name = "GetTransactionCollectionWithLinks")]
+        [HttpGet("{ids}", Name = "GetTransactionCollectionWithLinks")]
         [Produces("application/vnd.trade.transactioncollection.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Accept", 
             "application/vnd.trade.transactioncollection.hateoas+json")]
         public async Task<ActionResult<TransactionCollectionWithLinksDto>> GetTransactionCollectionWithLinks(
-            [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> transactionIds)
+            [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(GetTransactionCollectionWithLinks)} was called.");
 
-            var query = new GetTransactionCollectionQuery() { TransactionIds = transactionIds };
+            var query = new GetTransactionCollectionQuery() { Ids = ids };
 
             var transactionCollection = await _mediator.Send(query);
 
@@ -254,13 +254,13 @@ namespace TradeTracker.Api.Controllers
                 .Select(transaction => 
                 {
                     transaction.Links = CreateLinksForTransaction(
-                        transaction.TransactionId);
+                        transaction.Id);
                     
                     return transaction;
                 });
             
             transactionCollectionWithLinks.Links =
-                CreateLinksForTransactionCollection(transactionIds);
+                CreateLinksForTransactionCollection(ids);
 
             return Ok(transactionCollectionWithLinks);
         }
@@ -271,13 +271,13 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <remarks>
         /// Example: \
-        /// OPTIONS /api/transactioncollections/{firstTransactionId},{secondTransactionId} 
+        /// OPTIONS /api/transactioncollections/{firstId},{secondId} 
         /// </remarks>
-        [HttpOptions("{transactionIds}", Name = "OptionsForTransactionCollectionByTransactionIds")]
+        [HttpOptions("{ids}", Name = "OptionsForTransactionCollectionByIds")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public IActionResult OptionsForTransactionCollectionByTransactionIds()
+        public IActionResult OptionsForTransactionCollectionByIds()
         {
-            _logger.LogInformation($"TransactionCollectionsController: {nameof(OptionsForTransactionCollectionByTransactionIds)} was called.");
+            _logger.LogInformation($"TransactionCollectionsController: {nameof(OptionsForTransactionCollectionByIds)} was called.");
 
             Response.Headers.Add("Allow", "GET,OPTIONS");
             
@@ -286,7 +286,7 @@ namespace TradeTracker.Api.Controllers
 
 
         private IEnumerable<LinkDto> CreateLinksForTransaction(
-            Guid transactionId)
+            Guid id)
         {
             var links = new List<LinkDto>();
 
@@ -294,7 +294,7 @@ namespace TradeTracker.Api.Controllers
                 new LinkDto(
                     Url.Link(
                         "GetTransaction", 
-                        new { transactionId }),
+                        new { id }),
                 "self",
                 "GET"));
 
@@ -302,7 +302,7 @@ namespace TradeTracker.Api.Controllers
                 new LinkDto(
                     Url.Link(
                         "UpdateTransaction",
-                        new { transactionId }),
+                        new { id }),
                     "update transaction",
                     "PUT"));
                 
@@ -310,7 +310,7 @@ namespace TradeTracker.Api.Controllers
                 new LinkDto(
                     Url.Link(
                         "PatchTransaction",
-                        new { transactionId }),
+                        new { id }),
                     "patch transaction",
                     "PATCH"));
 
@@ -318,7 +318,7 @@ namespace TradeTracker.Api.Controllers
                 new LinkDto(
                     Url.Link(
                         "DeleteTransaction",
-                        new { transactionId }),
+                        new { id }),
                     "delete transaction",
                     "DELETE"));
 
@@ -327,7 +327,7 @@ namespace TradeTracker.Api.Controllers
 
 
         private IEnumerable<LinkDto> CreateLinksForTransactionCollection(
-            IEnumerable<Guid> transactionIds)
+            IEnumerable<Guid> ids)
         {
             var links = new List<LinkDto>();
 
@@ -335,7 +335,7 @@ namespace TradeTracker.Api.Controllers
                 new LinkDto(
                     Url.Link(
                         "GetTransactionCollection",
-                        new { transactionIds }),
+                        new { ids }),
                     "self",
                     "GET"));
             
