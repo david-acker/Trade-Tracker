@@ -231,10 +231,10 @@ namespace TradeTracker.Infrastructure.Services
             var sourceTransactionMap = await CreateSourceTransactionMap(symbol);
 
             decimal totalNotional = sourceTransactionMap
-                .Sum(p => p.LinkedQuantity * p.TradePrice);
+                .Sum(p => p.Quantity * p.TradePrice);
 
             decimal totalQuantity = sourceTransactionMap
-                .Sum(p => p.LinkedQuantity);
+                .Sum(p => p.Quantity);
 
             return Math.Round(totalNotional / totalQuantity, 2);
         }
@@ -246,15 +246,17 @@ namespace TradeTracker.Infrastructure.Services
         
             var position = await _authenticatedPositionRepository.GetBySymbolAsync(symbol);
 
-            var parametersForSymbol = new UnpagedTransactionsResourceParameters();
+            var parametersForSymbol = new UnpagedTransactionsResourceParameters()
+            {
+                SymbolSelection = new SymbolSelection(
+                    new List<string>() { symbol },
+                    SelectionType.Include),
+                TransactionType = TransactionType.Buy
+            };
 
             var symbolSelection = new SymbolSelection(
                 new List<string>() { symbol },
                 SelectionType.Include);
-
-            parametersForSymbol.SymbolSelection = symbolSelection;
-
-            parametersForSymbol.TransactionType = TransactionType.Buy;
 
             var transactionsForSymbol = await _authenticatedTransactionRepository
                 .GetUnpagedResponseAsync(parametersForSymbol);
@@ -271,26 +273,14 @@ namespace TradeTracker.Infrastructure.Services
                 if (remainingOpenQuantity > quantity)
                 {
                     sourceTransactionMap.Add(
-                        new SourceTransactionLink()
-                        {
-                            DateTime = transaction.DateTime,
-                            LinkedQuantity = quantity,
-                            TradePrice = transaction.TradePrice,
-                            TransactionId = transaction.TransactionId
-                        });
+                        new SourceTransactionLink(transaction, quantity));
 
                     remainingOpenQuantity -= quantity;
                 }
                 else
                 {
                     sourceTransactionMap.Add(
-                        new SourceTransactionLink()
-                        {
-                            DateTime = transaction.DateTime,
-                            LinkedQuantity = remainingOpenQuantity,
-                            TradePrice = transaction.TradePrice,
-                            TransactionId = transaction.TransactionId
-                        });
+                        new SourceTransactionLink(transaction, remainingOpenQuantity));
 
                     break;
                 }

@@ -1,18 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using TradeTracker.Application.Common.Interfaces.Persistence;
 using TradeTracker.Application.Common.Models.Resources.Responses;
 using TradeTracker.Application.ResourceParameters;
-using TradeTracker.Domain.Interfaces;
+using TradeTracker.Domain.Common;
 using TradeTracker.Persistence.Extensions;
 
 namespace TradeTracker.Persistence.Repositories
 {
     public class BaseRepository<TEntity, TPagedResourceParams, TUnpagedResourceParams> 
         : IAsyncRepository<TEntity, TPagedResourceParams, TUnpagedResourceParams> 
-            where TEntity : class, IAuthorizableEntity
+            where TEntity : BaseEntity
             where TPagedResourceParams : IPagedResourceParameters
             where TUnpagedResourceParams : IUnpagedResourceParameters
     {
@@ -29,6 +30,7 @@ namespace TradeTracker.Persistence.Repositories
         {
             return await _context.Set<TEntity>()
                 .ForAccessKey(accessKey)
+                .Where(t => t.Id == id)
                 .FirstOrDefaultAsync();
         }
 
@@ -61,7 +63,7 @@ namespace TradeTracker.Persistence.Repositories
                 .ToListAsync();
         }
 
-        public async Task<TEntity> AddAsync(TEntity entity)
+        public async virtual Task<TEntity> AddAsync(TEntity entity)
         {
             _context.Set<TEntity>().Add(entity);
             await _context.SaveChangesAsync();
@@ -69,7 +71,7 @@ namespace TradeTracker.Persistence.Repositories
             return entity;
         }
 
-        public async Task<IEnumerable<TEntity>> AddRangeAsync(IEnumerable<TEntity> entities)
+        public async virtual Task<IEnumerable<TEntity>> AddRangeAsync(IEnumerable<TEntity> entities)
         {
             _context.Set<TEntity>().AddRange(entities);
             await _context.SaveChangesAsync();
@@ -77,13 +79,13 @@ namespace TradeTracker.Persistence.Repositories
             return entities;
         }
 
-        public async Task UpdateAsync(TEntity entity)
+        public async virtual Task UpdateAsync(TEntity entity)
         {
             _context.Entry(entity).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(TEntity entity)
+        public async virtual Task DeleteAsync(TEntity entity)
         {
             _context.Set<TEntity>().Remove(entity);
             await _context.SaveChangesAsync();

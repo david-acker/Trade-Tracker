@@ -38,14 +38,7 @@ namespace TradeTracker.Persistence.Repositories
 
         public async Task<Transaction> AddAsync(Transaction transaction)
         {
-            var accessKey = GetAccessKey();
-
-            transaction.AccessKey = accessKey;
-
-            transaction.DomainEvents.Add(
-                new TransactionCreatedEvent(
-                    transaction.AccessKey,
-                    transaction.TransactionId));
+            transaction.AccessKey = GetAccessKey();
 
             return await _transactionRepository.AddAsync(transaction);
         }
@@ -62,34 +55,19 @@ namespace TradeTracker.Persistence.Repositories
                     return transaction;
                 });
 
-            var lastTransaction = transactionCollection.Last();
-            lastTransaction.DomainEvents.Add(
-                new TransactionCollectionCreatedEvent(transactionCollection));
-
             return await _transactionRepository.AddRangeAsync(transactionCollection); 
         }
 
         public async Task UpdateAsync(Transaction transaction)
         {
-            var accessKey = GetAccessKey();
-
-            transaction.AccessKey = accessKey;
+            transaction.AccessKey = GetAccessKey();
 
             await _transactionRepository.UpdateAsync(transaction);
         }
 
         public async Task DeleteAsync(Transaction transaction)
         {
-            var accessKey = GetAccessKey();
-
-            transaction.AccessKey = accessKey;
-
-            transaction.DomainEvents.Add(
-                new TransactionDeletedEvent(
-                    transaction.AccessKey,
-                    transaction.Symbol,
-                    transaction.Type,
-                    transaction.Quantity));
+            transaction.AccessKey = GetAccessKey();
 
             await _transactionRepository.DeleteAsync(transaction);
         }
