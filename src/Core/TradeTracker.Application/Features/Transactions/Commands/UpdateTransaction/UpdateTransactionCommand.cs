@@ -5,6 +5,6 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
 {
     public class UpdateTransactionCommand : UpdateTransactionCommandBase, IRequest
     {
-        public Guid TransactionId { get; set; }
+        public Guid Id { get; set; }
     }
 }
