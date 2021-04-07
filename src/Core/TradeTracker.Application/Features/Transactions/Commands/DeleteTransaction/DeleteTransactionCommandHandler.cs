@@ -24,11 +24,11 @@ namespace TradeTracker.Application.Features.Transactions.Commands.DeleteTransact
 
         public async Task<Unit> Handle(DeleteTransactionCommand request, CancellationToken cancellationToken)
         {   
-            var transaction = await _authenticatedTransactionRepository.GetByIdAsync(request.TransactionId);
+            var transaction = await _authenticatedTransactionRepository.GetByIdAsync(request.Id);
 
             if (transaction == null)
             {
-                throw new NotFoundException(nameof(Transaction), request.TransactionId);
+                throw new NotFoundException(nameof(Transaction), request.Id);
             }
 
             await _authenticatedTransactionRepository.DeleteAsync(transaction);
