@@ -42,18 +42,18 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
             var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
             var transactionId = Guid.Parse("3e2e267a-ab63-477f-92a0-7350ceac8d49");
 
-            var query = new GetTransactionQuery() { TransactionId = transactionId };
+            var query = new GetTransactionQuery() { Id = transactionId };
 
             // Act
             var transaction = await handler.Handle(query, CancellationToken.None);
             
             // Assert
             transaction.Should()
-                .Match<TransactionForReturnDto>((t) => t.TransactionId == transactionId);
+                .Match<TransactionForReturn>((t) => t.Id == transactionId);
         }
 
         [Fact]
-        public async Task Handle_InvalidRequestMissingTransactionId_ThrowsValidationException()
+        public async Task Handle_InvalidRequestMissingId_ThrowsValidationException()
         {
             // Arrange
             var handler = new GetTransactionQueryHandler(
@@ -70,7 +70,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
             // Assert
             await act.Should()
                 .ThrowAsync<ValidationException>()
-                .Where(e => e.ValidationErrors.Contains("A valid TransactionId is required."));
+                .Where(e => e.ValidationErrors.Contains("A valid Id is required."));
         }
 
         [Fact]
@@ -84,7 +84,7 @@ namespace TradeTracker.Application.UnitTests.Transactions.Queries
             var transactionId = Guid.NewGuid();
             var accessKey = Guid.Parse("e373eae5-9e71-43ad-8b31-09b141da6547");
 
-            var query = new GetTransactionQuery() { TransactionId = transactionId };
+            var query = new GetTransactionQuery() { Id = transactionId };
 
             // Act
             Func<Task> act = async () => await handler.Handle(query, CancellationToken.None);
