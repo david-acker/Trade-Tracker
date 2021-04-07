@@ -35,11 +35,11 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
         {
             await ValidateRequest(request);
 
-            var transaction = await _authenticatedTransactionRepository.GetByIdAsync(request.TransactionId);
+            var transaction = await _authenticatedTransactionRepository.GetByIdAsync(request.Id);
 
             if (transaction == null)
             {
-                throw new NotFoundException(nameof(Transaction), request.TransactionId);
+                throw new NotFoundException(nameof(Transaction), request.Id);
             }
 
             var ifMatchHeader = _entityTagService.GetEntityTagFromHeader();
@@ -50,23 +50,11 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
 
                 if (ETagComparer.IsConflict(transactionForReturn, ifMatchHeader))
                 {
-                    throw new ResourceStateConflictException(nameof(Transaction), request.TransactionId);
+                    throw new ResourceStateConflictException(nameof(Transaction), request.Id);
                 }
             }
 
-            string symbolBeforeModification = transaction.Symbol;
-            TransactionType typeBeforeModification = transaction.Type;
-            decimal quantityBeforeModification = transaction.Quantity;
-
             _mapper.Map(request, transaction, typeof(UpdateTransactionCommand), typeof(Transaction));
-
-            transaction.DomainEvents.Add(
-                new TransactionModifiedEvent(
-                    transaction.AccessKey, 
-                    transaction.TransactionId, 
-                    symbolBeforeModification,
-                    typeBeforeModification,
-                    quantityBeforeModification));
 
             await _authenticatedTransactionRepository.UpdateAsync(transaction);
 
