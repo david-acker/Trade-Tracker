@@ -3,9 +3,9 @@ using TradeTracker.Application.Models.Common.Resources.Responses;
 
 namespace TradeTracker.Application.Features.Positions
 {
-    public class DetailedPositionForReturnWithLinksDto : DetailedPositionForReturnDto
+    public class DetailedPositionForReturnWithLinks : DetailedPositionForReturn
     {
-        public IEnumerable<LinkDto> Links { get; set; }
+        public IEnumerable<Link> Links { get; set; }
     }
 }
 

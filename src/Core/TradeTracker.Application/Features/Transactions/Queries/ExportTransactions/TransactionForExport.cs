@@ -1,10 +1,10 @@
 using System;
 
-namespace TradeTracker.Application.Features.Transactions
+namespace TradeTracker.Application.Features.Transactions.Queries.ExportTransactions
 {
-    public class TransactionForReturnDto
+    public class TransactionForExport
     {
-        public Guid Id { get; set; }
+        public Guid TransactionId { get; set; }
         public DateTime DateTime { get; set; }
         public string Symbol { get; set; }
         public string Type { get; set; }

@@ -8,8 +8,6 @@ using TradeTracker.Application.Common.Exceptions;
 using TradeTracker.Application.Common.Interfaces;
 using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Domain.Entities;
-using TradeTracker.Domain.Enums;
-using TradeTracker.Domain.Events;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction
 {
@@ -46,7 +44,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.UpdateTransact
 
             if (!String.IsNullOrWhiteSpace(ifMatchHeader))
             {
-                var transactionForReturn = _mapper.Map<TransactionForReturnDto>(transaction);
+                var transactionForReturn = _mapper.Map<TransactionForReturn>(transaction);
 
                 if (ETagComparer.IsConflict(transactionForReturn, ifMatchHeader))
                 {

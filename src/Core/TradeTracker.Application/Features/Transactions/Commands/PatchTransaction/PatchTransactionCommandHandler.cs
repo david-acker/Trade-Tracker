@@ -10,8 +10,6 @@ using TradeTracker.Application.Common.Interfaces;
 using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using TradeTracker.Domain.Entities;
-using TradeTracker.Domain.Enums;
-using TradeTracker.Domain.Events;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransaction
 {
@@ -45,7 +43,7 @@ namespace TradeTracker.Application.Features.Transactions.Commands.PatchTransacti
             
             if (!String.IsNullOrWhiteSpace(ifMatchHeader))
             {
-                var transactionForReturn = _mapper.Map<TransactionForReturnDto>(existingTransaction);
+                var transactionForReturn = _mapper.Map<TransactionForReturn>(existingTransaction);
 
                 if (ETagComparer.IsConflict(transactionForReturn, ifMatchHeader))
                 {

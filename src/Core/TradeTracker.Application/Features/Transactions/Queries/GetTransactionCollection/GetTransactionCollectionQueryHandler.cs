@@ -14,7 +14,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
 {
     public class GetTransactionCollectionQueryHandler :
         ValidatableRequestBehavior<GetTransactionCollectionQuery>,
-        IRequestHandler<GetTransactionCollectionQuery, IEnumerable<TransactionForReturnDto>>
+        IRequestHandler<GetTransactionCollectionQuery, IEnumerable<TransactionForReturn>>
     {
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly IMapper _mapper;
@@ -27,7 +27,7 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<TransactionForReturnDto>> Handle(GetTransactionCollectionQuery request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<TransactionForReturn>> Handle(GetTransactionCollectionQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
@@ -41,9 +41,9 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactionC
                 throw new NotFoundException(nameof(Transaction), transactionIdsNotFound);
             }
 
-            var transactionCollectionDto = _mapper.Map<IEnumerable<TransactionForReturnDto>>(transactionCollection);
+            var transactionCollectionForReturn = _mapper.Map<IEnumerable<TransactionForReturn>>(transactionCollection);
 
-            return transactionCollectionDto;
+            return transactionCollectionForReturn;
         }
 
         private List<string> GetTransactionIdsNotFound(

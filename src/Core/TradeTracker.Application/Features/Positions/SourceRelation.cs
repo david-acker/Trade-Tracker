@@ -3,7 +3,7 @@ using TradeTracker.Domain.Entities;
 
 namespace TradeTracker.Application.Features.Positions
 {
-    public class SourceTransactionLink
+    public class SourceRelation
     {
          public Guid TransactionId { get; set; }
         public DateTime DateTime { get; set; }
@@ -11,7 +11,7 @@ namespace TradeTracker.Application.Features.Positions
         public decimal Quantity { get; set; }
        
 
-        public SourceTransactionLink(Transaction transaction, decimal quantity)
+        public SourceRelation(Transaction transaction, decimal quantity)
         {
             TransactionId = transaction.Id;
             DateTime = transaction.DateTime;

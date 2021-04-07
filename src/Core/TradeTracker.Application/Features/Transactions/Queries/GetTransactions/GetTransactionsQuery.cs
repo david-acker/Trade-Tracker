@@ -1,16 +1,15 @@
-using System;
 using MediatR;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionsQuery : IRequest<PagedTransactionsBaseDto>
+    public class GetTransactionsQuery : IRequest<PagedTransactionsBase>
     {
         public string OrderBy { get; set; }
         
         public string TransactionType { get; set; }
 
-        public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 25;
+        public int PageNumber { get; set; } 
+        public int PageSize { get; set; }
 
         public string SymbolSelection { get; set; }
         

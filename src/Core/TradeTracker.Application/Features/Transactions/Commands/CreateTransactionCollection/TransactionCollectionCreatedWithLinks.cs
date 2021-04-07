@@ -4,10 +4,10 @@ using TradeTracker.Application.Models.Common.Resources.Responses;
 
 namespace TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection
 {
-    public class TransactionCollectionCreatedWithLinksDto
+    public class TransactionCollectionCreatedWithLinks
     {
-        public IEnumerable<TransactionForReturnWithLinksDto> Items { get; set; }
+        public IEnumerable<TransactionForReturnWithLinks> Items { get; set; }
 
-        public IEnumerable<LinkDto> Links { get; set; }
+        public IEnumerable<Link> Links { get; set; }
     }
 }

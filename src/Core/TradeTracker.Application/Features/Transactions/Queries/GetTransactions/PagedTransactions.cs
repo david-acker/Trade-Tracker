@@ -2,8 +2,8 @@ using System.Collections.Generic;
 
 namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class PagedTransactionsDto 
+    public class PagedTransactions
     {
-        public IEnumerable<TransactionForReturnDto> Items { get; set; }
+        public IEnumerable<TransactionForReturn> Items { get; set; }
     }
 }

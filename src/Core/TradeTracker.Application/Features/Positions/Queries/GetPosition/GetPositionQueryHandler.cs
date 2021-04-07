@@ -12,7 +12,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
 {
     public class GetPositionQueryHandler : 
         ValidatableRequestBehavior<GetPositionQuery>,
-        IRequestHandler<GetPositionQuery, PositionForReturnDto>
+        IRequestHandler<GetPositionQuery, PositionForReturn>
     {
         private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
         private readonly IMapper _mapper;
@@ -28,7 +28,7 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
             _positionService = positionService;
         }
 
-        public async Task<PositionForReturnDto> Handle(GetPositionQuery request, CancellationToken cancellationToken)
+        public async Task<PositionForReturn> Handle(GetPositionQuery request, CancellationToken cancellationToken)
         {
             await ValidateRequest(request);
 
@@ -39,14 +39,14 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
                 throw new NotFoundException(nameof(Position), request.Symbol);
             }
             
-            var positionForReturn = _mapper.Map<PositionForReturnDto>(position);
+            var positionForReturn = _mapper.Map<PositionForReturn>(position);
 
             positionForReturn.AverageCostBasis = await _positionService
                 .CalculateAverageCostBasis( 
                     request.Symbol);
 
-            positionForReturn.SourceTransactionMap = await _positionService
-                .CreateSourceTransactionMap(
+            positionForReturn.SourceRelations = await _positionService
+                .CreateSourceRelations(
                     request.Symbol);
 
             return positionForReturn;

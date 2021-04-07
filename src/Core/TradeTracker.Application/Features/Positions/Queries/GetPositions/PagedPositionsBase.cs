@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
-    public class PagedPositionsBaseDto 
+    public class PagedPositionsBase
     {
         public int CurrentPage { get; set; }
         public int TotalPages { get; set; }
@@ -12,6 +12,6 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
         public bool HasPrevious { get; set; }
         public bool HasNext { get; set; }
 
-        public IEnumerable<PositionForReturnDto> Items { get; set; }
+        public IEnumerable<PositionForReturn> Items { get; set; }
     }
 }
