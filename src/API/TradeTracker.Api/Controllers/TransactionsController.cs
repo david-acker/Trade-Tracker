@@ -236,6 +236,7 @@ namespace TradeTracker.Api.Controllers
         /// <param name="id">The id of the transaction</param>
         /// <param name="mediaType">The request media type specified in the Accept header.</param>
         /// <remarks>
+        /// Example:
         /// 
         ///     GET /api/transactions/{id} 
         ///
