@@ -7,14 +7,19 @@ namespace TradeTracker.Api.Services
 {
     public class LoggedInUserService : ILoggedInUserService
     {
-        private string _accessKey;
-        public Guid AccessKey { get => Guid.Parse(_accessKey); }
+        private Guid _accessKey = Guid.Empty;
+        public Guid AccessKey { get => _accessKey; }
         public string UserId { get; }
 
         public LoggedInUserService(IHttpContextAccessor httpContextAccessor)
         {
-            _accessKey = httpContextAccessor.HttpContext?.User?.FindFirstValue("AccessKey");
+            Guid.TryParse(httpContextAccessor.HttpContext?.User?.FindFirstValue("AccessKey"), out _accessKey);
             UserId = httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+        }
+
+        public bool IsLoggedIn()
+        {
+            return AccessKey != Guid.Empty;
         }
     }
 }

@@ -28,8 +28,7 @@ namespace TradeTracker.Application.Features.Transactions.EventHandlers
             _logger.LogInformation($"TradeTracker Domain Event: {domainEvent.GetType().Name} received.");
 
             _positionTrackingService.RefreshAfterCollectionCreation(
-                accessKey: domainEvent.AccessKey, 
-                transactionMap: domainEvent.TransactionMap);
+                domainEvent.TransactionMap);
         
             return Task.CompletedTask;
         }

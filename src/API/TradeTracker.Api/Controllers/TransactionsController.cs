@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,6 @@ using TradeTracker.Api.ActionConstraints;
 using TradeTracker.Api.Helpers;
 using TradeTracker.Api.Utilities;
 using TradeTracker.Application.Common.Models.Resources.Responses;
-using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.DeleteTransaction;
@@ -53,214 +53,171 @@ namespace TradeTracker.Api.Controllers
         /// Get a paged list of transactions.
         /// </summary>
         /// <param name="query">The resource parameters for specifying the returned transactions</param>
-        /// <remarks>
-        /// Sample request: \
-        /// GET /api/transactions \
-        /// { \
-        ///     "orderBy": "DateTime", \
-        ///     "pageNumber": "2" \
-        ///     "pageSize": "50", \
-        ///     "including": [ \
-        ///         "ABC", \
-        ///         "XYZ", \
-        ///         "MNO" \
-        ///     ], \
-        ///     "rangeStart": "2020-06-01T00:00:00", \
-        ///     "rangeEnd": "2021-01-01T00:00:00" \
+        /// <param name="mediaType">The request media type specified in the Accept header.</param>
+        /// <example>
+        /// <code>
+        /// GET /api/transactions
+        ///
+        /// { 
+        ///     "orderBy": "DateTime", 
+        ///     "pageNumber": "2" 
+        ///     "pageSize": "50", 
+        ///     "including": [ 
+        ///         "ABC", 
+        ///         "XYZ", 
+        ///         "MNO" 
+        ///     ], 
+        ///     "rangeStart": "2020-06-01T00:00:00", 
+        ///     "rangeEnd": "2021-01-01T00:00:00" 
         /// } 
-        /// </remarks>
+        /// </code>
+        /// </example>
         /// <response code="200">Returns any paged transactions matching parameters</response>
         /// <response code="422">Validation Error</response>
         [HttpGet(Name = "GetPagedTransactions")]
         [Consumes("application/json")]
         [Produces("application/json",
-            "application/vnd.trade.pagedtransactions+json")]
+            "application/vnd.trade.pagedtransactions+json",
+            "application/vnd.trade.pagedtransactions.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", 
             "application/json",
-            "application/vnd.trade.pagedtransactions+json")]
-        public async Task<ActionResult<IEnumerable<TransactionForReturn>>> GetPagedTransactions(
-            [FromQuery] GetTransactionsQuery query)
+            "application/vnd.trade.pagedtransactions+json",
+            "application/vnd.trade.pagedtransactions.hateoas+json")]
+        public async Task<IActionResult> GetPagedTransactions(
+            [FromQuery] GetTransactionsQuery query,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetPagedTransactions)} was called.");
 
             var pagedTransactionsBase = await _mediator.Send(query);
 
-            Response.Headers.Add("X-Paging-PageNumber", pagedTransactionsBase.CurrentPage.ToString());
-            Response.Headers.Add("X-Paging-PageSize", pagedTransactionsBase.PageSize.ToString());
-            Response.Headers.Add("X-Paging-PageCount", pagedTransactionsBase.TotalPages.ToString());
-            Response.Headers.Add("X-Paging-TotalRecordCount", pagedTransactionsBase.TotalCount.ToString());
+            bool includeLinks = MediaTypeHeaderValue
+                .Parse(mediaType)
+                .SubTypeWithoutSuffix
+                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+            
+            if (includeLinks)
+            {
+                var pagedTransactionsWithLinks = new PagedTransactionsWithLinks();
 
-            return Ok(pagedTransactionsBase.Items);
+                pagedTransactionsWithLinks.Items = _mapper
+                .Map<IEnumerable<TransactionForReturnWithLinks>>(pagedTransactionsBase.Items);
+
+                pagedTransactionsWithLinks.Items = pagedTransactionsWithLinks.Items
+                    .Select(transaction =>
+                    {
+                        transaction.Links = 
+                            CreateLinksForTransaction(transaction.Id);
+
+                        return transaction;
+                    });
+                
+                pagedTransactionsWithLinks.Links = 
+                    CreateLinksForTransactions(
+                        query,
+                        pagedTransactionsBase.HasNext,
+                        pagedTransactionsBase.HasPrevious);
+                
+                pagedTransactionsWithLinks.Metadata =
+                    new PaginationMetadata()
+                    {
+                        PageNumber = pagedTransactionsBase.CurrentPage,
+                        PageSize = pagedTransactionsBase.PageSize,
+                        PageCount = pagedTransactionsBase.TotalPages,
+                        TotalRecordCount = pagedTransactionsBase.TotalCount,
+                    };
+
+                return Ok(pagedTransactionsWithLinks);
+            }
+            else
+            {
+                Response.Headers.Add("X-Paging-PageNumber", pagedTransactionsBase.CurrentPage.ToString());
+                Response.Headers.Add("X-Paging-PageSize", pagedTransactionsBase.PageSize.ToString());
+                Response.Headers.Add("X-Paging-PageCount", pagedTransactionsBase.TotalPages.ToString());
+                Response.Headers.Add("X-Paging-TotalRecordCount", pagedTransactionsBase.TotalCount.ToString());
+
+                return Ok(pagedTransactionsBase.Items);
+            } 
         }
-
-
-        /// <summary>
-        /// Get a paged list of transactions.
-        /// </summary>
-        /// <param name="query">The resource parameters for specifying the returned transactions</param>
-        /// <remarks>
-        /// Example: \
-        /// GET /api/transactions \
-        /// { \
-        ///     "orderBy": "DateTime", \
-        ///     "pageNumber": "2" \
-        ///     "pageSize": "50", \
-        ///     "including": [ \ 
-        ///         "ABC", \
-        ///         "XYZ", \
-        ///         "MNO" \
-        ///     ], \
-        ///     "rangeStart": "2020-06-01T00:00:00", \
-        ///     "rangeEnd": "2021-01-01T00:00:00" \
-        /// } 
-        /// </remarks>
-        /// <response code="200">Returns any paged transactions matching parameters</response>
-        /// <response code="422">Validation Error</response>
-        [HttpGet(Name = "GetPagedTransactionsWithLinks")]
-        [Consumes("application/json")]
-        [Produces("application/vnd.trade.pagedtransactions.hateoas+json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
-        [RequestHeaderMatchesMediaType("Accept", 
-            "application/vnd.trade.pagedtransactions.hateoas+json")]
-        [ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<ActionResult<PagedTransactionsWithLinks>> GetPagedTransactionsWithLinks(
-            [FromQuery] GetTransactionsQuery query)
-        {
-            _logger.LogInformation($"TransactionsController: {nameof(GetPagedTransactionsWithLinks)} was called.");
-            
-            var pagedTransactionsBase = await _mediator.Send(query);
-
-            var pagedTransactionsWithLinks = new PagedTransactionsWithLinks();
-
-            pagedTransactionsWithLinks.Items = _mapper
-            .Map<IEnumerable<TransactionForReturnWithLinks>>(pagedTransactionsBase.Items);
-
-            pagedTransactionsWithLinks.Items = pagedTransactionsWithLinks.Items
-                .Select(transaction =>
-                {
-                    transaction.Links = CreateLinksForTransaction(
-                        transaction.Id);
-
-                    return transaction;
-                });
-            
-            pagedTransactionsWithLinks.Links = 
-                CreateLinksForTransactions(
-                    query,
-                    pagedTransactionsBase.HasNext,
-                    pagedTransactionsBase.HasPrevious);
-            
-            pagedTransactionsWithLinks.Metadata =
-                new PaginationMetadata()
-                {
-                    PageNumber = pagedTransactionsBase.CurrentPage,
-                    PageSize = pagedTransactionsBase.PageSize,
-                    PageCount = pagedTransactionsBase.TotalPages,
-                    TotalRecordCount = pagedTransactionsBase.TotalCount,
-                };
-
-            return Ok(pagedTransactionsWithLinks);
-        }
-
 
         /// <summary>
         /// Create a transaction.
         /// </summary>
         /// <param name="command">The transaction to be created</param>
-        /// <remarks>
-        /// Example: \
-        /// POST /api/transactions \
-        /// { \
-        ///     "dateTime": "2020-01-01T12:30:15", \
-        ///     "symbol": "ABC" \
-        ///     "type": "BuyToOpen", \
-        ///     "quantity": "2.5", \
-        ///     "notional": "13.75", \
-        ///     "tradePrice": "5.50" \
+        /// <param name="mediaType">The request media type specified in the Accept header.</param>
+        /// <example>
+        /// <code>
+        /// POST /api/transactions 
+        ///
+        /// { 
+        ///     "dateTime": "2020-01-01T12:30:15", 
+        ///     "symbol": "ABC" 
+        ///     "type": "BuyToOpen", 
+        ///     "quantity": "2.5", 
+        ///     "notional": "13.75", 
+        ///     "tradePrice": "5.50" 
         /// } 
-        /// </remarks>
+        /// </code>
+        /// </example>
         /// <response code="422">Validation Error</response>
         [HttpPost(Name = "CreateTransaction")]
         [Consumes("application/json")]
         [Produces("application/json",
-            "application/vnd.trade.transaction+json")]
+            "application/vnd.trade.transaction+json",
+            "application/vnd.trade.transaction.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", 
             "application/json",
-            "application/vnd.trade.transaction+json")]
-        public async Task<IActionResult> CreateTransaction(
-            [FromBody] CreateTransactionCommand command)
-        {
-            _logger.LogInformation($"TransactionsController: {nameof(CreateTransaction)} was called.");
-
-            var transactionCreated = await _mediator.Send(command);
-
-            return CreatedAtAction(
-                "GetTransaction",
-                new { transactionId = transactionCreated.Id },
-                transactionCreated);
-        }
-
-
-        /// <summary>
-        /// Create a transaction.
-        /// </summary>
-        /// <param name="command">The transaction to be created</param>
-        /// <remarks>
-        /// Example: \
-        /// POST /api/transactions \
-        /// { \
-        ///     "dateTime": "2020-01-01T12:30:15", \
-        ///     "symbol": "ABC" \
-        ///     "type": "BuyToOpen", \
-        ///     "quantity": "2.5", \
-        ///     "notional": "13.75", \
-        ///     "tradePrice": "5.50" \
-        /// } 
-        /// </remarks>
-        /// <response code="422">Validation Error</response>
-        [HttpPost(Name = "CreateTransactionWithLinks")]
-        [Consumes("application/json")]
-        [Produces("application/vnd.trade.transaction.hateoas+json")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
-        [RequestHeaderMatchesMediaType("Accept", 
+            "application/vnd.trade.transaction+json",
             "application/vnd.trade.transaction.hateoas+json")]
-        public async Task<ActionResult<TransactionForReturnWithLinks>> CreateTransactionWithLinks(
-            [FromBody] CreateTransactionCommand command)
+        public async Task<IActionResult> CreateTransaction(
+            [FromBody] CreateTransactionCommand command,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             _logger.LogInformation($"TransactionsController: {nameof(CreateTransaction)} was called.");
 
             var transactionCreated = await _mediator.Send(command);
 
-            var transactionCreatedWithLinks =
+            bool includeLinks = MediaTypeHeaderValue
+                .Parse(mediaType)
+                .SubTypeWithoutSuffix
+                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+
+            if (includeLinks)
+            {
+                var transactionCreatedWithLinks =
                 _mapper.Map<TransactionForReturnWithLinks>(transactionCreated); 
 
-            transactionCreatedWithLinks.Links = CreateLinksForTransaction(
-                transactionCreatedWithLinks.Id);
+                transactionCreatedWithLinks.Links = CreateLinksForTransaction(
+                    transactionCreatedWithLinks.Id);
 
-            return CreatedAtAction(
-                "GetTransaction",
-                new { transactionId = transactionCreatedWithLinks.Id },
-                transactionCreatedWithLinks);
+                return CreatedAtAction(
+                    "GetTransaction",
+                    new { transactionId = transactionCreatedWithLinks.Id },
+                    transactionCreatedWithLinks);
+            }
+            else
+            {
+                return CreatedAtAction(
+                    "GetTransaction",
+                    new { transactionId = transactionCreated.Id },
+                    transactionCreated);
+            }
         }
-
 
         /// <summary>
         /// Options for /api/transactions URI.
         /// </summary>
-        /// <remarks>
-        /// Example: \
+        /// <example>
+        /// <code>
         /// OPTIONS /api/transactions 
-        /// </remarks>
+        /// </code>
+        /// </example>
         [HttpOptions(Name = "OptionsForTransactions")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactions()
@@ -276,62 +233,50 @@ namespace TradeTracker.Api.Controllers
         /// Get a transaction by its id.
         /// </summary>
         /// <param name="id">The id of the transaction</param>
-        /// <remarks>
-        /// Example: \
+        /// <param name="mediaType">The request media type specified in the Accept header.</param>
+        /// <example>
+        /// <code>
         /// GET /api/transactions/{id} 
-        /// </remarks>
+        /// </code>
+        /// </example>
         /// <response code="200">Returns the requested transaction</response>
-        [EntityTagFilter]
         [HttpGet("{id}", Name = "GetTransaction")]
+        [EntityTagFilter]
         [Produces("application/json",
-            "application/vnd.trade.transaction+json")]
+            "application/vnd.trade.transaction+json",
+            "application/vnd.trade.transaction.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [RequestHeaderMatchesMediaType("Accept", 
             "application/json",
-            "application/vnd.trade.transaction+json")]
-        public async Task<ActionResult<TransactionForReturn>> GetTransaction(
-            [FromRoute] Guid id)
+            "application/vnd.trade.transaction+json",
+            "application/vnd.trade.transaction.hateoas+json")]
+        public async Task<IActionResult> GetTransaction(
+            [FromRoute] Guid id,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             _logger.LogInformation($"TransactionsController: {nameof(GetTransaction)} was called.");
 
-            var query = new GetTransactionQuery() { Id = id };
-            
-            var transaction = await _mediator.Send(query);
+            var transaction = await _mediator.Send(
+                new GetTransactionQuery() { Id = id });
 
-            return Ok(transaction);
-        }
+            bool includeLinks = MediaTypeHeaderValue
+                .Parse(mediaType)
+                .SubTypeWithoutSuffix
+                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
 
+            if (includeLinks)
+            {
+                var transactionWithLinks = _mapper.Map<TransactionForReturnWithLinks>(transaction);
 
-        /// <summary>
-        /// Get a transaction by its id.
-        /// </summary>
-        /// <param name="id">The id of the transaction</param>
-        /// <remarks>
-        /// Example: \
-        /// GET /api/transactions/{id} 
-        /// </remarks>
-        /// <response code="200">Returns the requested transaction</response>
-        [HttpGet("{id}", Name = "GetTransactionWithLinks")]
-        [Produces("application/vnd.trade.transaction.hateoas+json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [RequestHeaderMatchesMediaType("Accept", 
-            "application/vnd.trade.transaction.hateoas+json")]
-        public async Task<ActionResult<TransactionForReturnWithLinks>> GetTransactionWithLinks(
-            [FromRoute] Guid id)
-        {
-            _logger.LogInformation($"TransactionsController: {nameof(GetTransactionWithLinks)} was called.");
+                transactionWithLinks.Links = CreateLinksForTransaction(id);
 
-            var query = new GetTransactionQuery() { Id = id };
-            
-            var transaction = await _mediator.Send(query);
-
-            var transactionWithLinks = _mapper.Map<TransactionForReturnWithLinks>(transaction);
-
-            transactionWithLinks.Links = CreateLinksForTransaction(id);
-
-            return Ok(transactionWithLinks);
+                return Ok(transactionWithLinks);
+            }
+            else
+            {
+                return Ok(transaction);
+            } 
         }
 
 
@@ -341,18 +286,20 @@ namespace TradeTracker.Api.Controllers
         /// <param name="id">The id for the transaction to be updated</param>
         /// <param name="command">The transaction with updated values</param>
         /// <response code="422">Validation Error</response>
-        /// <remarks>
-        /// Example: \
-        /// PUT /api/transactions/{id} \
-        /// { \
-        ///     "dateTime": "2020-01-15T15:00:00", \
-        ///     "symbol": "CBA" \
-        ///     "type": "SellToClose", \
-        ///     "quantity": "1.0", \
-        ///     "notional": "12.50", \
-        ///     "tradePrice": "12.50" \
+        /// <example>
+        /// <code>
+        /// PUT /api/transactions/{id} 
+        ///
+        /// { 
+        ///     "dateTime": "2020-01-15T15:00:00", 
+        ///     "symbol": "CBA",
+        ///     "type": "SellToClose", 
+        ///     "quantity": "1.0", 
+        ///     "notional": "12.50", 
+        ///     "tradePrice": "12.50" 
         /// } 
-        /// </remarks>
+        /// </code>
+        /// </example>
         [HttpPut("{id}", Name = "UpdateTransaction")]
         [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -377,20 +324,24 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="id">The id for the transaction to be updated</param>
         /// <param name="patchDocument">The set of operations to be applied to the transaction</param>
-        /// Example: \
-        /// PATCH /api/transactions/{id} \
-        /// [ \
-        ///     { \
-        ///         "op": "replace", \
-        ///         "path": "/quantity", \
-        ///         "value": "25" \
-        ///     }, \
-        ///     { \
-        ///         "op": "replace", \
+        /// <example>
+        /// <code>
+        /// PATCH /api/transactions/{id} 
+        ///
+        /// [ 
+        ///     { 
+        ///         "op": "replace", 
+        ///         "path": "/quantity", 
+        ///         "value": "25" 
+        ///     }, 
+        ///     { 
+        ///         "op": "replace", 
         ///         "path": "/notional",
-        ///         "value": "75" \
-        ///     } \
+        ///         "value": "75" 
+        ///     } 
         /// ]
+        /// </code>
+        /// </example>
         /// <response code="422">Validation Error</response>
         [HttpPatch("{id}", Name = "PatchTransaction")]
         [Consumes("application/json")]
@@ -419,10 +370,11 @@ namespace TradeTracker.Api.Controllers
         /// Delete a transaction.
         /// </summary>
         /// <param name="id">The id for the transaction to be deleted</param>
-        /// <remarks>
-        /// Example: \
+        /// <example>
+        /// <code>
         /// DELETE /api/transactions/{id} 
-        /// </remarks>
+        /// </code>
+        /// </example>
         [HttpDelete("{id}", Name = "DeleteTransaction")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -441,10 +393,11 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/transactions/{id} URI.
         /// </summary>
-        /// <remarks>
-        /// Example: \
+        /// <example>
+        /// <code>
         /// OPTIONS /api/transactions/{id} 
-        /// </remarks>
+        /// </code>
+        /// </example>
         [HttpOptions("{id}", Name = "OptionsForTransactionById")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactionById()
@@ -460,10 +413,11 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Get all transactions as a CSV file.
         /// </summary>
-        /// <remarks>
-        /// Example \
+        /// <example>
+        /// <code>
         /// GET /api/transactions/export 
-        /// </remarks>
+        /// </code>
+        /// </example>
         /// <response code="200"></response>
         [HttpGet("export", Name = "ExportTransactions")]
         [FileResultContentType("text/csv")]
@@ -485,10 +439,11 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/transactions/export URI.
         /// </summary>
-        /// <remarks>
-        /// Example: \
+        /// <example>
+        /// <code>
         /// OPTIONS /api/transactions/export 
-        /// </remarks>
+        /// </code>
+        /// </example>
         [HttpOptions("export", Name = "OptionsForExportTransactions")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForExportTransactions()

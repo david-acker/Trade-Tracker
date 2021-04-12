@@ -28,10 +28,9 @@ namespace TradeTracker.Application.Features.Transactions.EventHandlers
             _logger.LogInformation($"TradeTracker Domain Event: {domainEvent.GetType().Name} received.");
 
             _positionTrackingService.RefreshAfterDeletion(
-                accessKey: domainEvent.AccessKey, 
-                symbolBeforeDeletion: domainEvent.SymbolBeforeDeletion,
-                typeBeforeDeletion: domainEvent.TypeBeforeDeletion,
-                quantityBeforeDeletion: domainEvent.QuantityBeforeDeletion);
+                domainEvent.SymbolBeforeDeletion,
+                domainEvent.TypeBeforeDeletion,
+                domainEvent.QuantityBeforeDeletion);
         
             return Task.CompletedTask;
         }

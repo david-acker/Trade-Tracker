@@ -17,7 +17,6 @@ namespace TradeTracker.Domain.UnitTests.Events
                     {
                         new Transaction()
                         {
-                            AccessKey = Guid.Parse("fc0bd83d-8bc2-49a6-a6ab-b94c99ad7b1a"),
                             DateTime = new DateTime(2020, 1, 1),
                             Symbol = "A",
                             Type = TransactionType.Buy,
@@ -27,7 +26,6 @@ namespace TradeTracker.Domain.UnitTests.Events
                         },
                         new Transaction()
                         {
-                            AccessKey = Guid.Parse("fc0bd83d-8bc2-49a6-a6ab-b94c99ad7b1a"),
                             DateTime = new DateTime(2020, 1, 2),
                             Symbol = "B",
                             Type = TransactionType.Sell,
@@ -37,7 +35,6 @@ namespace TradeTracker.Domain.UnitTests.Events
                         },
                         new Transaction()
                         {
-                            AccessKey = Guid.Parse("fc0bd83d-8bc2-49a6-a6ab-b94c99ad7b1a"),
                             DateTime = new DateTime(2020, 1, 3),
                             Symbol = "A",
                             Type = TransactionType.Sell,

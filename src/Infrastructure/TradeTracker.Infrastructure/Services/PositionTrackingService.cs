@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using TradeTracker.Application.Common.Interfaces.Infrastructure;
 using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Domain.Enums;
@@ -11,83 +10,66 @@ namespace TradeTracker.Infrastructure.Services
     public class PositionTrackingService : IPositionTrackingService
     {
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
-        private readonly ILogger<PositionTrackingService> _logger;
         private readonly IPositionService _positionService;
 
         public PositionTrackingService(
             IAuthenticatedTransactionRepository authenticatedTransactionRepository,
-            ILogger<PositionTrackingService> logger, 
             IPositionService positionService)
         {
             _authenticatedTransactionRepository = authenticatedTransactionRepository;
-            _logger = logger;
             _positionService = positionService;
         }
 
-        public async Task RefreshAfterCreation(Guid accessKey, Guid transactionId)
+        public async Task RefreshAfterCreation(Guid transactionId)
         {
-            _logger.LogInformation($"PositionTrackingService: {nameof(RefreshAfterCreation)} was called.");
-
-            await _positionService.RefreshForTransaction(accessKey, transactionId);
+            await _positionService.RefreshForTransaction(transactionId);
         }
 
-        public async Task RefreshAfterCollectionCreation(Guid accessKey, Dictionary<string, List<Guid>> transactionMap)
+        public async Task RefreshAfterCollectionCreation(Dictionary<string, List<Guid>> transactionMap)
         {
-            _logger.LogInformation($"PositionTrackingService: {nameof(RefreshAfterCollectionCreation)} was called.");
-
             foreach (var entry in transactionMap)
-            {
-                await _positionService.RefreshForTransactionCollection(entry.Key, entry.Value, accessKey);
-            }
+                await _positionService.RefreshForTransactionCollection(entry.Value);
         }
 
-        public async Task RefreshAfterModification(
-            Guid accessKey, 
+        public async Task RefreshAfterModification( 
             Guid transactionId, 
             string symbolBeforeModification,
             TransactionType typeBeforeModification,
             decimal quantityBeforeModification)
         {
-            _logger.LogInformation($"PositionTrackingService: {nameof(RefreshAfterModification)} was called.");
-
-            var transaction = await _authenticatedTransactionRepository.GetByIdAsync(transactionId);
+            var transaction = await _authenticatedTransactionRepository
+                .GetByIdAsync(transactionId);
 
             string symbolForDetachment;
+
             if (symbolBeforeModification != transaction.Symbol)
-            {
                 symbolForDetachment = symbolBeforeModification;
-            }
             else
-            {
                 symbolForDetachment = transaction.Symbol;
-            }
 
-            await _positionService.DetachFromPosition(
-                accessKey: accessKey,
-                symbol: symbolForDetachment,
-                transactionType: typeBeforeModification,
-                quantity: quantityBeforeModification);
+            await _positionService
+                .DetachFromPosition(
+                    symbolForDetachment,
+                    typeBeforeModification,
+                    quantityBeforeModification);
 
-            await _positionService.AttachToPosition(
-                accessKey: accessKey,
-                symbol: transaction.Symbol,
-                transactionType: transaction.Type,
-                quantity: transaction.Quantity);
+            await _positionService
+                .AttachToPosition(
+                    transaction.Symbol,
+                    transaction.Type,
+                    transaction.Quantity);
         }
 
         public async Task RefreshAfterDeletion(
-            Guid accessKey, 
             string symbolBeforeDeletion, 
             TransactionType typeBeforeDeletion,
             decimal quantityBeforeDeletion)
         {
-            _logger.LogInformation($"PositionTrackingService: {nameof(RefreshAfterDeletion)} was called.");
-
-            await _positionService.DetachFromPosition(
-                accessKey: accessKey,
-                symbol: symbolBeforeDeletion,
-                transactionType: typeBeforeDeletion,
-                quantity: quantityBeforeDeletion);
+            await _positionService
+                .DetachFromPosition(
+                    symbolBeforeDeletion,
+                    typeBeforeDeletion,
+                    quantityBeforeDeletion);
         }
     }
 }
