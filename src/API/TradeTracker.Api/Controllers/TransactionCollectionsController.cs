@@ -47,30 +47,30 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="command">The transactions to be created</param>
         /// <param name="mediaType">The request media type specified in the Accept header.</param>
-        /// <example>
-        /// <code>
-        /// POST /api/transactioncollections 
+        /// <remarks>
+        /// Example:
         ///
-        /// [ 
-        ///     { 
-        ///         "dateTime": "2019-06-01T12:00:00", 
-        ///         "symbol": "XYZ" 
-        ///         "type": "SellToOpen", 
-        ///         "quantity": "1", 
-        ///         "notional": "50", 
-        ///         "tradePrice": "50" 
-        ///     }, 
-        ///     { 
-        ///         "dateTime": "2019-06-15T12:00:00", 
-        ///         "symbol": "XYZ" 
-        ///         "type": "BuyToClose", 
-        ///         "quantity": "1", 
-        ///         "notional": "40", 
-        ///         "tradePrice": "40" 
-        ///     }, 
-        /// ] 
-        /// </code>
-        /// </example>
+        ///     POST /api/transactioncollections 
+        ///     [ 
+        ///         { 
+        ///             "dateTime": "2019-06-01T12:00:00", 
+        ///             "symbol": "XYZ" 
+        ///             "type": "SellToOpen", 
+        ///             "quantity": "1", 
+        ///             "notional": "50", 
+        ///             "tradePrice": "50" 
+        ///         }, 
+        ///         { 
+        ///             "dateTime": "2019-06-15T12:00:00", 
+        ///             "symbol": "XYZ" 
+        ///             "type": "BuyToClose", 
+        ///             "quantity": "1", 
+        ///             "notional": "40", 
+        ///             "tradePrice": "40" 
+        ///         }, 
+        ///     ]
+        ///
+        /// </remarks>
         /// <response code="422">Validation Error</response>
         [HttpPost(Name = "CreateTransactionCollection")]
         [Consumes("application/json")]
@@ -146,11 +146,12 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/transactioncollections URI.
         /// </summary>
-        /// <example>
-        /// <code>
-        /// OPTIONS /api/transactioncollections 
-        /// </code>
-        /// </example>
+        /// <remarks>
+        /// Example:
+        ///
+        ///     OPTIONS /api/transactioncollections
+        ///
+        /// </remarks>
         [HttpOptions(Name = "OptionsForTransactionCollections")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactionCollections()
@@ -168,11 +169,12 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="ids">The ids for the transactions</param>
         /// <param name="mediaType">The request media type specified in the Accept header.</param>
-        /// <example>
-        /// <code>
-        /// GET /api/transactioncollections/{firstId},{secondId} 
-        /// </code>
-        /// </example>
+        /// <remarks>
+        /// Example:
+        ///
+        ///     GET /api/transactioncollections/{firstId},{secondId}
+        /// 
+        /// </remarks>
         /// <response code="200">Returns the requested transactions</response>
         [EntityTagFilter]
         [HttpGet("{ids}", Name = "GetTransactionCollection")]
@@ -229,11 +231,12 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/transactioncollections/{transactionIds} URI.
         /// </summary>
-        /// <example>
-        /// <code>
-        /// OPTIONS /api/transactioncollections/{firstId},{secondId} 
-        /// </code>
-        /// </example>
+        /// <remarks>
+        /// Example:
+        ///
+        ///     OPTIONS /api/transactioncollections/{firstId},{secondId} 
+        ///
+        /// </remarks>
         [HttpOptions("{ids}", Name = "OptionsForTransactionCollectionByIds")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactionCollectionByIds()

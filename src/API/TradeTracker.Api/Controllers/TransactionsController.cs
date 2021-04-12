@@ -54,24 +54,24 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="query">The resource parameters for specifying the returned transactions</param>
         /// <param name="mediaType">The request media type specified in the Accept header.</param>
-        /// <example>
-        /// <code>
-        /// GET /api/transactions
+        /// <remarks>
+        /// Example:
         ///
-        /// { 
-        ///     "orderBy": "DateTime", 
-        ///     "pageNumber": "2" 
-        ///     "pageSize": "50", 
-        ///     "including": [ 
-        ///         "ABC", 
-        ///         "XYZ", 
-        ///         "MNO" 
-        ///     ], 
-        ///     "rangeStart": "2020-06-01T00:00:00", 
-        ///     "rangeEnd": "2021-01-01T00:00:00" 
-        /// } 
-        /// </code>
-        /// </example>
+        ///     GET /api/transactions
+        ///     { 
+        ///         "orderBy": "DateTime", 
+        ///         "pageNumber": "2" 
+        ///         "pageSize": "50", 
+        ///         "including": [ 
+        ///             "ABC", 
+        ///             "XYZ", 
+        ///             "MNO" 
+        ///         ], 
+        ///         "rangeStart": "2020-06-01T00:00:00", 
+        ///         "rangeEnd": "2021-01-01T00:00:00" 
+        ///     } 
+        /// 
+        /// </remarks>
         /// <response code="200">Returns any paged transactions matching parameters</response>
         /// <response code="422">Validation Error</response>
         [HttpGet(Name = "GetPagedTransactions")]
@@ -148,20 +148,20 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="command">The transaction to be created</param>
         /// <param name="mediaType">The request media type specified in the Accept header.</param>
-        /// <example>
-        /// <code>
-        /// POST /api/transactions 
+        /// <remarks>
+        /// Example:
         ///
-        /// { 
-        ///     "dateTime": "2020-01-01T12:30:15", 
-        ///     "symbol": "ABC" 
-        ///     "type": "BuyToOpen", 
-        ///     "quantity": "2.5", 
-        ///     "notional": "13.75", 
-        ///     "tradePrice": "5.50" 
-        /// } 
-        /// </code>
-        /// </example>
+        ///     POST /api/transactions 
+        ///     { 
+        ///         "dateTime": "2020-01-01T12:30:15", 
+        ///         "symbol": "ABC" 
+        ///         "type": "BuyToOpen", 
+        ///         "quantity": "2.5", 
+        ///         "notional": "13.75", 
+        ///         "tradePrice": "5.50" 
+        ///     }
+        ///
+        /// </remarks>
         /// <response code="422">Validation Error</response>
         [HttpPost(Name = "CreateTransaction")]
         [Consumes("application/json")]
@@ -213,11 +213,12 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/transactions URI.
         /// </summary>
-        /// <example>
-        /// <code>
-        /// OPTIONS /api/transactions 
-        /// </code>
-        /// </example>
+        /// <remarks>
+        /// Example:
+        ///
+        ///     OPTIONS /api/transactions 
+        /// 
+        /// </remarks>
         [HttpOptions(Name = "OptionsForTransactions")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactions()
@@ -234,11 +235,11 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="id">The id of the transaction</param>
         /// <param name="mediaType">The request media type specified in the Accept header.</param>
-        /// <example>
-        /// <code>
-        /// GET /api/transactions/{id} 
-        /// </code>
-        /// </example>
+        /// <remarks>
+        /// 
+        ///     GET /api/transactions/{id} 
+        ///
+        /// </remarks>
         /// <response code="200">Returns the requested transaction</response>
         [HttpGet("{id}", Name = "GetTransaction")]
         [EntityTagFilter]
@@ -286,20 +287,20 @@ namespace TradeTracker.Api.Controllers
         /// <param name="id">The id for the transaction to be updated</param>
         /// <param name="command">The transaction with updated values</param>
         /// <response code="422">Validation Error</response>
-        /// <example>
-        /// <code>
-        /// PUT /api/transactions/{id} 
+        /// <remarks>
+        /// Example:
         ///
-        /// { 
-        ///     "dateTime": "2020-01-15T15:00:00", 
-        ///     "symbol": "CBA",
-        ///     "type": "SellToClose", 
-        ///     "quantity": "1.0", 
-        ///     "notional": "12.50", 
-        ///     "tradePrice": "12.50" 
-        /// } 
-        /// </code>
-        /// </example>
+        ///     PUT /api/transactions/{id} 
+        ///     { 
+        ///         "dateTime": "2020-01-15T15:00:00", 
+        ///         "symbol": "CBA",
+        ///         "type": "SellToClose", 
+        ///         "quantity": "1.0", 
+        ///         "notional": "12.50", 
+        ///         "tradePrice": "12.50" 
+        ///     } 
+        ///
+        /// </remarks>
         [HttpPut("{id}", Name = "UpdateTransaction")]
         [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -324,24 +325,24 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="id">The id for the transaction to be updated</param>
         /// <param name="patchDocument">The set of operations to be applied to the transaction</param>
-        /// <example>
-        /// <code>
-        /// PATCH /api/transactions/{id} 
+        /// <remarks>
+        /// Example:
         ///
-        /// [ 
-        ///     { 
-        ///         "op": "replace", 
-        ///         "path": "/quantity", 
-        ///         "value": "25" 
-        ///     }, 
-        ///     { 
-        ///         "op": "replace", 
-        ///         "path": "/notional",
-        ///         "value": "75" 
-        ///     } 
-        /// ]
-        /// </code>
-        /// </example>
+        ///     PATCH /api/transactions/{id} 
+        ///     [ 
+        ///         { 
+        ///             "op": "replace", 
+        ///             "path": "/quantity", 
+        ///             "value": "25" 
+        ///         }, 
+        ///         { 
+        ///             "op": "replace", 
+        ///             "path": "/notional",
+        ///             "value": "75" 
+        ///         } 
+        ///     ]
+        ///
+        /// </remarks>
         /// <response code="422">Validation Error</response>
         [HttpPatch("{id}", Name = "PatchTransaction")]
         [Consumes("application/json")]
@@ -370,11 +371,12 @@ namespace TradeTracker.Api.Controllers
         /// Delete a transaction.
         /// </summary>
         /// <param name="id">The id for the transaction to be deleted</param>
-        /// <example>
-        /// <code>
-        /// DELETE /api/transactions/{id} 
-        /// </code>
-        /// </example>
+        /// <remarks>
+        /// Example:
+        ///
+        ///     DELETE /api/transactions/{id} 
+        /// 
+        /// </remarks>
         [HttpDelete("{id}", Name = "DeleteTransaction")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -393,11 +395,12 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/transactions/{id} URI.
         /// </summary>
-        /// <example>
-        /// <code>
-        /// OPTIONS /api/transactions/{id} 
-        /// </code>
-        /// </example>
+        /// <remarks>
+        /// Example:
+        ///
+        ///     OPTIONS /api/transactions/{id} 
+        ///
+        /// </remarks>
         [HttpOptions("{id}", Name = "OptionsForTransactionById")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactionById()
@@ -413,11 +416,12 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Get all transactions as a CSV file.
         /// </summary>
-        /// <example>
-        /// <code>
-        /// GET /api/transactions/export 
-        /// </code>
-        /// </example>
+        /// <remarks>
+        /// Example:
+        ///
+        ///     GET /api/transactions/export
+        /// 
+        /// </remarks>
         /// <response code="200"></response>
         [HttpGet("export", Name = "ExportTransactions")]
         [FileResultContentType("text/csv")]
@@ -439,11 +443,12 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/transactions/export URI.
         /// </summary>
-        /// <example>
-        /// <code>
-        /// OPTIONS /api/transactions/export 
-        /// </code>
-        /// </example>
+        /// <remarks>
+        /// Example:
+        ///
+        ///     OPTIONS /api/transactions/export 
+        /// 
+        /// </remarks>
         [HttpOptions("export", Name = "OptionsForExportTransactions")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForExportTransactions()
