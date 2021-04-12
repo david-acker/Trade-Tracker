@@ -11,27 +11,22 @@ namespace TradeTracker.Application.Common.Interfaces.Infrastructure
         Task AttachToPosition(
             string symbol, 
             TransactionType transactionType, 
-            decimal quantity,
-            Guid accessKey);
+            decimal quantity);
 
         Task DetachFromPosition(
             string symbol, 
             TransactionType transactionType, 
-            decimal quantity,
-            Guid accessKey);
+            decimal quantity);
         
         Task RecalculateForSymbol(
             string symbol,
             Guid accessKey);
 
         Task RefreshForTransaction(
-            Guid transactionId,
-            Guid accessKey);
+            Guid transactionId);
 
         Task RefreshForTransactionCollection(
-            string symbol,
-            List<Guid> transactionIds,
-            Guid accessKey);
+            List<Guid> transactionIds);
 
         Task<decimal> CalculateAverageCostBasis(
             string symbol);

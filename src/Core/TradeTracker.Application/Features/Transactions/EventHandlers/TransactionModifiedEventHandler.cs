@@ -28,11 +28,10 @@ namespace TradeTracker.Application.Features.Transactions.EventHandlers
             _logger.LogInformation($"TradeTracker Domain Event: {domainEvent.GetType().Name} received.");
 
             _positionTrackingService.RefreshAfterModification(
-                accessKey: domainEvent.AccessKey, 
-                transactionId: domainEvent.TransactionId, 
-                symbolBeforeModification: domainEvent.SymbolBeforeModification,
-                typeBeforeModification: domainEvent.TypeBeforeModification,
-                quantityBeforeModification: domainEvent.QuantityBeforeModification);
+                domainEvent.TransactionId, 
+                domainEvent.SymbolBeforeModification,
+                domainEvent.TypeBeforeModification,
+                domainEvent.QuantityBeforeModification);
         
             return Task.CompletedTask;
         }

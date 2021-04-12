@@ -6,5 +6,7 @@ namespace TradeTracker.Application.Interfaces
     {
         Guid AccessKey { get; }
         string UserId { get; }
+
+        bool IsLoggedIn();
     }
 }

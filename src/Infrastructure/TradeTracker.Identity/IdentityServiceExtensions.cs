@@ -21,7 +21,8 @@ namespace TradeTracker.Identity
         {
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
 
-            services.AddDbContext<TradeTrackerIdentityDbContext>(options => options.UseSqlite(configuration.GetConnectionString("TradeTrackerIdentityConnectionString"),
+            services.AddDbContext<TradeTrackerIdentityDbContext>(
+                options => options.UseSqlite(configuration.GetConnectionString("TradeTrackerIdentityConnectionString"),
                 b => b.MigrationsAssembly(typeof(TradeTrackerIdentityDbContext).Assembly.FullName)));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -47,7 +48,8 @@ namespace TradeTracker.Identity
                         ClockSkew = TimeSpan.Zero,
                         ValidIssuer = configuration["JwtSettings:Issuer"],
                         ValidAudience = configuration["JwtSettings:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]))
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(configuration["JwtSettings:Key"]))
                     };
 
                     o.Events = new JwtBearerEvents()

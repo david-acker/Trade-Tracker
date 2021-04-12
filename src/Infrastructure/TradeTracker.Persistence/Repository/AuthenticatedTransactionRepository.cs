@@ -7,7 +7,6 @@ using TradeTracker.Application.Common.Models.Resources.Parameters.Transactions;
 using TradeTracker.Application.Common.Models.Resources.Responses;
 using TradeTracker.Application.Interfaces;
 using TradeTracker.Domain.Entities;
-using TradeTracker.Domain.Events;
 
 namespace TradeTracker.Persistence.Repositories
 {
@@ -26,14 +25,10 @@ namespace TradeTracker.Persistence.Repositories
 
         private Guid GetAccessKey()
         {
-            var accessKey = _loggedInUserService?.AccessKey;
-
-            if (accessKey == null || accessKey == Guid.Empty)
-            {
+            if ((bool)_loggedInUserService?.IsLoggedIn())
+                return _loggedInUserService.AccessKey;
+            else
                 throw new UnauthorizedAccessException("The current session has expired. Please reload and log back in.");
-            }
-
-            return (Guid)accessKey;
         }
 
         public async Task<Transaction> AddAsync(Transaction transaction)
@@ -74,40 +69,35 @@ namespace TradeTracker.Persistence.Repositories
 
         public async Task<Transaction> GetByIdAsync(Guid id)
         {
-            var accessKey = GetAccessKey();
-
-            return await _transactionRepository.GetByIdAsync(id, accessKey);
+            return await _transactionRepository
+                .GetByIdAsync(id, GetAccessKey());
         }
 
         public async Task<PagedList<Transaction>> GetPagedResponseAsync(
             PagedTransactionsResourceParameters parameters)
         {
-            var accessKey = GetAccessKey();
-
-            return await _transactionRepository.GetPagedResponseAsync(parameters, accessKey);
+            return await _transactionRepository
+                .GetPagedResponseAsync(parameters, GetAccessKey());
         }
 
         public async Task<IEnumerable<Transaction>> GetUnpagedResponseAsync(
             UnpagedTransactionsResourceParameters parameters)
         {
-            var accessKey = GetAccessKey();
-
-            return await _transactionRepository.GetUnpagedResponseAsync(parameters, accessKey);
+            return await _transactionRepository
+                .GetUnpagedResponseAsync(parameters, GetAccessKey());
         }
 
         public HashSet<string> GetSetOfSymbolsForAllTransactionsByUser()
         {
-            var accessKey = GetAccessKey();
-
-            return _transactionRepository.GetSetOfSymbolsForAllTransactionsByUser(accessKey);
+            return _transactionRepository
+                .GetSetOfSymbolsForAllTransactionsByUser(GetAccessKey());
         }
 
         public async Task<IEnumerable<Transaction>> GetTransactionCollectionByIdsAsync(
             IEnumerable<Guid> ids)
         {
-            var accessKey = GetAccessKey();
-
-            return await _transactionRepository.GetTransactionCollectionByIdsAsync(ids, accessKey);
+            return await _transactionRepository
+                .GetTransactionCollectionByIdsAsync(ids, GetAccessKey());
         }
     }
 }

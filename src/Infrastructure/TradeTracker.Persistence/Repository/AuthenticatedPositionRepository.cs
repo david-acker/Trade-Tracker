@@ -25,21 +25,15 @@ namespace TradeTracker.Persistence.Repositories
 
         private Guid GetAccessKey()
         {
-            var accessKey = _loggedInUserService?.AccessKey;
-
-            if (accessKey == null || accessKey == Guid.Empty)
-            {
+            if ((bool)_loggedInUserService?.IsLoggedIn())
+                return _loggedInUserService.AccessKey;
+            else
                 throw new UnauthorizedAccessException("The current session has expired. Please reload and log back in.");
-            }
-
-            return (Guid)accessKey;
         }
 
         public async Task<Position> AddAsync(Position position)
         {
-           var accessKey = GetAccessKey();
-
-            position.AccessKey = accessKey;
+            position.AccessKey = GetAccessKey();
 
             return await _positionRepository.AddAsync(position);
         }
@@ -60,50 +54,42 @@ namespace TradeTracker.Persistence.Repositories
 
         public async Task UpdateAsync(Position position)
         {
-            var accessKey = GetAccessKey();
-
-            position.AccessKey = accessKey;
+            position.AccessKey = GetAccessKey();
 
             await _positionRepository.UpdateAsync(position);
         }
 
         public async Task DeleteAsync(Position position)
         {
-            var accessKey = GetAccessKey();
-
-            position.AccessKey = accessKey;
+            position.AccessKey = GetAccessKey();
 
             await _positionRepository.DeleteAsync(position);
         }
 
         public async Task<Position> GetByIdAsync(Guid id)
         {
-            var accessKey = GetAccessKey();
-
-            return await _positionRepository.GetByIdAsync(id, accessKey);
+            return await _positionRepository
+                .GetByIdAsync(id, GetAccessKey());
         }
 
         public async Task<Position> GetBySymbolAsync(string symbol)
         {
-            var accessKey = GetAccessKey();
-
-            return await _positionRepository.GetBySymbolAsync(symbol, accessKey);
+            return await _positionRepository
+                .GetBySymbolAsync(symbol, GetAccessKey());
         }
 
         public async Task<PagedList<Position>> GetPagedResponseAsync(
             PagedPositionsResourceParameters parameters)
         {
-            var accessKey = GetAccessKey();
-
-            return await _positionRepository.GetPagedResponseAsync(parameters, accessKey);
+            return await _positionRepository
+                .GetPagedResponseAsync(parameters, GetAccessKey());
         }
 
         public async Task<IEnumerable<Position>> GetUnpagedResponseAsync(
             UnpagedPositionsResourceParameters parameters)
         {
-            var accessKey = GetAccessKey();
-
-            return await _positionRepository.GetUnpagedResponseAsync(parameters, accessKey);
+            return await _positionRepository
+                .GetUnpagedResponseAsync(parameters, GetAccessKey());
         }
     }
 }
