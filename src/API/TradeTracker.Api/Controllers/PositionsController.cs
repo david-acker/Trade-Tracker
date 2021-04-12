@@ -48,23 +48,23 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="query">The resource parameters for specifying the returned positions</param>
         /// <param name="mediaType">The request media type specified in the Accept header.</param>
-        /// <example>
-        /// <code> 
-        /// GET /api/positions 
+        /// <remarks>
+        /// Example:
         ///
-        /// { 
-        ///     "orderBy": "Quantity", 
-        ///     "pageNumber": "3", 
-        ///     "pageSize": "25", 
-        ///     "excluding": [ 
-        ///         "QRS", 
-        ///         "TUV", 
-        ///         "WXY" 
-        ///     ],
-        ///     "Exposure": "Long",
-        /// }
-        /// </code>
-        /// </example>
+        ///     GET /api/positions 
+        ///     { 
+        ///         "orderBy": "Quantity", 
+        ///         "pageNumber": "3", 
+        ///         "pageSize": "25", 
+        ///         "excluding": [ 
+        ///             "QRS", 
+        ///             "TUV", 
+        ///             "WXY" 
+        ///         ],
+        ///         "Exposure": "Long",
+        ///     }
+        ///
+        /// </remarks>
         /// <response code="200">Returns any paged positions matching the parameters</response>
         /// <response code="422">Validation Error</response>
         [HttpGet(Name = "GetPositions")]
@@ -140,11 +140,12 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/positions URI.
         /// </summary>
-        /// <example>
-        /// <code>
-        /// OPTIONS /api/positions 
-        /// </code>
-        /// </example>
+        /// <remarks>
+        /// Example:
+        ///
+        ///     OPTIONS /api/positions
+        ///
+        /// </remarks>
         [HttpOptions(Name = "OptionsForPositions")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForPositions()
@@ -162,11 +163,12 @@ namespace TradeTracker.Api.Controllers
         /// </summary>
         /// <param name="symbol">The symbol for the position</param>
         /// <param name="mediaType">The request media type specified in the Accept header.</param>
-        /// <example>
-        /// <code>
-        /// GET /api/positions/{symbol} 
-        /// </code>
-        /// </example>
+        /// <remarks>
+        /// Example:
+        ///
+        ///     GET /api/positions/{symbol}
+        ///
+        /// </remarks>
         /// <response code="200">Returns the requested position</response>
         /// <response code="422">Validation Error</response>
         [HttpGet("{symbol}", Name = "GetPosition")]
@@ -182,7 +184,7 @@ namespace TradeTracker.Api.Controllers
             "application/vnd.trade.position+json",
             "application/vnd.trade.position.hateoas+json",
             "application/vnd.trade.detailedposition.hateoas+json")]
-        public async Task<ActionResult<PositionForReturn>> GetPosition(
+        public async Task<IActionResult> GetPosition(
             [FromRoute] string symbol,
             [FromHeader(Name = "Accept")] string mediaType)
         {
@@ -254,11 +256,12 @@ namespace TradeTracker.Api.Controllers
         /// <summary>
         /// Options for /api/positions/{symbol} URI.
         /// </summary>
-        /// <example>
-        /// <code>
-        /// OPTIONS /api/positions/{symbol} 
-        /// </code>
-        /// </example>
+        /// <remarks>
+        /// Example:
+        ///
+        ///     OPTIONS /api/positions/{symbol}
+        ///
+        /// </remarks>
         [HttpOptions("{symbol}", Name = "OptionsForPositionBySymbol")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForPositionBySymbol()

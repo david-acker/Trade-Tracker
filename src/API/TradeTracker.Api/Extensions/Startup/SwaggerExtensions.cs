@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,12 +32,10 @@ namespace TradeTracker.Api.Extensions.Startup
                         }
                     });
 
-                    var xmlCommmentsFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlCommmentsFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlCommentsFullPath = Path.Combine(AppContext.BaseDirectory, xmlCommmentsFile);
 
-                options.IncludeXmlComments(xmlCommentsFullPath);
-
-                options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
+                options.IncludeXmlComments(xmlCommentsFullPath, includeControllerXmlComments: true);
             });
 
             return services;
