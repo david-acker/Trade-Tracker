@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,6 @@ using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
 using TradeTracker.Api.Helpers;
 using TradeTracker.Api.Utilities;
-using TradeTracker.Application.Features.Transactions;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactionCollection;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
@@ -46,138 +46,111 @@ namespace TradeTracker.Api.Controllers
         /// Create a collection of transactions.
         /// </summary>
         /// <param name="command">The transactions to be created</param>
-        /// <remarks>
-        /// Example: \
-        /// POST /api/transactioncollections \
-        /// [ \
-        ///     { \
-        ///         "dateTime": "2019-06-01T12:00:00", \
-        ///         "symbol": "XYZ" \
-        ///         "type": "SellToOpen", \
-        ///         "quantity": "1", \
-        ///         "notional": "50", \
-        ///         "tradePrice": "50" \
-        ///     }, \
-        ///     { \
-        ///         "dateTime": "2019-06-15T12:00:00", \
-        ///         "symbol": "XYZ" \
-        ///         "type": "BuyToClose", \
-        ///         "quantity": "1", \
-        ///         "notional": "40", \
-        ///         "tradePrice": "40" \
-        ///     }, \
+        /// <param name="mediaType">The request media type specified in the Accept header.</param>
+        /// <example>
+        /// <code>
+        /// POST /api/transactioncollections 
+        ///
+        /// [ 
+        ///     { 
+        ///         "dateTime": "2019-06-01T12:00:00", 
+        ///         "symbol": "XYZ" 
+        ///         "type": "SellToOpen", 
+        ///         "quantity": "1", 
+        ///         "notional": "50", 
+        ///         "tradePrice": "50" 
+        ///     }, 
+        ///     { 
+        ///         "dateTime": "2019-06-15T12:00:00", 
+        ///         "symbol": "XYZ" 
+        ///         "type": "BuyToClose", 
+        ///         "quantity": "1", 
+        ///         "notional": "40", 
+        ///         "tradePrice": "40" 
+        ///     }, 
         /// ] 
-        /// </remarks>
+        /// </code>
+        /// </example>
         /// <response code="422">Validation Error</response>
         [HttpPost(Name = "CreateTransactionCollection")]
         [Consumes("application/json")]
         [Produces("application/json",
-            "application/vnd.trade.transactioncollection+json")]
+            "application/vnd.trade.transactioncollection+json",
+            "application/vnd.trade.transactioncollection.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", 
             "application/json",
-            "application/vnd.trade.transactioncollection+json")]
-        public async Task<ActionResult<IEnumerable<TransactionForReturn>>> CreateTransactionCollection(
-            [FromBody] CreateTransactionCollectionCommand command)
+            "application/vnd.trade.transactioncollection+json",
+            "application/vnd.trade.transactioncollection.hateoas+json")]
+        public async Task<IActionResult> CreateTransactionCollection(
+            [FromBody] CreateTransactionCollectionCommand command,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(CreateTransactionCollection)} was called.");
 
             var transactionCollectionCreated = await _mediator.Send(command);
 
-            var idsAsString = String.Join(
-                ",", transactionCollectionCreated.Select(t => t.Id));
+            bool includeLinks = MediaTypeHeaderValue
+                .Parse(mediaType)
+                .SubTypeWithoutSuffix
+                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+
+            if (includeLinks)
+            {
+                var transactionCollectionCreatedWithLinks = 
+                    new TransactionCollectionCreatedWithLinks();
+
+                transactionCollectionCreatedWithLinks.Items = _mapper
+                    .Map<IEnumerable<TransactionForReturnWithLinks>>(
+                        transactionCollectionCreated);
+
+                transactionCollectionCreatedWithLinks.Items = 
+                    transactionCollectionCreatedWithLinks.Items
+                        .Select(transaction => 
+                        {
+                            transaction.Links = CreateLinksForTransaction(
+                                transaction.Id);
+
+                            return transaction;
+                        });
+
+                IEnumerable<Guid> transactionIds = 
+                    transactionCollectionCreatedWithLinks.Items
+                        .Select(t => t.Id);
                 
-            return CreatedAtAction(
-                "GetTransactionCollection",
-                new { transactionIds = idsAsString },
-                transactionCollectionCreated);
-        }
+                transactionCollectionCreatedWithLinks.Links = 
+                    CreateLinksForTransactionCollection(transactionIds);
 
-
-        /// <summary>
-        /// Create a collection of transactions.
-        /// </summary>
-        /// <param name="command">The transactions to be created</param>
-        /// <remarks>
-        /// Example: \
-        /// POST /api/transactioncollections \
-        /// [ \
-        ///     { \
-        ///         "dateTime": "2019-06-01T12:00:00", \
-        ///         "symbol": "XYZ" \
-        ///         "type": "SellToOpen", \
-        ///         "quantity": "1", \
-        ///         "notional": "50", \
-        ///         "tradePrice": "50" \
-        ///     }, \
-        ///     { \
-        ///         "dateTime": "2019-06-15T12:00:00", \
-        ///         "symbol": "XYZ" \
-        ///         "type": "BuyToClose", \
-        ///         "quantity": "1", \
-        ///         "notional": "40", \
-        ///         "tradePrice": "40" \
-        ///     }, \
-        /// ] 
-        /// </remarks>
-        /// <response code="422">Validation Error</response>
-        [HttpPost(Name = "CreateTransactionCollectionWithLinks")]
-        [Consumes("application/json")]
-        [Produces("application/vnd.trade.transactioncollection.hateoas+json")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
-        [RequestHeaderMatchesMediaType("Accept", 
-            "application/vnd.trade.transactioncollection.hateoas+json")]
-        public async Task<ActionResult<TransactionCollectionCreatedWithLinks>> CreateTransactionCollectionWithLinks(
-            [FromBody] CreateTransactionCollectionCommand command)
-        {
-            _logger.LogInformation($"TransactionCollectionsController: {nameof(CreateTransactionCollectionWithLinks)} was called.");
-
-            var transactionCollectionCreated = await _mediator.Send(command);
-
-            var transactionCollectionCreatedWithLinks = 
-                new TransactionCollectionCreatedWithLinks();
-
-            transactionCollectionCreatedWithLinks.Items = _mapper
-                .Map<IEnumerable<TransactionForReturnWithLinks>>(
+                var idsAsString = String.Join(",", transactionIds);
+                
+                return CreatedAtAction(
+                    "GetTransactionCollection",
+                    new { transactionIds = idsAsString },
+                    transactionCollectionCreatedWithLinks);
+            }
+            else
+            {
+                var idsAsString = String.Join(
+                    ",", transactionCollectionCreated.Select(t => t.Id));
+                
+                return CreatedAtAction(
+                    "GetTransactionCollection",
+                    new { transactionIds = idsAsString },
                     transactionCollectionCreated);
-
-            transactionCollectionCreatedWithLinks.Items = 
-                transactionCollectionCreatedWithLinks.Items
-                    .Select(transaction => 
-                    {
-                        transaction.Links = CreateLinksForTransaction(
-                            transaction.Id);
-
-                        return transaction;
-                    });
-
-            IEnumerable<Guid> transactionIds = 
-                transactionCollectionCreatedWithLinks.Items
-                    .Select(t => t.Id);
-            
-            transactionCollectionCreatedWithLinks.Links = 
-                CreateLinksForTransactionCollection(transactionIds);
-
-            var idsAsString = String.Join(",", transactionIds);
-            
-            return CreatedAtAction(
-                "GetTransactionCollection",
-                new { transactionIds = idsAsString },
-                transactionCollectionCreatedWithLinks);
+            }
         }
 
 
         /// <summary>
         /// Options for /api/transactioncollections URI.
         /// </summary>
-        /// <remarks>
-        /// Example: \
+        /// <example>
+        /// <code>
         /// OPTIONS /api/transactioncollections 
-        /// </remarks>
+        /// </code>
+        /// </example>
         [HttpOptions(Name = "OptionsForTransactionCollections")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactionCollections()
@@ -194,10 +167,12 @@ namespace TradeTracker.Api.Controllers
         /// Get a collection of transactions.
         /// </summary>
         /// <param name="ids">The ids for the transactions</param>
-        /// <remarks>
-        /// Example: \
+        /// <param name="mediaType">The request media type specified in the Accept header.</param>
+        /// <example>
+        /// <code>
         /// GET /api/transactioncollections/{firstId},{secondId} 
-        /// </remarks>
+        /// </code>
+        /// </example>
         /// <response code="200">Returns the requested transactions</response>
         [EntityTagFilter]
         [HttpGet("{ids}", Name = "GetTransactionCollection")]
@@ -208,71 +183,57 @@ namespace TradeTracker.Api.Controllers
         [RequestHeaderMatchesMediaType("Accept", 
             "application/json",
             "application/vnd.trade.transactioncollection+json")]
-        public async Task<ActionResult<IEnumerable<TransactionForReturn>>> GetTransactionCollection(
-            [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
+        public async Task<IActionResult> GetTransactionCollection(
+            [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             _logger.LogInformation($"TransactionCollectionsController: {nameof(GetTransactionCollection)} was called.");
 
-            var query = new GetTransactionCollectionQuery() { Ids = ids };
+            var transactionCollection = await _mediator.Send(
+                new GetTransactionCollectionQuery() { Ids = ids });
 
-            var transactionCollection = await _mediator.Send(query);
+            bool includeLinks = MediaTypeHeaderValue
+                .Parse(mediaType)
+                .SubTypeWithoutSuffix
+                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
 
-            return Ok(transactionCollection);
-        }
+            if (includeLinks)
+            {
+                var transactionCollectionWithLinks = 
+                    new TransactionCollectionWithLinks();
 
+                transactionCollectionWithLinks.Items = _mapper
+                    .Map<IEnumerable<TransactionForReturnWithLinks>>(transactionCollection);
 
-        /// <summary>
-        /// Get a collection of transactions.
-        /// </summary>
-        /// <param name="ids">The ids for the transactions</param>
-        /// <remarks>
-        /// Example: \
-        /// GET /api/transactioncollections/{firstId},{secondId} 
-        /// </remarks>
-        /// <response code="200">Returns the requested transactions</response>
-        [HttpGet("{ids}", Name = "GetTransactionCollectionWithLinks")]
-        [Produces("application/vnd.trade.transactioncollection.hateoas+json")]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [RequestHeaderMatchesMediaType("Accept", 
-            "application/vnd.trade.transactioncollection.hateoas+json")]
-        public async Task<ActionResult<TransactionCollectionWithLinks>> GetTransactionCollectionWithLinks(
-            [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))] IEnumerable<Guid> ids)
-        {
-            _logger.LogInformation($"TransactionCollectionsController: {nameof(GetTransactionCollectionWithLinks)} was called.");
+                transactionCollectionWithLinks.Items = transactionCollectionWithLinks.Items
+                    .Select(transaction => 
+                    {
+                        transaction.Links = CreateLinksForTransaction(
+                            transaction.Id);
+                        
+                        return transaction;
+                    });
+                
+                transactionCollectionWithLinks.Links =
+                    CreateLinksForTransactionCollection(ids);
 
-            var query = new GetTransactionCollectionQuery() { Ids = ids };
-
-            var transactionCollection = await _mediator.Send(query);
-
-            var transactionCollectionWithLinks = new TransactionCollectionWithLinks();
-
-            transactionCollectionWithLinks.Items = _mapper
-                .Map<IEnumerable<TransactionForReturnWithLinks>>(transactionCollection);
-
-            transactionCollectionWithLinks.Items = transactionCollectionWithLinks.Items
-                .Select(transaction => 
-                {
-                    transaction.Links = CreateLinksForTransaction(
-                        transaction.Id);
-                    
-                    return transaction;
-                });
-            
-            transactionCollectionWithLinks.Links =
-                CreateLinksForTransactionCollection(ids);
-
-            return Ok(transactionCollectionWithLinks);
+                return Ok(transactionCollectionWithLinks);
+            }
+            else
+            {
+                return Ok(transactionCollection);
+            }
         }
 
 
         /// <summary>
         /// Options for /api/transactioncollections/{transactionIds} URI.
         /// </summary>
-        /// <remarks>
-        /// Example: \
+        /// <example>
+        /// <code>
         /// OPTIONS /api/transactioncollections/{firstId},{secondId} 
-        /// </remarks>
+        /// </code>
+        /// </example>
         [HttpOptions("{ids}", Name = "OptionsForTransactionCollectionByIds")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForTransactionCollectionByIds()
