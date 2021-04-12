@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,124 +47,104 @@ namespace TradeTracker.Api.Controllers
         /// Get a paged list of positions.
         /// </summary>
         /// <param name="query">The resource parameters for specifying the returned positions</param>
-        /// <remarks>
-        /// Example: \
-        /// GET /api/positions \
-        /// { \
-        ///     "orderBy": "Quantity", \
-        ///     "pageNumber": "3" \
-        ///     "pageSize": "25", \
-        ///     "excluding": [ \
-        ///         "QRS", \
-        ///         "TUV", \
-        ///         "WXY" \
-        ///     ], \
-        ///     "Exposure": "Long", \
-        /// } 
-        /// </remarks>
+        /// <param name="mediaType">The request media type specified in the Accept header.</param>
+        /// <example>
+        /// <code> 
+        /// GET /api/positions 
+        ///
+        /// { 
+        ///     "orderBy": "Quantity", 
+        ///     "pageNumber": "3", 
+        ///     "pageSize": "25", 
+        ///     "excluding": [ 
+        ///         "QRS", 
+        ///         "TUV", 
+        ///         "WXY" 
+        ///     ],
+        ///     "Exposure": "Long",
+        /// }
+        /// </code>
+        /// </example>
         /// <response code="200">Returns any paged positions matching the parameters</response>
         /// <response code="422">Validation Error</response>
         [HttpGet(Name = "GetPositions")]
         [Consumes("application/json")]
         [Produces("application/json",
-            "application/vnd.trade.pagedpositions+json")]
+            "application/vnd.trade.pagedpositions+json",
+            "application/vnd.trade.pagedpositions.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
         [RequestHeaderMatchesMediaType("Accept", 
             "application/json",
-            "application/vnd.trade.pagedpositions+json")]
+            "application/vnd.trade.pagedpositions+json",
+            "application/vnd.trade.pagedpositions.hateoas+json")]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<ActionResult<IEnumerable<PositionForReturn>>> GetPositions(
-            [FromQuery] GetPositionsQuery query)
+        public async Task<IActionResult> GetPositions(
+            [FromQuery] GetPositionsQuery query,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPositions)} was called.");
 
             var pagedPositionsBase = await _mediator.Send(query);
 
-            Response.Headers.Add("X-Paging-PageNumber", pagedPositionsBase.CurrentPage.ToString());
-            Response.Headers.Add("X-Paging-PageSize", pagedPositionsBase.PageSize.ToString());
-            Response.Headers.Add("X-Paging-PageCount", pagedPositionsBase.TotalPages.ToString());
-            Response.Headers.Add("X-Paging-TotalRecordCount", pagedPositionsBase.TotalCount.ToString());
+            bool includeLinks = MediaTypeHeaderValue
+                .Parse(mediaType)
+                .SubTypeWithoutSuffix
+                .EndsWith("hateoas", 
+                    StringComparison.InvariantCultureIgnoreCase);
 
-            return Ok(pagedPositionsBase.Items);
-        }
-        
+            if (includeLinks)
+            {
+                var pagedPositionsWithLinks = new PagedPositionsWithLinks();
 
-        /// <summary>
-        /// Get a paged list of positions.
-        /// </summary>
-        /// <param name="query">The resource parameters for specifying the returned positions</param>
-        /// <remarks>
-        /// Example: \
-        /// GET /api/positions \
-        /// { \
-        ///     "orderBy": "Quantity", \
-        ///     "pageNumber": "3" \
-        ///     "pageSize": "25", \
-        ///     "excluding": [ \
-        ///         "QRS", \
-        ///         "TUV", \
-        ///         "WXY" \
-        ///     ], \
-        ///     "Exposure": "Long", \
-        /// } 
-        /// </remarks>
-        /// <response code="200">Returns any paged positions matching the parameters</response>
-        /// <response code="422">Validation Error</response>
-        [HttpGet(Name = "GetPositions")]
-        [Consumes("application/json")]
-        [Produces("application/vnd.trade.pagedpositions.hateoas+json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [RequestHeaderMatchesMediaType("Content-Type", "application/json")]
-        [RequestHeaderMatchesMediaType("Accept", 
-            "application/vnd.trade.pagedpositions.hateoas+json")]
-        public async Task<ActionResult<PagedPositionsWithLinks>> GetPositionsWithLinks(
-            [FromQuery] GetPositionsQuery query)
-        {
-            _logger.LogInformation($"PositionsController: {nameof(GetPositionsWithLinks)} was called.");
+                pagedPositionsWithLinks.Items = _mapper
+                    .Map<IEnumerable<PositionForReturnWithLinks>>(pagedPositionsBase.Items);
 
-            var pagedPositionsBase = await _mediator.Send(query);
+                pagedPositionsWithLinks.Items = pagedPositionsWithLinks.Items
+                    .Select(position => 
+                    {
+                        position.Links = CreateLinksForPosition(position.Symbol);
+                        return position;
+                    });
+                
+                pagedPositionsWithLinks.Links = 
+                    CreateLinksForPositions(
+                        query,
+                        pagedPositionsBase.HasNext,
+                        pagedPositionsBase.HasPrevious);
 
-            var pagedPositionsWithLinks = new PagedPositionsWithLinks();
+                pagedPositionsWithLinks.Metadata = 
+                    new PaginationMetadata()
+                    {
+                        PageNumber = pagedPositionsBase.CurrentPage,
+                        PageSize = pagedPositionsBase.PageSize,
+                        PageCount = pagedPositionsBase.TotalPages,
+                        TotalRecordCount = pagedPositionsBase.TotalCount
+                    };
 
-            pagedPositionsWithLinks.Items = _mapper
-                .Map<IEnumerable<PositionForReturnWithLinks>>(pagedPositionsBase.Items);
+                return Ok(pagedPositionsWithLinks);
+            }
+            else
+            {
+                Response.Headers.Add("X-Paging-PageNumber", pagedPositionsBase.CurrentPage.ToString());
+                Response.Headers.Add("X-Paging-PageSize", pagedPositionsBase.PageSize.ToString());
+                Response.Headers.Add("X-Paging-PageCount", pagedPositionsBase.TotalPages.ToString());
+                Response.Headers.Add("X-Paging-TotalRecordCount", pagedPositionsBase.TotalCount.ToString());
 
-            pagedPositionsWithLinks.Items = pagedPositionsWithLinks.Items
-                .Select(position => 
-                {
-                    position.Links = CreateLinksForPosition(position.Symbol);
-                    return position;
-                });
-            
-            pagedPositionsWithLinks.Links = 
-                CreateLinksForPositions(
-                    query,
-                    pagedPositionsBase.HasNext,
-                    pagedPositionsBase.HasPrevious);
-
-            pagedPositionsWithLinks.Metadata = 
-                new PaginationMetadata()
-                {
-                    PageNumber = pagedPositionsBase.CurrentPage,
-                    PageSize = pagedPositionsBase.PageSize,
-                    PageCount = pagedPositionsBase.TotalPages,
-                    TotalRecordCount = pagedPositionsBase.TotalCount
-                };
-
-            return Ok(pagedPositionsWithLinks);
+                return Ok(pagedPositionsBase.Items);
+            } 
         }
 
 
         /// <summary>
         /// Options for /api/positions URI.
         /// </summary>
-        /// <remarks>
-        /// Example: \
+        /// <example>
+        /// <code>
         /// OPTIONS /api/positions 
-        /// </remarks>
+        /// </code>
+        /// </example>
         [HttpOptions(Name = "OptionsForPositions")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForPositions()
@@ -179,120 +161,104 @@ namespace TradeTracker.Api.Controllers
         /// Gets a position by symbol of its security.
         /// </summary>
         /// <param name="symbol">The symbol for the position</param>
-        /// <remarks>
-        /// Example: \
+        /// <param name="mediaType">The request media type specified in the Accept header.</param>
+        /// <example>
+        /// <code>
         /// GET /api/positions/{symbol} 
-        /// </remarks>
+        /// </code>
+        /// </example>
         /// <response code="200">Returns the requested position</response>
         /// <response code="422">Validation Error</response>
         [HttpGet("{symbol}", Name = "GetPosition")]
         [Produces("application/json", 
-            "application/vnd.trade.position+json")]
+            "application/vnd.trade.position+json",
+            "application/vnd.trade.position.hateoas+json",
+            "application/vnd.trade.detailedposition.hateoas+json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [RequestHeaderMatchesMediaType("Accept", 
             "application/json",
-            "application/vnd.trade.position+json")]
+            "application/vnd.trade.position+json",
+            "application/vnd.trade.position.hateoas+json",
+            "application/vnd.trade.detailedposition.hateoas+json")]
         public async Task<ActionResult<PositionForReturn>> GetPosition(
-            [FromRoute] string symbol)
+            [FromRoute] string symbol,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             _logger.LogInformation($"PositionsController: {nameof(GetPosition)} was called.");
 
-            var query = new GetPositionQuery() { Symbol = symbol };
+            StringSegment mediaSubType = MediaTypeHeaderValue
+                .Parse(mediaType)
+                .SubTypeWithoutSuffix;
 
-            var position = await _mediator.Send(query);
+            string[] subTypeElements = mediaSubType
+                .ToString()
+                .Split('.');
+                
+            string representation = subTypeElements
+                .Take(subTypeElements.Length - 1)
+                .LastOrDefault();
+                
+            if (representation.Equals("detailedposition", 
+                StringComparison.InvariantCultureIgnoreCase))
+            {
+                var detailedPosition = await _mediator.Send(
+                    new GetDetailedPositionQuery() { Symbol = symbol });
 
-            return Ok(position);
-        }
+                var detailedPositionWithLinks = 
+                        _mapper.Map<DetailedPositionForReturnWithLinks>(detailedPosition);
 
+                    detailedPositionWithLinks.SourceRelations =
+                        detailedPositionWithLinks.SourceRelations
+                            .Select(fullSourceLink => 
+                            {
+                                fullSourceLink.Transaction.Links = 
+                                    CreateLinksForTransaction(fullSourceLink.Transaction.Id);
 
-        /// <summary>
-        /// Gets a position by symbol of its security.
-        /// </summary>
-        /// <param name="symbol">The symbol for the position</param>
-        /// <remarks>
-        /// Example: \
-        /// GET /api/positions/{symbol} 
-        /// </remarks>
-        /// <response code="200">Returns the requested position</response>
-        /// <response code="422">Validation Error</response>
-        [HttpGet("{symbol}", Name = "GetPositionWithLinks")]
-        [Produces("application/vnd.trade.position.hateoas+json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [RequestHeaderMatchesMediaType("Accept", 
-            "application/vnd.trade.position.hateoas+json")]
-        public async Task<ActionResult<PositionForReturnWithLinks>> GetPositionWithLinks(
-            [FromRoute] string symbol)
-        {
-            _logger.LogInformation($"PositionsController: {nameof(GetPositionWithLinks)} was called.");
+                                return fullSourceLink;
 
-            var query = new GetPositionQuery() { Symbol = symbol };
+                            }).ToList();
 
-            var position = await _mediator.Send(query);
+                    detailedPositionWithLinks.Links = CreateLinksForPosition(symbol);
 
-            var positionWithLinks = _mapper.Map<PositionForReturnWithLinks>(position);
+                    return Ok(detailedPositionWithLinks);
+            }
+            else
+            {
+                var position = await _mediator.Send(
+                    new GetPositionQuery() { Symbol = symbol });
 
-            positionWithLinks.Links = CreateLinksForPosition(symbol);
+                bool includeLinks = MediaTypeHeaderValue
+                    .Parse(mediaType)
+                    .SubTypeWithoutSuffix
+                    .EndsWith("hateoas", 
+                        StringComparison.InvariantCultureIgnoreCase);
 
-            return Ok(positionWithLinks);
-        }
+                if (includeLinks)
+                {
+                    var positionWithLinks = _mapper.Map<PositionForReturnWithLinks>(position);
 
+                    positionWithLinks.Links = CreateLinksForPosition(symbol);
 
-        /// <summary>
-        /// Gets a position by symbol of its security.
-        /// </summary>
-        /// <param name="symbol">The symbol for the position</param>
-        /// <remarks>
-        /// Example: \
-        /// GET /api/positions/{symbol} 
-        /// </remarks>
-        /// <response code="200">Returns the requested position</response>
-        /// <response code="422">Validation Error</response>
-        [HttpGet("{symbol}", Name = "GetDetailedPositionWithLinks")]
-        [Produces("application/vnd.trade.detailedposition.hateoas+json")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-        [RequestHeaderMatchesMediaType("Accept", "application/vnd.trade.detailedposition.hateoas+json")]
-        public async Task<ActionResult<PositionForReturnWithLinks>> GetDetailedPositionWithLinks(
-            [FromRoute] string symbol)
-        {
-            _logger.LogInformation($"PositionsController: {nameof(GetPositionWithLinks)} was called.");
-
-            var query = new GetDetailedPositionQuery() { Symbol = symbol };
-
-            var detailedPosition = await _mediator.Send(query);
-
-            var detailedPositionWithLinks = 
-                _mapper.Map<DetailedPositionForReturnWithLinks>(detailedPosition);
-
-            detailedPositionWithLinks.SourceRelations =
-                detailedPositionWithLinks.SourceRelations
-                    .Select(fullSourceLink => 
-                    {
-                        fullSourceLink.Transaction.Links = 
-                            CreateLinksForTransaction(fullSourceLink.Transaction.Id);
-
-                        return fullSourceLink;
-
-                    }).ToList();
-
-            detailedPositionWithLinks.Links = CreateLinksForPosition(symbol);
-
-            return Ok(detailedPositionWithLinks);
+                    return Ok(positionWithLinks);
+                }
+                else
+                {
+                    return Ok(position);
+                }
+            }
         }
 
 
         /// <summary>
         /// Options for /api/positions/{symbol} URI.
         /// </summary>
-        /// <remarks>
-        /// Example: \
+        /// <example>
+        /// <code>
         /// OPTIONS /api/positions/{symbol} 
-        /// </remarks>
+        /// </code>
+        /// </example>
         [HttpOptions("{symbol}", Name = "OptionsForPositionBySymbol")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public IActionResult OptionsForPositionBySymbol()
