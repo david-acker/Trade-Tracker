@@ -1,13 +1,11 @@
 using System.Collections.Generic;
+using TradeTracker.Application.Common.Models.Resources.Responses;
 
 namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 {
     public class PagedPositionsBase
     {
-        public int CurrentPage { get; set; }
-        public int TotalPages { get; set; }
-        public int PageSize { get; set; }
-        public int TotalCount { get; set; }
+        public PaginationMetadata Metadata { get; set; }
 
         public bool HasPrevious { get; set; }
         public bool HasNext { get; set; }

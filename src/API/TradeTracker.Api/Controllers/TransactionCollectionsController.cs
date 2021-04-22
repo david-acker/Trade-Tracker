@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
+using TradeTracker.Api.Extensions;
 using TradeTracker.Api.Helpers;
 using TradeTracker.Api.Utilities;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransactionCollection;
@@ -92,29 +93,22 @@ namespace TradeTracker.Api.Controllers
 
             var transactionCollectionCreated = await _mediator.Send(command);
 
-            bool includeLinks = MediaTypeHeaderValue
-                .Parse(mediaType)
-                .SubTypeWithoutSuffix
-                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+            var parsedMediaType = MediaTypeHeaderValue.Parse(mediaType);
+            bool includeLinks = parsedMediaType.IsRepresentationWithLinks();
 
             if (includeLinks)
             {
                 var transactionCollectionCreatedWithLinks = 
-                    new TransactionCollectionCreatedWithLinks();
-
-                transactionCollectionCreatedWithLinks.Items = _mapper
-                    .Map<IEnumerable<TransactionForReturnWithLinks>>(
-                        transactionCollectionCreated);
-
-                transactionCollectionCreatedWithLinks.Items = 
-                    transactionCollectionCreatedWithLinks.Items
-                        .Select(transaction => 
-                        {
-                            transaction.Links = CreateLinksForTransaction(
-                                transaction.Id);
-
-                            return transaction;
-                        });
+                    new TransactionCollectionCreatedWithLinks()
+                    {
+                        Items = _mapper
+                            .Map<IEnumerable<TransactionForReturnWithLinks>>(transactionCollectionCreated)
+                            .Select(transaction =>
+                            {
+                                transaction.Links = CreateLinksForTransaction(transaction.Id);
+                                return transaction;
+                            })
+                    };
 
                 IEnumerable<Guid> transactionIds = 
                     transactionCollectionCreatedWithLinks.Items
@@ -194,28 +188,23 @@ namespace TradeTracker.Api.Controllers
             var transactionCollection = await _mediator.Send(
                 new GetTransactionCollectionQuery() { Ids = ids });
 
-            bool includeLinks = MediaTypeHeaderValue
-                .Parse(mediaType)
-                .SubTypeWithoutSuffix
-                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+            var parsedMediaType = MediaTypeHeaderValue.Parse(mediaType);
+            bool includeLinks = parsedMediaType.IsRepresentationWithLinks();
 
             if (includeLinks)
             {
                 var transactionCollectionWithLinks = 
-                    new TransactionCollectionWithLinks();
-
-                transactionCollectionWithLinks.Items = _mapper
-                    .Map<IEnumerable<TransactionForReturnWithLinks>>(transactionCollection);
-
-                transactionCollectionWithLinks.Items = transactionCollectionWithLinks.Items
-                    .Select(transaction => 
+                    new TransactionCollectionWithLinks()
                     {
-                        transaction.Links = CreateLinksForTransaction(
-                            transaction.Id);
-                        
-                        return transaction;
-                    });
-                
+                        Items = _mapper
+                            .Map<IEnumerable<TransactionForReturnWithLinks>>(transactionCollection)
+                            .Select(transaction =>
+                            {
+                                transaction.Links = CreateLinksForTransaction(transaction.Id);
+                                return transaction;
+                            })
+                    };
+
                 transactionCollectionWithLinks.Links =
                     CreateLinksForTransactionCollection(ids);
 

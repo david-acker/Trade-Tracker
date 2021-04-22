@@ -11,8 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
+using TradeTracker.Api.Extensions;
 using TradeTracker.Api.Helpers;
-using TradeTracker.Application.Common.Models.Resources.Responses;
 using TradeTracker.Application.Features.Positions;
 using TradeTracker.Application.Features.Positions.Queries.GetPosition;
 using TradeTracker.Application.Features.Positions.Queries.GetPositions;
@@ -87,26 +87,22 @@ namespace TradeTracker.Api.Controllers
             _logger.LogInformation($"PositionsController: {nameof(GetPositions)} was called.");
 
             var pagedPositionsBase = await _mediator.Send(query);
-
-            bool includeLinks = MediaTypeHeaderValue
-                .Parse(mediaType)
-                .SubTypeWithoutSuffix
-                .EndsWith("hateoas", 
-                    StringComparison.InvariantCultureIgnoreCase);
+            
+            var parsedMediaType = MediaTypeHeaderValue.Parse(mediaType);
+            bool includeLinks = parsedMediaType.IsRepresentationWithLinks();
 
             if (includeLinks)
             {
-                var pagedPositionsWithLinks = new PagedPositionsWithLinks();
-
-                pagedPositionsWithLinks.Items = _mapper
-                    .Map<IEnumerable<PositionForReturnWithLinks>>(pagedPositionsBase.Items);
-
-                pagedPositionsWithLinks.Items = pagedPositionsWithLinks.Items
-                    .Select(position => 
-                    {
-                        position.Links = CreateLinksForPosition(position.Symbol);
-                        return position;
-                    });
+                var pagedPositionsWithLinks = new PagedPositionsWithLinks()
+                {
+                    Items = _mapper
+                        .Map<IEnumerable<PositionForReturnWithLinks>>(pagedPositionsBase.Items)
+                        .Select(position => 
+                        {
+                            position.Links = CreateLinksForPosition(position.Symbol);
+                            return position;
+                        })
+                };
                 
                 pagedPositionsWithLinks.Links = 
                     CreateLinksForPositions(
@@ -114,23 +110,18 @@ namespace TradeTracker.Api.Controllers
                         pagedPositionsBase.HasNext,
                         pagedPositionsBase.HasPrevious);
 
-                pagedPositionsWithLinks.Metadata = 
-                    new PaginationMetadata()
-                    {
-                        PageNumber = pagedPositionsBase.CurrentPage,
-                        PageSize = pagedPositionsBase.PageSize,
-                        PageCount = pagedPositionsBase.TotalPages,
-                        TotalRecordCount = pagedPositionsBase.TotalCount
-                    };
-
                 return Ok(pagedPositionsWithLinks);
             }
             else
             {
-                Response.Headers.Add("X-Paging-PageNumber", pagedPositionsBase.CurrentPage.ToString());
-                Response.Headers.Add("X-Paging-PageSize", pagedPositionsBase.PageSize.ToString());
-                Response.Headers.Add("X-Paging-PageCount", pagedPositionsBase.TotalPages.ToString());
-                Response.Headers.Add("X-Paging-TotalRecordCount", pagedPositionsBase.TotalCount.ToString());
+                Response.Headers.Add("X-Paging-PageNumber", 
+                    pagedPositionsBase.Metadata.PageNumber.ToString());
+                Response.Headers.Add("X-Paging-PageSize", 
+                    pagedPositionsBase.Metadata.PageSize.ToString());
+                Response.Headers.Add("X-Paging-PageCount", 
+                    pagedPositionsBase.Metadata.PageCount.ToString());
+                Response.Headers.Add("X-Paging-TotalRecordCount", 
+                    pagedPositionsBase.Metadata.TotalRecordCount.ToString());
 
                 return Ok(pagedPositionsBase.Items);
             } 
@@ -208,23 +199,23 @@ namespace TradeTracker.Api.Controllers
                 var detailedPosition = await _mediator.Send(
                     new GetDetailedPositionQuery() { Symbol = symbol });
 
-                var detailedPositionWithLinks = 
-                        _mapper.Map<DetailedPositionForReturnWithLinks>(detailedPosition);
+                var detailedPositionWithLinks = _mapper
+                    .Map<DetailedPositionForReturnWithLinks>(detailedPosition);
 
-                    detailedPositionWithLinks.SourceRelations =
-                        detailedPositionWithLinks.SourceRelations
-                            .Select(fullSourceLink => 
-                            {
-                                fullSourceLink.Transaction.Links = 
-                                    CreateLinksForTransaction(fullSourceLink.Transaction.Id);
+                detailedPositionWithLinks.SourceRelations =
+                    detailedPositionWithLinks.SourceRelations
+                        .Select(fullSourceLink => 
+                        {
+                            fullSourceLink.Transaction.Links = 
+                                CreateLinksForTransaction(fullSourceLink.Transaction.Id);
 
-                                return fullSourceLink;
+                            return fullSourceLink;
 
-                            }).ToList();
+                        }).ToList();
 
-                    detailedPositionWithLinks.Links = CreateLinksForPosition(symbol);
+                detailedPositionWithLinks.Links = CreateLinksForPosition(symbol);
 
-                    return Ok(detailedPositionWithLinks);
+                return Ok(detailedPositionWithLinks);
             }
             else
             {

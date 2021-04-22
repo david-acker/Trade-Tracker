@@ -38,10 +38,13 @@ namespace TradeTracker.Application.Features.Transactions.Queries.GetTransactions
 
             return new PagedTransactionsBase()
             {
-                CurrentPage = pagedTransactions.CurrentPage,
-                TotalPages = pagedTransactions.TotalPages,
-                PageSize = pagedTransactions.PageSize,
-                TotalCount = pagedTransactions.TotalCount,
+                Metadata = new PaginationMetadata()
+                {
+                    PageNumber = pagedTransactions.CurrentPage,
+                    PageSize = pagedTransactions.PageSize,
+                    PageCount = pagedTransactions.TotalPages,
+                    TotalRecordCount = pagedTransactions.TotalCount
+                },
                 HasPrevious = pagedTransactions.HasPrevious,
                 HasNext = pagedTransactions.HasNext,
                 Items = transactionsForReturn

@@ -47,10 +47,13 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
 
             return new PagedPositionsBase()
             {
-                CurrentPage = pagedPositions.CurrentPage,
-                TotalPages = pagedPositions.TotalPages,
-                PageSize = pagedPositions.PageSize,
-                TotalCount = pagedPositions.TotalCount,
+                Metadata = new PaginationMetadata()
+                {
+                    PageNumber = pagedPositions.CurrentPage,
+                    PageSize = pagedPositions.PageSize,
+                    PageCount = pagedPositions.TotalPages,
+                    TotalRecordCount = pagedPositions.TotalCount
+                },
                 HasPrevious = pagedPositions.HasPrevious,
                 HasNext = pagedPositions.HasNext,
                 Items = positionsForReturnWithSourceInformation

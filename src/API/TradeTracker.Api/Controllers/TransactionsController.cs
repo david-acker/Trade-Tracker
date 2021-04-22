@@ -11,9 +11,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TradeTracker.Api.ActionConstraints;
+using TradeTracker.Api.Extensions;
 using TradeTracker.Api.Helpers;
 using TradeTracker.Api.Utilities;
-using TradeTracker.Application.Common.Models.Resources.Responses;
 using TradeTracker.Application.Features.Transactions.Commands;
 using TradeTracker.Application.Features.Transactions.Commands.CreateTransaction;
 using TradeTracker.Application.Features.Transactions.Commands.DeleteTransaction;
@@ -94,50 +94,40 @@ namespace TradeTracker.Api.Controllers
 
             var pagedTransactionsBase = await _mediator.Send(query);
 
-            bool includeLinks = MediaTypeHeaderValue
-                .Parse(mediaType)
-                .SubTypeWithoutSuffix
-                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+            var parsedMediaType = MediaTypeHeaderValue.Parse(mediaType);
+            bool includeLinks = parsedMediaType.IsRepresentationWithLinks();
             
             if (includeLinks)
             {
-                var pagedTransactionsWithLinks = new PagedTransactionsWithLinks();
-
-                pagedTransactionsWithLinks.Items = _mapper
-                .Map<IEnumerable<TransactionForReturnWithLinks>>(pagedTransactionsBase.Items);
-
-                pagedTransactionsWithLinks.Items = pagedTransactionsWithLinks.Items
-                    .Select(transaction =>
-                    {
-                        transaction.Links = 
-                            CreateLinksForTransaction(transaction.Id);
-
-                        return transaction;
-                    });
+                var pagedTransactionsWithLinks = new PagedTransactionsWithLinks()
+                {
+                    Items = _mapper
+                        .Map<IEnumerable<TransactionForReturnWithLinks>>(pagedTransactionsBase.Items)
+                        .Select(transaction => 
+                        {
+                            transaction.Links = CreateLinksForTransaction(transaction.Id);
+                            return transaction;
+                        })
+                };
                 
                 pagedTransactionsWithLinks.Links = 
                     CreateLinksForTransactions(
                         query,
                         pagedTransactionsBase.HasNext,
                         pagedTransactionsBase.HasPrevious);
-                
-                pagedTransactionsWithLinks.Metadata =
-                    new PaginationMetadata()
-                    {
-                        PageNumber = pagedTransactionsBase.CurrentPage,
-                        PageSize = pagedTransactionsBase.PageSize,
-                        PageCount = pagedTransactionsBase.TotalPages,
-                        TotalRecordCount = pagedTransactionsBase.TotalCount,
-                    };
 
                 return Ok(pagedTransactionsWithLinks);
             }
             else
             {
-                Response.Headers.Add("X-Paging-PageNumber", pagedTransactionsBase.CurrentPage.ToString());
-                Response.Headers.Add("X-Paging-PageSize", pagedTransactionsBase.PageSize.ToString());
-                Response.Headers.Add("X-Paging-PageCount", pagedTransactionsBase.TotalPages.ToString());
-                Response.Headers.Add("X-Paging-TotalRecordCount", pagedTransactionsBase.TotalCount.ToString());
+                Response.Headers.Add("X-Paging-PageNumber",
+                    pagedTransactionsBase.Metadata.PageNumber.ToString());
+                Response.Headers.Add("X-Paging-PageSize",
+                    pagedTransactionsBase.Metadata.PageSize.ToString());
+                Response.Headers.Add("X-Paging-PageCount",
+                    pagedTransactionsBase.Metadata.PageCount.ToString());
+                Response.Headers.Add("X-Paging-TotalRecordCount",
+                    pagedTransactionsBase.Metadata.TotalRecordCount.ToString());
 
                 return Ok(pagedTransactionsBase.Items);
             } 
@@ -183,15 +173,13 @@ namespace TradeTracker.Api.Controllers
 
             var transactionCreated = await _mediator.Send(command);
 
-            bool includeLinks = MediaTypeHeaderValue
-                .Parse(mediaType)
-                .SubTypeWithoutSuffix
-                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+            var parsedMediaType = MediaTypeHeaderValue.Parse(mediaType);
+            bool includeLinks = parsedMediaType.IsRepresentationWithLinks();
 
             if (includeLinks)
             {
                 var transactionCreatedWithLinks =
-                _mapper.Map<TransactionForReturnWithLinks>(transactionCreated); 
+                    _mapper.Map<TransactionForReturnWithLinks>(transactionCreated); 
 
                 transactionCreatedWithLinks.Links = CreateLinksForTransaction(
                     transactionCreatedWithLinks.Id);
@@ -262,10 +250,8 @@ namespace TradeTracker.Api.Controllers
             var transaction = await _mediator.Send(
                 new GetTransactionQuery() { Id = id });
 
-            bool includeLinks = MediaTypeHeaderValue
-                .Parse(mediaType)
-                .SubTypeWithoutSuffix
-                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+            var parsedMediaType = MediaTypeHeaderValue.Parse(mediaType);
+            bool includeLinks = parsedMediaType.IsRepresentationWithLinks();
 
             if (includeLinks)
             {
