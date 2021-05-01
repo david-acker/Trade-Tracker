@@ -13,7 +13,6 @@ using TradeTracker.Application.Features.Positions;
 using TradeTracker.Application.Interfaces;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
-using TradeTracker.Domain.Extensions;
 
 namespace TradeTracker.Infrastructure.Services
 {
@@ -95,13 +94,13 @@ namespace TradeTracker.Infrastructure.Services
 
         public async Task HandleNewPosition(Position position)
         {
-            if (position.IsClosed())
+            if (position.IsClosed)
                 await AddPosition(position);
         }
 
         public async Task HandleExistingPosition(Position position)
         {
-            if (position.IsClosed())
+            if (position.IsClosed)
                 await UpdatePosition(position);
             else
                 await ClosePosition(position);
