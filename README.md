@@ -17,20 +17,6 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
 * [Swashbuckle](https://github.com/domaindrivendev/Swashbuckle.WebApi)
 * [Postman](https://www.postman.com/) (for testing API endpoints)
 
-## Objectives
-- [x] CRUD Functionality for Transactions
-  - [X] By security/ticker
-  - [X] Using filters/queries (e.g. time range, include/exclude, etc.) 
-- [X] Position Tracking By Instrument
-  - [x] Average Cost Basis
-  - [ ] Profit/Loss (using FIFO)
-  - [ ] Aggregate/summary statistics
-- [x] API adherent to [REST Architectural Constraints](https://restfulapi.net/rest-architectural-constraints/) *(pragmatically)*
-- [ ] Basic UI with Angular + TypeScript
-  - [x] Accounts
-  - [x] Transactions 
-  - [ ] Positions
-
 ## Documentation
 
 The API documentation using Swagger UI can be viewed here: [API Documentation](https://david-acker.github.io/Trade-Tracker-API-Spec/#/)
