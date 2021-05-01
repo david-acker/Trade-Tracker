@@ -62,4 +62,4 @@ The API documentation using Swagger UI can be viewed here: [API Documentation](h
 * Gain experience using ASP.NET Core to build RESTful APIs.
 
 ## License
-TradeTracker is licensed under the [MIT license](LICENSE).
+TradeTracker is licensed under the [MIT License](LICENSE).
