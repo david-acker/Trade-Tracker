@@ -10,7 +10,6 @@ namespace TradeTracker.Infrastructure
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IDomainEventService, DomainEventService>();
-            services.AddScoped<IPositionService, PositionService>();
             services.AddScoped<IPositionTrackingService, PositionTrackingService>();
 
             services.AddTransient<ICsvExporter, CsvExporter>();

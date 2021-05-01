@@ -1,8 +1,9 @@
+﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using TradeTracker.Application.Common.Enums;
 using TradeTracker.Application.Common.Interfaces.Infrastructure;
 using TradeTracker.Application.Common.Interfaces.Persistence.Positions;
@@ -14,7 +15,7 @@ using TradeTracker.Application.Interfaces;
 using TradeTracker.Domain.Entities;
 using TradeTracker.Domain.Enums;
 
-namespace TradeTracker.Infrastructure.Services
+namespace TradeTracker.Application.Common.Services
 {
     public class PositionService : IPositionService
     {
@@ -29,7 +30,7 @@ namespace TradeTracker.Infrastructure.Services
             IAuthenticatedPositionRepository authenticatedPositionRepository,
             IAuthenticatedTransactionRepository authenticatedTransactionRepository,
             ILoggedInUserService loggedInUserService,
-            ILogger<PositionService> logger, 
+            ILogger<PositionService> logger,
             IPositionRepository positionRepository,
             ITransactionRepository transactionRepository)
         {
@@ -37,7 +38,7 @@ namespace TradeTracker.Infrastructure.Services
             _authenticatedTransactionRepository = authenticatedTransactionRepository;
             _loggedInUserService = loggedInUserService;
             _logger = logger;
-            _positionRepository = positionRepository;   
+            _positionRepository = positionRepository;
             _transactionRepository = transactionRepository;
         }
 
@@ -125,8 +126,8 @@ namespace TradeTracker.Infrastructure.Services
         }
 
         public async Task AttachToPosition(
-            string symbol, 
-            TransactionType transactionType, 
+            string symbol,
+            TransactionType transactionType,
             decimal quantity)
         {
             var position = await _authenticatedPositionRepository
@@ -149,8 +150,8 @@ namespace TradeTracker.Infrastructure.Services
         }
 
         public async Task DetachFromPosition(
-            string symbol, 
-            TransactionType transactionType, 
+            string symbol,
+            TransactionType transactionType,
             decimal quantity)
         {
             var position = await _authenticatedPositionRepository
@@ -173,7 +174,7 @@ namespace TradeTracker.Infrastructure.Services
         }
 
         public async Task RecalculateForSymbol(
-            string symbol, 
+            string symbol,
             Guid accessKey)
         {
             var position = await _positionRepository
