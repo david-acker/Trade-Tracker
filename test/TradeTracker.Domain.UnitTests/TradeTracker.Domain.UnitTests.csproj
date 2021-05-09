@@ -23,8 +23,4 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Core\TradeTracker.Domain\TradeTracker.Domain.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Extensions\" />
-  </ItemGroup>
 </Project>
