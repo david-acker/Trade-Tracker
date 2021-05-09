@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Common.Behaviors;
 using TradeTracker.Application.Common.Exceptions;
-using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces;
 using TradeTracker.Application.Common.Interfaces.Persistence.Positions;
 using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Application.Features.Transactions.Queries.GetTransactions;
@@ -20,18 +20,18 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
         private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
         private readonly IMapper _mapper;
-        private readonly IPositionService _positionService;
+        private readonly ICostBasisCalculator _costBasisCalculator;
 
         public GetDetailedPositionQueryHandler(
             IAuthenticatedTransactionRepository authenticatedTransactionRepository,
             IAuthenticatedPositionRepository authenticatedPositionRepository,
             IMapper mapper,
-            IPositionService positionService)
+            ICostBasisCalculator costBasisCalculator)
         {
             _authenticatedTransactionRepository = authenticatedTransactionRepository;
             _authenticatedPositionRepository = authenticatedPositionRepository;
             _mapper = mapper;
-            _positionService = positionService;
+            _costBasisCalculator = costBasisCalculator;
         }
 
         public async Task<DetailedPositionForReturn> Handle(GetDetailedPositionQuery request, CancellationToken cancellationToken)
@@ -47,11 +47,11 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
             
             var positionForReturn = _mapper.Map<DetailedPositionForReturn>(position);
 
-            positionForReturn.AverageCostBasis = await _positionService
+            positionForReturn.AverageCostBasis = await _costBasisCalculator
                 .CalculateAverageCostBasis(
                     request.Symbol);
 
-            var sourceRelations = await _positionService
+            var sourceRelations = await _costBasisCalculator
                 .CreateSourceRelations(
                     request.Symbol);
 

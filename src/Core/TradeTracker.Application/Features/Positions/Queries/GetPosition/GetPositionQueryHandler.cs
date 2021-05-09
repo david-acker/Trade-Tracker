@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Common.Behaviors;
 using TradeTracker.Application.Common.Exceptions;
-using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces;
 using TradeTracker.Application.Common.Interfaces.Persistence.Positions;
 using TradeTracker.Domain.Entities;
 
@@ -16,16 +16,16 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
     {
         private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
         private readonly IMapper _mapper;
-        private readonly IPositionService _positionService;
+        private readonly ICostBasisCalculator _costBasisCalculator;
 
         public GetPositionQueryHandler(
             IAuthenticatedPositionRepository authenticatedPositionRepository,
             IMapper mapper,
-            IPositionService positionService)
+            ICostBasisCalculator costBasisCalculator)
         {
             _authenticatedPositionRepository = authenticatedPositionRepository;
             _mapper = mapper;
-            _positionService = positionService;
+            _costBasisCalculator = costBasisCalculator;
         }
 
         public async Task<PositionForReturn> Handle(GetPositionQuery request, CancellationToken cancellationToken)
@@ -41,11 +41,11 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPosition
             
             var positionForReturn = _mapper.Map<PositionForReturn>(position);
 
-            positionForReturn.AverageCostBasis = await _positionService
+            positionForReturn.AverageCostBasis = await _costBasisCalculator
                 .CalculateAverageCostBasis( 
                     request.Symbol);
 
-            positionForReturn.SourceRelations = await _positionService
+            positionForReturn.SourceRelations = await _costBasisCalculator
                 .CreateSourceRelations(
                     request.Symbol);
 
