@@ -31,6 +31,15 @@ Stock trade and portfolio tracking solution implemented in ASP.NET Core using [C
 
 The API documentation using Swagger UI can be viewed here: [API Documentation](https://david-acker.github.io/Trade-Tracker-API-Spec/#/)
 
+## Architecture (Update)
+
+### Core
+### Business
+### Api
+### Database
+### EntityModels
+### Repository
+
 ## Architecture
 
 ### Api
