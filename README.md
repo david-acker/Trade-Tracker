@@ -1,6 +1,16 @@
 # TradeTracker
 Stock trade and portfolio tracking solution implemented in ASP.NET Core using [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html).
 
+## Technologies (Updated)
+* [ASP.NET Core](https://dotnet.microsoft.com/apps/aspnet)
+* [AutoMapper](https://automapper.org/)
+* [Dapper](https://github.com/DapperLib/Dapper)
+* [SQL Server 2019](https://www.microsoft.com/en-us/sql-server/sql-server-2019)
+* [xUnit](https://xunit.net/)
+* [Moq](https://github.com/moq/moq)
+* [Autofac](https://github.com/autofac/Autofac)
+* [Postman](https://www.postman.com/) (for testing API endpoints)
+
 ## Technologies
 
 * [ASP.NET Core 5](https://dotnet.microsoft.com/apps/aspnet)
