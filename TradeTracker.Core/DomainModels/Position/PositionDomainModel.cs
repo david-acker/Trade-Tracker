@@ -1,4 +1,4 @@
-﻿namespace TradeTracker.Core.DomainModels
+﻿namespace TradeTracker.Core.DomainModels.Position
 {
     public class PositionDomainModel
     {

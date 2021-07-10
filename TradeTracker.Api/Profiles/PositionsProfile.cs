@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using TradeTracker.Core.DomainModels;
-using TradeTracker.EntityModels.Models.Position;
+using TradeTracker.Api.DTOs.Position;
+using TradeTracker.Core.DomainModels.Position;
 
 namespace TradeTracker.Api.Profiles
 {
@@ -8,7 +8,9 @@ namespace TradeTracker.Api.Profiles
     {
         public PositionsProfile()
         {
-            CreateMap<Position, PositionDomainModel>();
+            CreateMap<PositionDomainModel, PositionDto>();
+
+            CreateMap<PositionFilterDto, PositionFilterDomainModel>();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using TradeTracker.Business.Interfaces.Infrastructure;
 using TradeTracker.Repository.Factories;
 using TradeTracker.Repository.Repositories;
 
@@ -10,6 +11,7 @@ namespace TradeTracker.Repository
         {
             services.AddScoped<IConnectionFactory, ConnectionFactory>();
             services.AddScoped<ITransactionsRepository, TransactionsRepository>();
+            services.AddScoped<IPositionsRepository, PositionsRepository>();
 
             return services;
         }

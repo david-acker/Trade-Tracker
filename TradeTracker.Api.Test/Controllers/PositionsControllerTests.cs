@@ -8,8 +8,7 @@ using System.Threading.Tasks;
 using TradeTracker.Api.Controllers;
 using TradeTracker.Api.Profiles;
 using TradeTracker.Business.Services;
-using TradeTracker.Core.DomainModels;
-using TradeTracker.EntityModels.Models.Position;
+using TradeTracker.Core.DomainModels.Position;
 using Xunit;
 
 namespace TradeTracker.Api.Test.Controllers
@@ -34,7 +33,7 @@ namespace TradeTracker.Api.Test.Controllers
             {
                 mock.Mock<IPositionsService>()
                     .Setup(x => x.GetPosition(It.IsAny<string>(), It.IsAny<string>()))
-                    .Returns(Task.FromResult<Position>(null));
+                    .Returns(Task.FromResult<PositionDomainModel>(null));
 
                 var controller = mock.Create<PositionsController>();
 
@@ -56,7 +55,7 @@ namespace TradeTracker.Api.Test.Controllers
             {
                 mock.Mock<IPositionsService>()
                     .Setup(x => x.GetPosition(It.IsAny<string>(), It.IsAny<string>()))
-                    .ReturnsAsync(new Position
+                    .ReturnsAsync(new PositionDomainModel
                     {
                         Symbol = "AAA",
                         Quantity = 1

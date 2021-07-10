@@ -1,24 +1,33 @@
-﻿using Dapper;
+﻿using AutoMapper;
+using Dapper;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
-using TradeTracker.EntityModels.Models.Position;
+using TradeTracker.Business.Interfaces.Infrastructure;
+using TradeTracker.Core.DomainModels.Position;
+using TradeTracker.Core.DomainModels.Response;
+using TradeTracker.Repository.EntityModels.Position;
 using TradeTracker.Repository.Factories;
+using TradeTracker.Repository.Helpers;
 
 namespace TradeTracker.Repository.Repositories
 {
-    public interface IPositionsRepository
-    {
-        Task<Position> GetAsync(string symbol, string accessKey);
-    }
+
     public class PositionsRepository : IPositionsRepository
     {
         private readonly IConnectionFactory _connectionFactory;
+        private readonly IMapper _mapper;
 
-        public PositionsRepository(IConnectionFactory connectionFactory)
+        public PositionsRepository(
+            IConnectionFactory connectionFactory,
+            IMapper mapper)
         {
             _connectionFactory = connectionFactory;
+            _mapper = mapper;
         }
 
-        public async Task<Position> GetAsync(string symbol, string accessKey)
+        public async Task<PositionDomainModel> GetAsync(string symbol, string accessKey)
         {
             var sql = $@"SELECT * FROM [Position] WHERE Symbol = @Symbol AND AccessKey = @AccessKey";
 
@@ -29,7 +38,61 @@ namespace TradeTracker.Repository.Repositories
             using var connection = _connectionFactory.NewConnection();
             await connection.OpenAsync();
 
-            return await connection.QueryFirstOrDefaultAsync<Position>(sql, parameters);
+            var position = await connection.QueryFirstOrDefaultAsync<PositionDomainModel>(sql, parameters);
+
+            return _mapper.Map<PositionDomainModel>(position);
+        }
+
+        public async Task<PaginatedResult<PositionDomainModel>> GetFilteredAsync(PositionFilterDomainModel filterModel, string accessKey)
+        {
+            var filterEntityModel = _mapper.Map<PositionFilterEntityModel>(filterModel);
+            filterEntityModel.AccessKey = accessKey;
+
+            var parameters = CreateParametersForGetFilteredAsync(filterEntityModel);
+
+            using var connection = _connectionFactory.NewConnection();
+            await connection.OpenAsync();
+
+            var reader = await connection.QueryMultipleAsync(
+                "StoGetFilteredPositions",
+                parameters,
+                commandType: CommandType.StoredProcedure);
+
+            var positions = reader.Read<PositionEntityModel>().ToList();
+            var totalRecordCount = reader.Read<int>().SingleOrDefault();
+
+            return new PaginatedResult<PositionDomainModel>(
+                results: _mapper.Map<IEnumerable<PositionDomainModel>>(positions),
+                metadata: CreatePaginationMetadata(filterEntityModel, totalRecordCount));
+        }
+
+        private DynamicParameters CreateParametersForGetFilteredAsync(PositionFilterEntityModel filterModel)
+        {
+            var skip = PaginationHelper.CalculateSkip(filterModel);
+            var take = PaginationHelper.CalculateTake(filterModel);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@AccessKey", filterModel.AccessKey);
+            parameters.Add("@Skip", skip);
+            parameters.Add("@Take", take);
+            parameters.Add("@PositionType", filterModel.PositionType);
+            parameters.Add("@OrderByField", filterModel.OrderByField);
+            parameters.Add("@OrderByDirection", filterModel.OrderByDirection);
+
+            return parameters;
+        }
+
+        private PaginationMetadata CreatePaginationMetadata(PositionFilterEntityModel filterModel, int totalRecordCount)
+        {
+            var metadata = new PaginationMetadata
+            {
+                Page = filterModel.Page,
+                PageSize = filterModel.PageSize,
+                TotalPages = PaginationHelper.CalculateTotalPages(filterModel, totalRecordCount),
+                TotalRecordCount = totalRecordCount
+            };
+
+            return metadata;
         }
     }
 }

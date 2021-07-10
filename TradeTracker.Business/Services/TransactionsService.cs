@@ -1,19 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Linq;
 using System.Threading.Tasks;
+using TradeTracker.Business.AuxiliaryModels;
 using TradeTracker.Business.Helpers;
-using TradeTracker.Core.DomainModels;
-using TradeTracker.EntityModels.Models.Transaction;
-using TradeTracker.Repository.Repositories;
+using TradeTracker.Business.Interfaces.Infrastructure;
+using TradeTracker.Core.DomainModels.Transaction;
 
 namespace TradeTracker.Business.Services
 {
     public interface ITransactionsService
     {
-        Task<Transaction> GetTransaction(int transactionId, string accessKey);
-        Task<Transaction> CreateTransaction(Transaction transaction);
-        Task UpdateTransaction(Transaction transaction);
-        Task DeleteTransaction(int transactionId, string accessKey);
-        ModelStateDictionary ValidateTransaction(TransactionInputDomainModel inputModel);
+        Task<TransactionDomainModel> GetTransaction(int transactionId, string accessKey);
+        Task<PaginatedResult<TransactionDomainModel>> GetFilteredTransactions(TransactionFilterDomainModel filterModel, string accessKey);
+        Task<TransactionDomainModel> CreateTransaction(TransactionDomainModel transaction);
+        Task UpdateTransaction(TransactionDomainModel transaction);
+        Task DeleteTransaction(TransactionDomainModel transaction);
+        ModelStateDictionary ValidateTransaction(TransactionDomainModel inputModel);
+        ModelStateDictionary ValidateTransactionFilterModel(TransactionFilterDomainModel filterModel);
     }
     
     public class TransactionsService : ITransactionsService
@@ -29,27 +32,32 @@ namespace TradeTracker.Business.Services
             _transactionsRepository = transactionsRepository;
         }
 
-        public async Task<Transaction> GetTransaction(int transactionId, string accessKey)
+        public async Task<TransactionDomainModel> GetTransaction(int transactionId, string accessKey)
         {
             return await _transactionsRepository.GetAsync(transactionId, accessKey);
         }
 
-        public async Task<Transaction> CreateTransaction(Transaction transaction)
+        public async Task<PaginatedResult<TransactionDomainModel>> GetFilteredTransactions(TransactionFilterDomainModel filterModel, string accessKey)
+        {
+            return await _transactionsRepository.GetFilteredAsync(filterModel, accessKey);
+        }
+
+        public async Task<TransactionDomainModel> CreateTransaction(TransactionDomainModel transaction)
         {
             return await _transactionsRepository.CreateAsync(transaction);
         }
 
-        public async Task UpdateTransaction(Transaction transaction)
+        public async Task UpdateTransaction(TransactionDomainModel transaction)
         {
             await _transactionsRepository.UpdateAsync(transaction);
         }
 
-        public async Task DeleteTransaction(int transactionId, string accessKey)
+        public async Task DeleteTransaction(TransactionDomainModel transaction)
         {
-            await _transactionsRepository.DeleteAsync(transactionId, accessKey);
+            await _transactionsRepository.DeleteAsync(transaction.TransactionId, transaction.AccessKey);
         }
 
-        public ModelStateDictionary ValidateTransaction(TransactionInputDomainModel inputModel)
+        public ModelStateDictionary ValidateTransaction(TransactionDomainModel inputModel)
         {
             var errors = new ModelStateDictionary();
 
@@ -76,6 +84,81 @@ namespace TradeTracker.Business.Services
             if (inputModel.Notional <= decimal.Zero)
             {
                 errors.AddModelError("Notional", "The notional must be greater than zero.");
+            }
+
+            return errors;
+        }
+
+        public ModelStateDictionary ValidateTransactionFilterModel(TransactionFilterDomainModel filterModel)
+        {
+            var errors = new ModelStateDictionary();
+
+            if (filterModel.Page < 1)
+            {
+                errors.AddModelError("Page", "The page number cannot be less than one.");
+            }
+
+            if (filterModel.PageSize < 0)
+            {
+                errors.AddModelError("PageSize", "The page size must be greater than zero.");
+            }
+
+            if (filterModel.StartDate.HasValue && filterModel.EndDate.HasValue)
+            {
+                if (filterModel.StartDate.Value >= filterModel.EndDate.Value)
+                {
+                    errors.AddModelError("StartDate", "The start date must occur before the end date.");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(filterModel.Symbol) && filterModel.Symbol.Length > 10)
+            {
+                errors.AddModelError("Symbol", "The provided symbol must not exceed 10 characters.");
+            }
+
+            if (filterModel.TransactionType.HasValue)
+            {
+                char inputTransactionType = filterModel.TransactionType.Value;
+
+                var validTransactionTypes = new char[] { 'B', 'S' };
+
+                if (!validTransactionTypes.Contains(inputTransactionType))
+                {
+                    errors.AddModelError("TransactionType", "The transaction type must be a valid type: B - Buy, S - Sell.");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(filterModel.OrderByField))
+            {
+                string inputOrderByField = filterModel.OrderByField;
+
+                var validOrderByFields = new string[]
+                {
+                    "TransactionId",
+                    "Symbol",
+                    "TradeDate",
+                    "TradePrice",
+                    "Quantity",
+                    "Notional"
+                };
+
+                if (!validOrderByFields.Select(x => x.ToLower())
+                                       .Contains(inputOrderByField.ToLower()))
+                {
+                    errors.AddModelError("OrderByField", $"The order by field must be a valid field: {string.Join(", ", validOrderByFields)}.");
+                }
+            }
+
+            if (filterModel.OrderByDirection.HasValue)
+            {
+                char inputOrderByDirection = filterModel.TransactionType.Value;
+
+                var validOrderByDirections = new char[] { 'A', 'D' };
+
+                if (!validOrderByDirections.Contains(inputOrderByDirection))
+                {
+                    errors.AddModelError("OrderByDirection", "The order by direction must be a valid direction: A - Ascending, D - Descending.");
+                }
             }
 
             return errors;

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using TradeTracker.Core.DomainModels;
-using TradeTracker.EntityModels.Models.Transaction;
+using TradeTracker.Api.DTOs.Transaction;
+using TradeTracker.Core.DomainModels.Transaction;
 
 namespace TradeTracker.Api.Profiles
 {
@@ -8,11 +8,13 @@ namespace TradeTracker.Api.Profiles
     {
         public TransactionsProfile()
         {
-            CreateMap<Transaction, TransactionDomainModel>();
+            CreateMap<TransactionDomainModel, TransactionDto>();
 
-            CreateMap<TransactionInputDomainModel, Transaction>()
+            CreateMap<TransactionInputDto, TransactionDomainModel>()
                 .ForMember(dest => dest.TransactionId, opt => opt.Ignore())
                 .ForMember(dest => dest.AccessKey, opt => opt.Ignore());
+
+            CreateMap<TransactionFilterDto, TransactionFilterDomainModel>();
         }
     }
 }

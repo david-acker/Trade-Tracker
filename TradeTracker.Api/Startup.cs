@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using System.Reflection;
+using TradeTracker.Api.Services;
 using TradeTracker.Business;
 using TradeTracker.Repository;
 using TradeTracker.Repository.Options;
@@ -14,14 +15,12 @@ namespace TradeTracker.Api
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<DatabaseOptions>(
@@ -31,6 +30,8 @@ namespace TradeTracker.Api
 
             services.AddBusinessDependencies();
             services.AddRepositoryDependencies();
+
+            services.AddSingleton<IMediaTypeService, MediaTypeService>();
 
             services.AddControllers()
                 .AddNewtonsoftJson(setupAction =>
@@ -48,7 +49,6 @@ namespace TradeTracker.Api
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())

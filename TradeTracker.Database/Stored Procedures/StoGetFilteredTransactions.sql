@@ -1,13 +1,13 @@
 ﻿CREATE PROCEDURE StoGetFilteredTransactions
-	@Skip INT
-  , @Take INT
-  , @AccessKey CHAR(36)
+	@AccessKey CHAR(36)
+  , @Skip INT = NULL
+  , @Take INT = NULL
   , @StartDate DATETIME2(2) = NULL
   , @EndDate DATETIME2(2) = NULL
   , @Symbol VARCHAR(10) = NULL
-  , @TransactionType VARCHAR(1) = NULL
+  , @TransactionType CHAR(1) = NULL
   , @OrderByField VARCHAR(25) = NULL
-  , @OrderByDirection VARCHAR(1) = NULL
+  , @OrderByDirection CHAR(1) = NULL
 AS
 /*-------------------------------------------------------------------------
 	Name: StoGetFilteredTransactions
@@ -16,15 +16,15 @@ AS
 		Returns a filtered and paginated list of transactions.
 
 	Input:
+	@AccessKey			CHAR(36)
 	@Skip				INT
 	@Take				INT
-	@AccessKey			CHAR(36)
 	@StartDate			DATETIME2(2)
 	@EndDate			DATETIME2(2)
 	@Symbol				VARCHAR(10)
-	@TransactionType	VARCHAR(1)
+	@TransactionType	CHAR(1)
 	@OrderByField		VARCHAR(25)
-	@OrderByDirection	VARCHAR(1)
+	@OrderByDirection	CHAR(1)
 
 	Output 1:
 	TransactionId		INT
@@ -39,8 +39,8 @@ AS
 */-------------------------------------------------------------------------
 BEGIN
 	--Reference names for valid Transaction Types
-	DECLARE @TT_Buy VARCHAR(1) = 'B';
-	DECLARE @TT_Sell VARCHAR(1) = 'S';
+	DECLARE @TT_Buy CHAR(1) = 'B';
+	DECLARE @TT_Sell CHAR(1) = 'S';
 
 	--Reference names for valid Order By Fields
 	DECLARE @OBF_TransactionId VARCHAR(25) = 'TransactionId';
@@ -53,8 +53,8 @@ BEGIN
 	DECLARE @OBF_Default VARCHAR(25) = @OBF_TradeDate;
 	
 	--Reference names for valid Order By Directions
-	DECLARE @OBD_Ascending VARCHAR(1) = 'A';
-	DECLARE @OBD_Descending VARCHAR(1) = 'D';
+	DECLARE @OBD_Ascending CHAR(1) = 'A';
+	DECLARE @OBD_Descending CHAR(1) = 'D';
 
 	CREATE TABLE #Temp (
 		   TransactionId INT

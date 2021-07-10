@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TradeTracker.Business\TradeTracker.Business.csproj" />
+    <ProjectReference Include="..\TradeTracker.Repository\TradeTracker.Repository.csproj" />
   </ItemGroup>
 
 </Project>
