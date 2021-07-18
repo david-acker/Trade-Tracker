@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TradeTracker.Application.Common.Behaviors;
-using TradeTracker.Application.Common.Interfaces.Infrastructure;
+using TradeTracker.Application.Common.Interfaces;
 using TradeTracker.Application.Common.Interfaces.Persistence.Positions;
 using TradeTracker.Application.Common.Models.Resources.Parameters.Positions;
 using TradeTracker.Application.Common.Models.Resources.Responses;
@@ -20,16 +20,16 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
         
         private readonly IAuthenticatedPositionRepository _authenticatedPositionRepository;
         private readonly IMapper _mapper;
-        private readonly IPositionService _positionService;
+        private readonly ICostBasisCalculator _costBasisCalculator;
 
         public GetPositionsQueryHandler(
             IAuthenticatedPositionRepository authenticatedPositionRepository,
             IMapper mapper,
-            IPositionService positionService)
+            ICostBasisCalculator costBasisCalculator)
         {
             _authenticatedPositionRepository = authenticatedPositionRepository;
             _mapper = mapper;
-            _positionService = positionService;
+            _costBasisCalculator = costBasisCalculator;
         }
 
         public async Task<PagedPositionsBase> Handle(GetPositionsQuery request, CancellationToken cancellationToken)
@@ -65,11 +65,11 @@ namespace TradeTracker.Application.Features.Positions.Queries.GetPositions
         {
             var tasks = positions.Select(async (position) =>
             {
-                position.AverageCostBasis = await _positionService
+                position.AverageCostBasis = await _costBasisCalculator
                     .CalculateAverageCostBasis(
                         position.Symbol);
 
-                position.SourceRelations = await _positionService
+                position.SourceRelations = await _costBasisCalculator
                     .CreateSourceRelations(
                         position.Symbol);
                 

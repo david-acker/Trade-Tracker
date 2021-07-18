@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TradeTracker.Application.Common.Interfaces;
 using TradeTracker.Application.Common.Interfaces.Infrastructure;
 using TradeTracker.Application.Common.Interfaces.Persistence.Transactions;
 using TradeTracker.Domain.Enums;
@@ -10,25 +11,28 @@ namespace TradeTracker.Infrastructure.Services
     public class PositionTrackingService : IPositionTrackingService
     {
         private readonly IAuthenticatedTransactionRepository _authenticatedTransactionRepository;
+        private readonly IPositionCalculator _positionCalculator;
         private readonly IPositionService _positionService;
 
         public PositionTrackingService(
             IAuthenticatedTransactionRepository authenticatedTransactionRepository,
+            IPositionCalculator positionCalculator,
             IPositionService positionService)
         {
             _authenticatedTransactionRepository = authenticatedTransactionRepository;
+            _positionCalculator = positionCalculator;
             _positionService = positionService;
         }
 
         public async Task RefreshAfterCreation(Guid transactionId)
         {
-            await _positionService.RefreshForTransaction(transactionId);
+            await _positionCalculator.RefreshForTransaction(transactionId);
         }
 
         public async Task RefreshAfterCollectionCreation(Dictionary<string, List<Guid>> transactionMap)
         {
             foreach (var entry in transactionMap)
-                await _positionService.RefreshForTransactionCollection(entry.Value);
+                await _positionCalculator.RefreshForTransactionCollection(entry.Value);
         }
 
         public async Task RefreshAfterModification( 
