@@ -8,8 +8,9 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using TradeTracker.Application.Models.Common.Authentication;
 using TradeTracker.Identity.Models;
+using TradeTracker.Identity.Models.Authentication;
+using TradeTracker.Identity.Models.Registration;
 
 namespace TradeTracker.Identity.Services
 {

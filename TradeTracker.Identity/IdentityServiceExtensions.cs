@@ -20,7 +20,7 @@ namespace TradeTracker.Identity
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
 
             services.AddDbContext<TradeTrackerIdentityDbContext>(
-                options => options.UseSqlServer(configuration.GetConnectionString("TradeTrackerIdentityConnectionString"),
+                options => options.UseSqlServer(configuration.GetConnectionString("TradeTrackerIdentity"),
                 b => b.MigrationsAssembly(typeof(TradeTrackerIdentityDbContext).Assembly.FullName)));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
