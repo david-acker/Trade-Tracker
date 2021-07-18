@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
 
 namespace TradeTracker.Api.Test.Base
 {
@@ -17,7 +16,7 @@ namespace TradeTracker.Api.Test.Base
             controller.ControllerContext.HttpContext.Request.Headers[headerKey] = headerValue;
         }
 
-        private void PrepareControllerContext(ControllerBase controller)
+        public void PrepareControllerContext(ControllerBase controller)
         {
             if (controller.ControllerContext == null)
             {

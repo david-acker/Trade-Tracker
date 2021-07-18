@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using TradeTracker.Business.Helpers;
 using TradeTracker.Business.Services;
 
 namespace TradeTracker.Business
@@ -8,8 +7,9 @@ namespace TradeTracker.Business
     {
         public static IServiceCollection AddBusinessDependencies(this IServiceCollection services)
         {
-            services.AddSingleton<IDateTimeHelper, DateTimeHelper>();
-            services.AddScoped<ITransactionsService, TransactionsService>();
+            services.AddSingleton<IDateTimeService, DateTimeService>();
+            services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<IPositionService, PositionService>();
 
             return services;
         }

@@ -1,4 +1,12 @@
-﻿CREATE PROCEDURE StoUpdateTransaction
+﻿USE [TradeTracker]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE StoUpdateTransaction
 	@TransactionId INT
   , @AccessKey CHAR(36)
   , @Symbol VARCHAR(10)

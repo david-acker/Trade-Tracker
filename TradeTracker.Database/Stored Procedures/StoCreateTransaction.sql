@@ -1,4 +1,12 @@
-﻿CREATE PROCEDURE StoCreateTransaction
+﻿USE [TradeTracker]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE StoCreateTransaction
 	@AccessKey CHAR(36)
   , @Symbol VARCHAR(10)
   , @TradeDate DATETIME2(2)

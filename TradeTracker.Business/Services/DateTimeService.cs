@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace TradeTracker.Business.Helpers
+namespace TradeTracker.Business.Services
 {
-    public interface IDateTimeHelper
+    public interface IDateTimeService
     {
         bool HasDateTimeAlreadyOccurred(DateTime input);
     }
 
-    public class DateTimeHelper : IDateTimeHelper
+    public class DateTimeService : IDateTimeService
     {
-        public DateTimeHelper()
+        public DateTimeService()
         {
         }
 

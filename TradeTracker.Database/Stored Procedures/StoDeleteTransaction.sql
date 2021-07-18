@@ -1,4 +1,12 @@
-﻿CREATE PROCEDURE StoDeleteTransaction
+﻿USE [TradeTracker]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE StoDeleteTransaction
 	@TransactionId INT
   , @AccessKey CHAR(36)
 AS

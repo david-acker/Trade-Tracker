@@ -8,12 +8,17 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using TradeTracker.Application.Common.Interfaces.Identity;
 using TradeTracker.Application.Models.Common.Authentication;
 using TradeTracker.Identity.Models;
 
 namespace TradeTracker.Identity.Services
 {
+    public interface IAuthenticationService
+    {
+        Task<AuthenticationResponse> AuthenticateAsync(AuthenticationRequest request);
+        Task<RegistrationResponse> RegisterAsync(RegistrationRequest request);
+    }
+
     public class AuthenticationService : IAuthenticationService
     {
         private readonly JwtSettings _jwtSettings;

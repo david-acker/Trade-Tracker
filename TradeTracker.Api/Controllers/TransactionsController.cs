@@ -13,20 +13,21 @@ using TradeTracker.Business.Services;
 using TradeTracker.Core.DomainModels.Transaction;
 using TradeTracker.Business.AuxiliaryModels;
 using TradeTracker.Api.Enums;
-using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using System.Transactions;
+using TradeTracker.Api.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TradeTracker.Api.Controllers
 {
-    [Route("api/transactions")]
+    [Authorize]
     [ApiController]
+    [Route("api/[controller]")]
     public class TransactionsController : ControllerBase
     {
         private readonly ICurrentUserService _currentUserService;
         private readonly ILogger<TransactionsController> _logger;
         private readonly IMapper _mapper;
         private readonly IMediaTypeService _mediaTypeService;
-        private readonly ITransactionsService _transactionsService;
+        private readonly ITransactionService _transactionsService;
 
         private string _mediaType => HttpContext?.Request.Headers["Accept"] ?? string.Empty;
 
@@ -35,7 +36,7 @@ namespace TradeTracker.Api.Controllers
             ILogger<TransactionsController> logger,
             IMapper mapper,
             IMediaTypeService mediaTypeService,
-            ITransactionsService transactionsService)
+            ITransactionService transactionsService)
         {
             _currentUserService = currentUserService;
             _logger = logger;
@@ -85,7 +86,7 @@ namespace TradeTracker.Api.Controllers
         [Consumes("application/json")]
         [Produces("application/vnd.trade.transaction.paged+json",
             "application/vnd.trade.transaction.paged.hateoas+json")]
-        public async Task<IActionResult> GetFilteredAsync(TransactionFilterDto filterModel)
+        public async Task<IActionResult> GetFilteredAsync([FromQuery]TransactionFilterDto filterModel)
 {
             _logger.LogInformation($"{nameof(TransactionsController)}: {nameof(GetFilteredAsync)} was called with filter model: {JsonSerializer.Serialize(filterModel)}.");
 
@@ -97,9 +98,10 @@ namespace TradeTracker.Api.Controllers
                 return UnprocessableEntity(modelState);
             }
 
-            var pagedTransactionsDomainModel = await _transactionsService.GetFilteredTransactions(
-                filterDomainModel, 
-                _currentUserService.AccessKey);
+            var pagedTransactionsDomainModel = await _transactionsService
+                .GetFilteredTransactions(
+                    filterDomainModel, 
+                    _currentUserService.AccessKey);
 
             var pagedTransactionsDto = _mapper.Map<PaginatedResult<TransactionDto>>(pagedTransactionsDomainModel);
 
@@ -145,7 +147,7 @@ namespace TradeTracker.Api.Controllers
         public async Task<IActionResult> CreateAsync(TransactionInputDto inputModel)
         {
             _logger.LogInformation($"{nameof(TransactionsController)}: {nameof(CreateAsync)} was called.");
-
+            
             var transactionDomainModel = _mapper.Map<TransactionDomainModel>(inputModel);
             
             var modelState = _transactionsService.ValidateTransaction(transactionDomainModel);

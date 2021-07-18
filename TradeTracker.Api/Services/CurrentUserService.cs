@@ -6,23 +6,16 @@ namespace TradeTracker.Api.Services
 {
     public interface ICurrentUserService
     {
-        string AccessKey { get; }
-        string UserId { get; }
+        string AccessKey { get; set; } 
     }
 
     public class CurrentUserService : ICurrentUserService
     {
-        private Guid _accessKey = Guid.Empty;
-        public string AccessKey { get => _accessKey.ToString(); }
-        public string UserId { get; }
+        public string AccessKey { get ; set; } = Guid.Empty.ToString();
 
         public CurrentUserService(IHttpContextAccessor httpContextAccessor)
         {
-            Guid.TryParse(
-                httpContextAccessor.HttpContext?.User?.FindFirstValue("AccessKey"), 
-                out _accessKey);
-
-            UserId = httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            AccessKey = httpContextAccessor.HttpContext?.User?.FindFirstValue("AccessKey");
         }
     }
 }

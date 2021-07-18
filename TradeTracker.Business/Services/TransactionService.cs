@@ -2,13 +2,12 @@
 using System.Linq;
 using System.Threading.Tasks;
 using TradeTracker.Business.AuxiliaryModels;
-using TradeTracker.Business.Helpers;
 using TradeTracker.Business.Interfaces.Infrastructure;
 using TradeTracker.Core.DomainModels.Transaction;
 
 namespace TradeTracker.Business.Services
 {
-    public interface ITransactionsService
+    public interface ITransactionService
     {
         Task<TransactionDomainModel> GetTransaction(int transactionId, string accessKey);
         Task<PaginatedResult<TransactionDomainModel>> GetFilteredTransactions(TransactionFilterDomainModel filterModel, string accessKey);
@@ -19,14 +18,14 @@ namespace TradeTracker.Business.Services
         ModelStateDictionary ValidateTransactionFilterModel(TransactionFilterDomainModel filterModel);
     }
     
-    public class TransactionsService : ITransactionsService
+    public class TransactionService : ITransactionService
     {
-        private readonly IDateTimeHelper _dateTimeHelper;
+        private readonly IDateTimeService _dateTimeHelper;
         private readonly ITransactionsRepository _transactionsRepository;
 
-        public TransactionsService(
+        public TransactionService(
             ITransactionsRepository transactionsRepository,
-            IDateTimeHelper dateTimeHelper)
+            IDateTimeService dateTimeHelper)
         {
             _dateTimeHelper = dateTimeHelper;
             _transactionsRepository = transactionsRepository;
@@ -66,7 +65,11 @@ namespace TradeTracker.Business.Services
                 errors.AddModelError("Symbol", "A symbol is required for the transaction.");
             }
 
-            if (!_dateTimeHelper.HasDateTimeAlreadyOccurred(inputModel.TradeDate))
+            if (inputModel.TradeDate == default)
+            {
+                errors.AddModelError("TradeDate", "A trade date is required for the transaction.");
+            } 
+            else if (!_dateTimeHelper.HasDateTimeAlreadyOccurred(inputModel.TradeDate))
             {
                 errors.AddModelError("TradeDate", "The transaction must have already occurred.");
             }
@@ -76,14 +79,14 @@ namespace TradeTracker.Business.Services
                 errors.AddModelError("TradePrice", "The trade price must be greater than zero.");
             }
 
-            if (inputModel.Quantity <= decimal.Zero)
+            if (inputModel.Quantity == decimal.Zero)
             {
-                errors.AddModelError("Quantity", "The quantity must be greater than zero.");
+                errors.AddModelError("Quantity", "The quantity cannot be equal to zero.");
             }
 
-            if (inputModel.Notional <= decimal.Zero)
+            if (inputModel.Notional == decimal.Zero)
             {
-                errors.AddModelError("Notional", "The notional must be greater than zero.");
+                errors.AddModelError("Notional", "The notional cannot be equal to zero.");
             }
 
             return errors;
@@ -98,9 +101,9 @@ namespace TradeTracker.Business.Services
                 errors.AddModelError("Page", "The page number cannot be less than one.");
             }
 
-            if (filterModel.PageSize < 0)
+            if (filterModel.PageSize < 1)
             {
-                errors.AddModelError("PageSize", "The page size must be greater than zero.");
+                errors.AddModelError("PageSize", "The page size cannot be less than 1.");
             }
 
             if (filterModel.StartDate.HasValue && filterModel.EndDate.HasValue)
@@ -151,7 +154,7 @@ namespace TradeTracker.Business.Services
 
             if (filterModel.OrderByDirection.HasValue)
             {
-                char inputOrderByDirection = filterModel.TransactionType.Value;
+                char inputOrderByDirection = filterModel.OrderByDirection.Value;
 
                 var validOrderByDirections = new char[] { 'A', 'D' };
 

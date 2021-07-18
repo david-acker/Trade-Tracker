@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using TradeTracker.Api.DTOs;
 using TradeTracker.Api.DTOs.Position;
 using TradeTracker.Api.Enums;
 using TradeTracker.Api.Services;
@@ -16,15 +18,16 @@ using TradeTracker.Core.DomainModels.Position;
 
 namespace TradeTracker.Api.Controllers
 {
-    [Route("api/positions")]
+    [Authorize]
     [ApiController]
+    [Route("api/[controller]")]
     public class PositionsController : ControllerBase
     {
         private readonly ICurrentUserService _currentUserService;
         private readonly ILogger<PositionsController> _logger;
         private readonly IMapper _mapper;
         private readonly IMediaTypeService _mediaTypeService;
-        private readonly IPositionsService _positionsService;
+        private readonly IPositionService _positionsService;
 
         private string _mediaType => HttpContext?.Request.Headers["Accept"] ?? string.Empty;
 
@@ -33,7 +36,7 @@ namespace TradeTracker.Api.Controllers
             ILogger<PositionsController> logger,
             IMapper mapper,
             IMediaTypeService mediaTypeService,
-            IPositionsService positionsService)
+            IPositionService positionsService)
         {
             _currentUserService = currentUserService;
             _logger = logger;
@@ -83,7 +86,7 @@ namespace TradeTracker.Api.Controllers
         [Consumes("application/json")]
         [Produces("application/vnd.trade.position.paged+json",
             "application/vnd.trade.position.paged.hateoas+json")]
-        public async Task<IActionResult> GetFilteredAsync(PositionFilterDto filterModel)
+        public async Task<IActionResult> GetFilteredAsync([FromQuery]PositionFilterDto filterModel)
         {
             _logger.LogInformation($"{nameof(PositionsController)}: {nameof(GetFilteredAsync)} was called with filter model: {JsonSerializer.Serialize(filterModel)}.");
 

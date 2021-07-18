@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using TradeTracker.Api.DTOs.Transaction;
+using TradeTracker.Business.AuxiliaryModels;
 using TradeTracker.Core.DomainModels.Transaction;
 
 namespace TradeTracker.Api.Profiles
@@ -15,6 +16,8 @@ namespace TradeTracker.Api.Profiles
                 .ForMember(dest => dest.AccessKey, opt => opt.Ignore());
 
             CreateMap<TransactionFilterDto, TransactionFilterDomainModel>();
+
+            CreateMap<PaginatedResult<TransactionDomainModel>, PaginatedResult<TransactionDto>>();
         }
     }
 }

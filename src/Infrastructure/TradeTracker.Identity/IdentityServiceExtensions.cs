@@ -8,8 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System;
 using System.Text;
-using TradeTracker.Application.Common.Interfaces.Identity;
-using TradeTracker.Application.Models.Common.Authentication;
 using TradeTracker.Identity.Models;
 using TradeTracker.Identity.Services;
 
@@ -22,7 +20,7 @@ namespace TradeTracker.Identity
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
 
             services.AddDbContext<TradeTrackerIdentityDbContext>(
-                options => options.UseSqlite(configuration.GetConnectionString("TradeTrackerIdentityConnectionString"),
+                options => options.UseSqlServer(configuration.GetConnectionString("TradeTrackerIdentityConnectionString"),
                 b => b.MigrationsAssembly(typeof(TradeTrackerIdentityDbContext).Assembly.FullName)));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()

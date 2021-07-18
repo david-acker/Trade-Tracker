@@ -18,15 +18,6 @@ namespace TradeTracker.Business.AuxiliaryModels
         }
     }
 
-    public class LinkedPaginatedResult<TEntity> : PaginatedResult<TEntity>
-    {
-        public IEnumerable<Link> Links { get; set; }
-
-        public LinkedPaginatedResult(IEnumerable<TEntity> results, PaginationMetadata metadata) : base(results, metadata)
-        {
-        }
-    }
-
     public class PaginationMetadata
     {
         public int Page { get; set; }

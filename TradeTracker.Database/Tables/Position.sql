@@ -1,6 +1,11 @@
 ﻿USE [TradeTracker]
 GO
 
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
 CREATE TABLE [Position] (
 	PositionId INT IDENTITY(1,1)
   , AccessKey CHAR(36) NOT NULL

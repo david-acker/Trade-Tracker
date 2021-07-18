@@ -1,4 +1,4 @@
-﻿namespace TradeTracker.Business.AuxiliaryModels
+﻿namespace TradeTracker.Api.DTOs
 {
     public class Link
     {

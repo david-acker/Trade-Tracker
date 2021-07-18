@@ -5,11 +5,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
+using System;
 using System.Reflection;
 using TradeTracker.Api.Services;
 using TradeTracker.Business;
+using TradeTracker.Identity;
 using TradeTracker.Repository;
-using TradeTracker.Repository.Options;
 
 namespace TradeTracker.Api
 {
@@ -23,15 +24,15 @@ namespace TradeTracker.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<DatabaseOptions>(
-                Configuration.GetSection(DatabaseOptions.Database));
+            services.AddHttpContextAccessor();
 
-            services.AddAutoMapper(Assembly.GetExecutingAssembly());
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddSingleton<IMediaTypeService, MediaTypeService>();
+            services.AddTransient<ICurrentUserService, CurrentUserService>();
 
             services.AddBusinessDependencies();
-            services.AddRepositoryDependencies();
-
-            services.AddSingleton<IMediaTypeService, MediaTypeService>();
+            services.AddRepositoryDependencies(Configuration);
+            services.AddIdentityServices(Configuration);
 
             services.AddControllers()
                 .AddNewtonsoftJson(setupAction =>
@@ -58,10 +59,9 @@ namespace TradeTracker.Api
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TradeTracker.Api v1"));
             }
 
+            app.UseAuthentication();
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

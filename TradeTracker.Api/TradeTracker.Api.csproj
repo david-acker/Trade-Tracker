@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TradeTracker.Business\TradeTracker.Business.csproj" />
+    <ProjectReference Include="..\TradeTracker.Identity\TradeTracker.Identity.csproj" />
     <ProjectReference Include="..\TradeTracker.Repository\TradeTracker.Repository.csproj" />
   </ItemGroup>
 

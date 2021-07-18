@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using TradeTracker.Business.AuxiliaryModels;
 
 namespace TradeTracker.Api.DTOs.Transaction
 {
@@ -22,6 +21,7 @@ namespace TradeTracker.Api.DTOs.Transaction
 
     public class TransactionInputDto
     {
+        public string Type { get; set; }
         public string Symbol { get; set; }
         public DateTime TradeDate { get; set; }
         public decimal TradePrice { get; set; }

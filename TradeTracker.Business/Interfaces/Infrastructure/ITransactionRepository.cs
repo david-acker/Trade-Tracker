@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using TradeTracker.Core.DomainModels.Response;
+using TradeTracker.Business.AuxiliaryModels;
 using TradeTracker.Core.DomainModels.Transaction;
 
 namespace TradeTracker.Business.Interfaces.Infrastructure

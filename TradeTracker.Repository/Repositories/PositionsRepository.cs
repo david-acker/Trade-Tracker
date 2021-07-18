@@ -4,16 +4,15 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeTracker.Business.AuxiliaryModels;
 using TradeTracker.Business.Interfaces.Infrastructure;
 using TradeTracker.Core.DomainModels.Position;
-using TradeTracker.Core.DomainModels.Response;
 using TradeTracker.Repository.EntityModels.Position;
 using TradeTracker.Repository.Factories;
 using TradeTracker.Repository.Helpers;
 
 namespace TradeTracker.Repository.Repositories
 {
-
     public class PositionsRepository : IPositionsRepository
     {
         private readonly IConnectionFactory _connectionFactory;
@@ -38,7 +37,15 @@ namespace TradeTracker.Repository.Repositories
             using var connection = _connectionFactory.NewConnection();
             await connection.OpenAsync();
 
-            var position = await connection.QueryFirstOrDefaultAsync<PositionDomainModel>(sql, parameters);
+            PositionEntityModel position = await connection.QueryFirstOrDefaultAsync<PositionEntityModel>(sql, parameters);
+
+            if (position == null)
+            {
+                position = new PositionEntityModel
+                {
+                    Symbol = symbol
+                };
+            }
 
             return _mapper.Map<PositionDomainModel>(position);
         }
@@ -58,7 +65,7 @@ namespace TradeTracker.Repository.Repositories
                 parameters,
                 commandType: CommandType.StoredProcedure);
 
-            var positions = reader.Read<PositionEntityModel>().ToList();
+            IEnumerable<PositionEntityModel> positions = reader.Read<PositionEntityModel>().ToList();
             var totalRecordCount = reader.Read<int>().SingleOrDefault();
 
             return new PaginatedResult<PositionDomainModel>(

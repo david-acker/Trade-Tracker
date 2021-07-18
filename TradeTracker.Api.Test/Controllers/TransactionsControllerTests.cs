@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using TradeTracker.Api.Controllers;
+using TradeTracker.Api.DTOs;
 using TradeTracker.Api.DTOs.Transaction;
 using TradeTracker.Api.Profiles;
 using TradeTracker.Api.Services;
@@ -37,9 +38,9 @@ namespace TradeTracker.Api.Test.Controllers
         [Fact]
         public async Task ItWillReturn422ForInvalidInput_Create()
         {
-            using (var mock = AutoMock.GetLoose())
+            using (var mock = AutoMock.GetLoose(cfg => cfg.RegisterInstance(_mapper).As<IMapper>()))
             {
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()))
                     .Returns(() =>
                     {
@@ -63,10 +64,10 @@ namespace TradeTracker.Api.Test.Controllers
                 Assert.Equal("Key", error.Key);
                 Assert.Equal("Error Message", ((string[])error.Value).SingleOrDefault());
 
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.CreateTransaction(It.IsAny<TransactionDomainModel>()), Times.Never);
+                mock.Mock<ITransactionService>().Verify(x => x.CreateTransaction(It.IsAny<TransactionDomainModel>()), Times.Never);
             }
         }
 
@@ -75,11 +76,11 @@ namespace TradeTracker.Api.Test.Controllers
         {
             using (var mock = AutoMock.GetLoose(cfg => cfg.RegisterInstance(_mapper).As<IMapper>()))
             {
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()))
                     .Returns(new ModelStateDictionary());
 
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.CreateTransaction(It.IsAny<TransactionDomainModel>()))
                     .ReturnsAsync(new TransactionDomainModel
                     {
@@ -88,6 +89,8 @@ namespace TradeTracker.Api.Test.Controllers
                     });
 
                 var controller = mock.Create<TransactionsController>();
+
+                SetRequestHeader(controller, "Accept", "application/vnd.trade.transaction+json");
 
                 var response = await controller.CreateAsync(
                     new TransactionInputDto
@@ -101,15 +104,74 @@ namespace TradeTracker.Api.Test.Controllers
                 Assert.Equal(nameof(TransactionsController.GetAsync), result.ActionName);
                 Assert.Equal(1, result.RouteValues.SingleOrDefault().Value);
 
-                var transaction = Assert.IsType<TransactionDomainModel>(result.Value);
+                var transaction = Assert.IsType<TransactionDto>(result.Value);
                 Assert.Equal(1, transaction.TransactionId);
                 Assert.Equal("AAA", transaction.Symbol);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.CreateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.CreateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.CreateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.CreateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
+
+                mock.Mock<IMediaTypeService>().Verify(x => x.IsLinkedRepresentation(It.IsAny<string>()), Times.Once);
+                mock.Mock<IMediaTypeService>().Verify(x => x.IsLinkedRepresentation(It.Is<string>(i => i == "application/vnd.trade.transaction+json")));
+            }
+        }
+
+        [Fact]
+        public async Task ItWillReturnLinkedTransaction_Create()
+        {
+            using (var mock = AutoMock.GetLoose(cfg => cfg.RegisterInstance(_mapper).As<IMapper>()))
+            {
+                mock.Mock<ITransactionService>()
+                    .Setup(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()))
+                    .Returns(new ModelStateDictionary());
+
+                mock.Mock<ITransactionService>()
+                    .Setup(x => x.CreateTransaction(It.IsAny<TransactionDomainModel>()))
+                    .ReturnsAsync(new TransactionDomainModel
+                    {
+                        TransactionId = 1,
+                        Symbol = "AAA"
+                    });
+
+                mock.Mock<IMediaTypeService>()
+                    .Setup(x => x.IsLinkedRepresentation(It.IsAny<string>()))
+                    .Returns(false);
+
+                var controller = mock.Create<TransactionsController>();
+
+                var urlHelperMock = new Mock<IUrlHelper>();
+                urlHelperMock.Setup(x => x.Link(It.IsAny<string>(), It.IsAny<object>())).Returns(string.Empty);
+                controller.Url = urlHelperMock.Object;
+
+                SetRequestHeader(controller, "Accept", "application/vnd.trade.transaction.hateoas+json");
+
+                var response = await controller.CreateAsync(
+                    new TransactionInputDto
+                    {
+                        Symbol = "AAA"
+                    });
+
+                Assert.NotNull(response);
+                var result = Assert.IsType<CreatedAtActionResult>(response);
+                Assert.Equal(HttpStatusCode.Created, (HttpStatusCode)result.StatusCode);
+                Assert.Equal(nameof(TransactionsController.GetAsync), result.ActionName);
+                Assert.Equal(1, result.RouteValues.SingleOrDefault().Value);
+
+                var transaction = Assert.IsType<TransactionDto>(result.Value);
+                Assert.Equal(1, transaction.TransactionId);
+                Assert.Equal("AAA", transaction.Symbol);
+
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
+
+                mock.Mock<ITransactionService>().Verify(x => x.CreateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.CreateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
+
+                mock.Mock<IMediaTypeService>().Verify(x => x.IsLinkedRepresentation(It.IsAny<string>()), Times.Once);
+                mock.Mock<IMediaTypeService>().Verify(x => x.IsLinkedRepresentation(It.Is<string>(i => i == "application/vnd.trade.transaction.hateoas+json")));
             }
         }
 
@@ -118,11 +180,11 @@ namespace TradeTracker.Api.Test.Controllers
         {
             using (var mock = AutoMock.GetLoose(cfg => cfg.RegisterInstance(_mapper).As<IMapper>()))
             {
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()))
                     .Returns(new ModelStateDictionary());
 
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.CreateTransaction(It.IsAny<TransactionDomainModel>()))
                     .ReturnsAsync(new TransactionDomainModel
                     {
@@ -154,15 +216,15 @@ namespace TradeTracker.Api.Test.Controllers
                 Assert.Equal(nameof(TransactionsController.GetAsync), result.ActionName);
                 Assert.Equal(1, result.RouteValues.SingleOrDefault().Value);
 
-                var transaction = Assert.IsType<TransactionDomainModel>(result.Value);
+                var transaction = Assert.IsType<TransactionDto>(result.Value);
                 Assert.Equal(1, transaction.TransactionId);
                 Assert.Equal("AAA", transaction.Symbol);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.CreateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.CreateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.CreateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.CreateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
 
                 mock.Mock<IMediaTypeService>().Verify(x => x.IsLinkedRepresentation(It.IsAny<string>()), Times.Once);
                 mock.Mock<IMediaTypeService>().Verify(x => x.IsLinkedRepresentation(It.Is<string>(i => i == "application/vnd.trade.transaction.hateoas+json")));
@@ -176,7 +238,11 @@ namespace TradeTracker.Api.Test.Controllers
         {
             using (var mock = AutoMock.GetLoose())
             {
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ICurrentUserService>()
+                    .SetupGet(x => x.AccessKey)
+                    .Returns("AccessKey");
+
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()))
                     .Returns(Task.FromResult<TransactionDomainModel>(null));
 
@@ -188,8 +254,8 @@ namespace TradeTracker.Api.Test.Controllers
                 var result = Assert.IsType<NotFoundObjectResult>(response);
                 Assert.Equal(HttpStatusCode.NotFound, (HttpStatusCode)result.StatusCode);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i == "AccessKey")), Times.Once);
             }
         }
 
@@ -198,7 +264,11 @@ namespace TradeTracker.Api.Test.Controllers
         {
             using (var mock = AutoMock.GetLoose(cfg => cfg.RegisterInstance(_mapper).As<IMapper>()))
             {
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ICurrentUserService>()
+                    .SetupGet(x => x.AccessKey)
+                    .Returns("AccessKey");
+
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()))
                     .Returns(Task.FromResult(
                         new TransactionDomainModel
@@ -212,6 +282,7 @@ namespace TradeTracker.Api.Test.Controllers
                     .Returns(false);
 
                 var controller = mock.Create<TransactionsController>();
+
                 SetRequestHeader(controller, "Accept", "application/vnd.trade.transaction+json");
 
                 var response = await controller.GetAsync(1);
@@ -220,12 +291,12 @@ namespace TradeTracker.Api.Test.Controllers
                 var result = Assert.IsType<OkObjectResult>(response);
                 Assert.Equal(HttpStatusCode.OK, (HttpStatusCode)result.StatusCode);
 
-                var transaction = Assert.IsType<TransactionDomainModel>(result.Value);
+                var transaction = Assert.IsType<TransactionDto>(result.Value);
                 Assert.Equal(1, transaction.TransactionId);
                 Assert.Equal("AAA", transaction.Symbol);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i == "AccessKey")), Times.Once);
 
                 mock.Mock<IMediaTypeService>().Verify(x => x.IsLinkedRepresentation(It.IsAny<string>()), Times.Once);
                 mock.Mock<IMediaTypeService>().Verify(x => x.IsLinkedRepresentation(It.Is<string>(i => i == "application/vnd.trade.transaction+json")));
@@ -237,7 +308,11 @@ namespace TradeTracker.Api.Test.Controllers
         {
             using (var mock = AutoMock.GetLoose(cfg => cfg.RegisterInstance(_mapper).As<IMapper>()))
             {
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ICurrentUserService>()
+                    .SetupGet(x => x.AccessKey)
+                    .Returns("AccessKey");
+
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()))
                     .Returns(Task.FromResult(
                         new TransactionDomainModel
@@ -274,8 +349,8 @@ namespace TradeTracker.Api.Test.Controllers
                 var links = linkedTransaction.Links;
                 Assert.NotNull(links);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i == "AccessKey")), Times.Once);
 
                 mock.Mock<IMediaTypeService>().Verify(x => x.IsLinkedRepresentation(It.IsAny<string>()), Times.Once);
                 mock.Mock<IMediaTypeService>().Verify(x => x.IsLinkedRepresentation(It.Is<string>(i => i == "application/vnd.trade.transaction.hateoas+json")));
@@ -289,15 +364,25 @@ namespace TradeTracker.Api.Test.Controllers
         {
             using (var mock = AutoMock.GetLoose(cfg => cfg.RegisterInstance(_mapper).As<IMapper>()))
             {
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ICurrentUserService>()
+                    .SetupGet(x => x.AccessKey)
+                    .Returns("AccessKey");
+
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.ValidateTransactionFilterModel(It.IsAny<TransactionFilterDomainModel>()))
                     .Returns(new ModelStateDictionary());
 
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.GetFilteredTransactions(It.IsAny<TransactionFilterDomainModel>(), It.IsAny<string>()))
                     .Returns(Task.FromResult(new PaginatedResult<TransactionDomainModel>(new List<TransactionDomainModel>() { new TransactionDomainModel() }, new PaginationMetadata())));
 
+                mock.Mock<IMediaTypeService>()
+                    .Setup(x => x.IsLinkedRepresentation(It.IsAny<string>()))
+                    .Returns(false);
+
                 var controller = mock.Create<TransactionsController>();
+
+                SetRequestHeader(controller, "Accept", "application/vnd.trade.transaction.paged+json");
 
                 var response = await controller.GetFilteredAsync(
                     new TransactionFilterDto
@@ -310,24 +395,86 @@ namespace TradeTracker.Api.Test.Controllers
                 var result = Assert.IsType<OkObjectResult>(response);
                 Assert.Equal(HttpStatusCode.OK, (HttpStatusCode)result.StatusCode);
 
-                var transactions = Assert.IsType<PaginatedResult<TransactionDomainModel>>(result.Value);
+                var transactions = Assert.IsType<PaginatedResult<TransactionDto>>(result.Value);
                 Assert.NotNull(transactions);
                 Assert.Single(transactions.Results);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransactionFilterModel(It.IsAny<TransactionFilterDomainModel>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransactionFilterModel(It.Is<TransactionFilterDomainModel>(i => i != null && i.Page == 1 && i.PageSize == 10)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransactionFilterModel(It.IsAny<TransactionFilterDomainModel>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransactionFilterModel(It.Is<TransactionFilterDomainModel>(i => i != null && i.Page == 1 && i.PageSize == 10)), Times.Once);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.GetFilteredTransactions(It.IsAny<TransactionFilterDomainModel>(), It.IsAny<string>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.GetFilteredTransactions(It.Is<TransactionFilterDomainModel>(i => i != null && i.Page == 1 && i.PageSize == 10), It.Is<string>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetFilteredTransactions(It.IsAny<TransactionFilterDomainModel>(), It.IsAny<string>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetFilteredTransactions(It.Is<TransactionFilterDomainModel>(i => i != null && i.Page == 1 && i.PageSize == 10), It.Is<string>(i => i == "AccessKey")), Times.Once);
+
+                mock.Mock<IMediaTypeService>().Verify(x => x.IsLinkedRepresentation(It.IsAny<string>()), Times.Once);
+                mock.Mock<IMediaTypeService>().Verify(x => x.IsLinkedRepresentation(It.Is<string>(i => i == "application/vnd.trade.transaction.paged+json")));
+            }
+        }
+
+        [Fact]
+        public async Task ItWillReturnFilteredLinkedTransactions()
+        {
+            using (var mock = AutoMock.GetLoose(cfg => cfg.RegisterInstance(_mapper).As<IMapper>()))
+            {
+                mock.Mock<ICurrentUserService>()
+                    .SetupGet(x => x.AccessKey)
+                    .Returns("AccessKey");
+
+                mock.Mock<ITransactionService>()
+                    .Setup(x => x.ValidateTransactionFilterModel(It.IsAny<TransactionFilterDomainModel>()))
+                    .Returns(new ModelStateDictionary());
+
+                mock.Mock<ITransactionService>()
+                    .Setup(x => x.GetFilteredTransactions(It.IsAny<TransactionFilterDomainModel>(), It.IsAny<string>()))
+                    .Returns(Task.FromResult(new PaginatedResult<TransactionDomainModel>(new List<TransactionDomainModel>() { new TransactionDomainModel() }, new PaginationMetadata())));
+
+                mock.Mock<IMediaTypeService>()
+                    .Setup(x => x.IsLinkedRepresentation(It.IsAny<string>()))
+                    .Returns(true);
+
+                var controller = mock.Create<TransactionsController>();
+
+                var urlHelperMock = new Mock<IUrlHelper>();
+                urlHelperMock.Setup(x => x.Link(It.IsAny<string>(), It.IsAny<object>())).Returns(string.Empty);
+                controller.Url = urlHelperMock.Object;
+
+                SetRequestHeader(controller, "Accept", "application/vnd.trade.transaction.paged.hateoas+json");
+
+                var response = await controller.GetFilteredAsync(
+                    new TransactionFilterDto
+                    {
+                        Page = 1,
+                        PageSize = 10
+                    });
+
+                Assert.NotNull(response);
+                var result = Assert.IsType<OkObjectResult>(response);
+                Assert.Equal(HttpStatusCode.OK, (HttpStatusCode)result.StatusCode);
+
+                var transactions = Assert.IsType<LinkedPaginatedResult<LinkedTransactionDto>>(result.Value);
+                Assert.NotNull(transactions);
+
+                Assert.Single(transactions.Results);
+                Assert.NotNull(transactions.Results.FirstOrDefault().Links);
+
+                Assert.NotNull(transactions.Metadata);
+
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransactionFilterModel(It.IsAny<TransactionFilterDomainModel>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransactionFilterModel(It.Is<TransactionFilterDomainModel>(i => i != null && i.Page == 1 && i.PageSize == 10)), Times.Once);
+
+                mock.Mock<ITransactionService>().Verify(x => x.GetFilteredTransactions(It.IsAny<TransactionFilterDomainModel>(), It.IsAny<string>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetFilteredTransactions(It.Is<TransactionFilterDomainModel>(i => i != null && i.Page == 1 && i.PageSize == 10), It.Is<string>(i => i == "AccessKey")), Times.Once);
+
+                mock.Mock<IMediaTypeService>().Verify(x => x.IsLinkedRepresentation(It.IsAny<string>()), Times.Once);
+                mock.Mock<IMediaTypeService>().Verify(x => x.IsLinkedRepresentation(It.Is<string>(i => i == "application/vnd.trade.transaction.paged.hateoas+json")));
             }
         }
 
         [Fact]
         public async Task ItWillReturn422ForInvalidInput_GetFiltered()
         {
-            using (var mock = AutoMock.GetLoose())
+            using (var mock = AutoMock.GetLoose(cfg => cfg.RegisterInstance(_mapper).As<IMapper>()))
             {
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.ValidateTransactionFilterModel(It.IsAny<TransactionFilterDomainModel>()))
                     .Returns(() =>
                     {
@@ -355,10 +502,10 @@ namespace TradeTracker.Api.Test.Controllers
                 Assert.Equal("Key", error.Key);
                 Assert.Equal("Error Message", ((string[])error.Value).SingleOrDefault());
 
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransactionFilterModel(It.IsAny<TransactionFilterDomainModel>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransactionFilterModel(It.Is<TransactionFilterDomainModel>(i => i != null && i.Page == 1 && i.PageSize == 10)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransactionFilterModel(It.IsAny<TransactionFilterDomainModel>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransactionFilterModel(It.Is<TransactionFilterDomainModel>(i => i != null && i.Page == 1 && i.PageSize == 10)), Times.Once);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.GetFilteredTransactions(It.IsAny<TransactionFilterDomainModel>(), It.IsAny<string>()), Times.Never);
+                mock.Mock<ITransactionService>().Verify(x => x.GetFilteredTransactions(It.IsAny<TransactionFilterDomainModel>(), It.IsAny<string>()), Times.Never);
             }
         }
 
@@ -367,7 +514,11 @@ namespace TradeTracker.Api.Test.Controllers
         {
             using (var mock = AutoMock.GetLoose())
             {
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ICurrentUserService>()
+                    .SetupGet(x => x.AccessKey)
+                    .Returns("AccessKey");
+
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()))
                     .Returns(Task.FromResult<TransactionDomainModel>(null));
 
@@ -379,25 +530,29 @@ namespace TradeTracker.Api.Test.Controllers
                 var result = Assert.IsType<NotFoundObjectResult>(response);
                 Assert.Equal(HttpStatusCode.NotFound, (HttpStatusCode)result.StatusCode);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i == "AccessKey")), Times.Once);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()), Times.Never);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()), Times.Never);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.UpdateTransaction(It.IsAny<TransactionDomainModel>()), Times.Never);
+                mock.Mock<ITransactionService>().Verify(x => x.UpdateTransaction(It.IsAny<TransactionDomainModel>()), Times.Never);
             }
         }
 
         [Fact]
         public async Task ItWillReturn422ForInvalidInput_Update()
         {
-            using (var mock = AutoMock.GetLoose())
+            using (var mock = AutoMock.GetLoose(cfg => cfg.RegisterInstance(_mapper).As<IMapper>()))
             {
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ICurrentUserService>()
+                    .SetupGet(x => x.AccessKey)
+                    .Returns("AccessKey");
+
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()))
                     .ReturnsAsync(new TransactionDomainModel());
 
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()))
                     .Returns(() =>
                     {
@@ -421,13 +576,13 @@ namespace TradeTracker.Api.Test.Controllers
                 Assert.Equal("Key", error.Key);
                 Assert.Equal("Error Message", ((string[])error.Value).SingleOrDefault());
 
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i == "AccessKey")), Times.Once);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.UpdateTransaction(It.IsAny<TransactionDomainModel>()), Times.Never);
+                mock.Mock<ITransactionService>().Verify(x => x.UpdateTransaction(It.IsAny<TransactionDomainModel>()), Times.Never);
             }
         }
 
@@ -436,7 +591,11 @@ namespace TradeTracker.Api.Test.Controllers
         {
             using (var mock = AutoMock.GetLoose(cfg => cfg.RegisterInstance(_mapper).As<IMapper>()))
             {
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ICurrentUserService>()
+                    .SetupGet(x => x.AccessKey)
+                    .Returns("AccessKey");
+
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()))
                     .ReturnsAsync(new TransactionDomainModel
                     {
@@ -446,11 +605,11 @@ namespace TradeTracker.Api.Test.Controllers
                         TradePrice = 10
                     });
 
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()))
                     .Returns(new ModelStateDictionary());
 
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.UpdateTransaction(It.IsAny<TransactionDomainModel>()))
                     .Returns(Task.CompletedTask);
 
@@ -468,14 +627,14 @@ namespace TradeTracker.Api.Test.Controllers
                 var result = Assert.IsType<NoContentResult>(response);
                 Assert.Equal(HttpStatusCode.NoContent, (HttpStatusCode)result.StatusCode);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i == "AccessKey")), Times.Once);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.ValidateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.ValidateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.UpdateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.UpdateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.UpdateTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.UpdateTransaction(It.Is<TransactionDomainModel>(i => i != null)), Times.Once);
             }
         }
 
@@ -484,7 +643,11 @@ namespace TradeTracker.Api.Test.Controllers
         {
             using (var mock = AutoMock.GetLoose())
             {
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ICurrentUserService>()
+                    .SetupGet(x => x.AccessKey)
+                    .Returns("AccessKey");
+
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()))
                     .Returns(Task.FromResult<TransactionDomainModel>(null));
 
@@ -496,10 +659,10 @@ namespace TradeTracker.Api.Test.Controllers
                 var result = Assert.IsType<NotFoundObjectResult>(response);
                 Assert.Equal(HttpStatusCode.NotFound, (HttpStatusCode)result.StatusCode);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i == "AccessKey")), Times.Once);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.DeleteTransaction(It.IsAny<TransactionDomainModel>()), Times.Never);
+                mock.Mock<ITransactionService>().Verify(x => x.DeleteTransaction(It.IsAny<TransactionDomainModel>()), Times.Never);
             }
         }
 
@@ -508,14 +671,18 @@ namespace TradeTracker.Api.Test.Controllers
         {
             using (var mock = AutoMock.GetLoose())
             {
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ICurrentUserService>()
+                    .SetupGet(x => x.AccessKey)
+                    .Returns("AccessKey");
+
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()))
                     .ReturnsAsync(new TransactionDomainModel
                     {
                         TransactionId = 1
                     });
 
-                mock.Mock<ITransactionsService>()
+                mock.Mock<ITransactionService>()
                     .Setup(x => x.DeleteTransaction(It.IsAny<TransactionDomainModel>()))
                     .Returns(Task.CompletedTask);
 
@@ -527,11 +694,11 @@ namespace TradeTracker.Api.Test.Controllers
                 var result = Assert.IsType<NoContentResult>(response);
                 Assert.Equal(HttpStatusCode.NoContent, (HttpStatusCode)result.StatusCode);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i != null)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.IsAny<int>(), It.IsAny<string>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.GetTransaction(It.Is<int>(i => i == 1), It.Is<string>(i => i == "AccessKey")), Times.Once);
 
-                mock.Mock<ITransactionsService>().Verify(x => x.DeleteTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
-                mock.Mock<ITransactionsService>().Verify(x => x.DeleteTransaction(It.Is<TransactionDomainModel>(i => i != null && i.TransactionId == 1)), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.DeleteTransaction(It.IsAny<TransactionDomainModel>()), Times.Once);
+                mock.Mock<ITransactionService>().Verify(x => x.DeleteTransaction(It.Is<TransactionDomainModel>(i => i != null && i.TransactionId == 1)), Times.Once);
             }
         }
 

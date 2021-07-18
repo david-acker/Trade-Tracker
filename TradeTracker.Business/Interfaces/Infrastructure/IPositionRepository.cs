@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
+using TradeTracker.Business.AuxiliaryModels;
 using TradeTracker.Core.DomainModels.Position;
-using TradeTracker.Core.DomainModels.Response;
 
 namespace TradeTracker.Business.Interfaces.Infrastructure
 {

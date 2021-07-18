@@ -1,4 +1,12 @@
-﻿CREATE PROCEDURE StoGetFilteredTransactions
+﻿USE [TradeTracker]
+GO
+
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE StoGetFilteredTransactions
 	@AccessKey CHAR(36)
   , @Skip INT = NULL
   , @Take INT = NULL
@@ -122,7 +130,7 @@ BEGIN
 					SET @OrderByDirection = 
 						CASE @OrderByField
 							WHEN @OBF_TradeDate THEN @OBD_Descending
-							WHEN @@OBF_Quantity THEN @OBD_Descending
+							WHEN @OBF_Quantity THEN @OBD_Descending
 							ELSE @OBD_Ascending
 						END;
 				END;
@@ -146,8 +154,8 @@ BEGIN
 	  FROM [Transaction]
 	 WHERE AccessKey = @AccessKey
 		   AND Symbol = CASE WHEN @Symbol IS NOT NULL THEN @Symbol ELSE Symbol END
-		   AND TradeDate >= CASE WHEN @StartDate IS NOT NULL THEN TradeDate END
-		   AND TradeDate <= CASE WHEN @EndDate IS NOT NULL Then TradeDate END
+		   AND TradeDate >= CASE WHEN @StartDate IS NOT NULL THEN @StartDate ELSE TradeDate END
+		   AND TradeDate <= CASE WHEN @EndDate IS NOT NULL THEN @EndDate ELSE TradeDate END
 		   AND Quantity >= CASE @TransactionType WHEN @TT_Buy THEN 0 ELSE ABS(Quantity) END
 		   AND Quantity <= CASE @TransactionType WHEN @TT_Sell THEN 0 ELSE ABS(Quantity) END;
 

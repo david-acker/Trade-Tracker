@@ -8,7 +8,7 @@ namespace TradeTracker.Repository.Profiles
     {
         public PositionsProfile()
         {
-            CreateMap<PositionDomainModel, PositionEntityModel>();
+            CreateMap<PositionEntityModel, PositionDomainModel>();
 
             CreateMap<PositionFilterDomainModel, PositionFilterEntityModel>();
         }

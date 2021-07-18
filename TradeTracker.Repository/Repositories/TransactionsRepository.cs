@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using TradeTracker.Business.AuxiliaryModels;
 using TradeTracker.Business.Interfaces.Infrastructure;
-using TradeTracker.Core.DomainModels.Response;
 using TradeTracker.Core.DomainModels.Transaction;
 using TradeTracker.Repository.EntityModels.Transaction;
 using TradeTracker.Repository.Factories;
@@ -74,8 +74,8 @@ namespace TradeTracker.Repository.Repositories
             parameters.Add("@AccessKey", filterModel.AccessKey);
             parameters.Add("@Skip", skip);
             parameters.Add("@Take", take);
-            parameters.Add("@StartDate", filterModel.StartDate);
-            parameters.Add("@EndDate", filterModel.EndDate);
+            parameters.Add("@StartDate", filterModel.StartDate, DbType.DateTime2);
+            parameters.Add("@EndDate", filterModel.EndDate, DbType.DateTime2);
             parameters.Add("@Symbol", filterModel.Symbol);
             parameters.Add("@TransactionType", filterModel.TransactionType);
             parameters.Add("@OrderByField", filterModel.OrderByField);
@@ -119,7 +119,7 @@ namespace TradeTracker.Repository.Repositories
             var parameters = new DynamicParameters();
             parameters.Add("@AccessKey", transaction.AccessKey);
             parameters.Add("@Symbol", transaction.Symbol);
-            parameters.Add("@TradeDate", transaction.TradeDate);
+            parameters.Add("@TradeDate", transaction.TradeDate, DbType.DateTime2);
             parameters.Add("@TradePrice", transaction.TradePrice);
             parameters.Add("@Quantity", transaction.Quantity);
             parameters.Add("@Notional", transaction.Notional);
@@ -148,7 +148,7 @@ namespace TradeTracker.Repository.Repositories
             parameters.Add("@TransactionId", transaction.TransactionId);
             parameters.Add("@AccessKey", transaction.AccessKey);
             parameters.Add("@Symbol", transaction.Symbol);
-            parameters.Add("@TradeDate", transaction.TradeDate);
+            parameters.Add("@TradeDate", transaction.TradeDate, DbType.DateTime2);
             parameters.Add("@TradePrice", transaction.TradePrice);
             parameters.Add("@Quantity", transaction.Quantity);
             parameters.Add("@Notional", transaction.Notional);
